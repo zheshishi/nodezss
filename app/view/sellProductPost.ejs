@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>试用平台 | 发布产品</title>
+    <!-- Tell the browser to be responsive to screen width -->
+    <!-- Bootstrap 3.3.7 -->
+    <link rel="stylesheet" href="/public/adminLTE/bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="/public/adminLTE/bower_components/font-awesome/css/font-awesome.min.css">
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="/public/adminLTE/bower_components/Ionicons/css/ionicons.min.css">
+    <!-- daterange picker -->
+    <link rel="stylesheet" href="/public/adminLTE/bower_components/bootstrap-daterangepicker/daterangepicker.css">
+    <!-- bootstrap datepicker -->
+    <link rel="stylesheet" href="/public/adminLTE/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css">
+    <!-- iCheck for checkboxes and radio inputs -->
+    <link rel="stylesheet" href="/public/adminLTE/plugins/iCheck/all.css">
+    <!-- Bootstrap Color Picker -->
+    <link rel="stylesheet" href="/public/adminLTE/bower_components/bootstrap-colorpicker/dist/css/bootstrap-colorpicker.min.css">
+    <!-- Bootstrap time Picker -->
+    <link rel="stylesheet" href="/public/adminLTE/plugins/timepicker/bootstrap-timepicker.min.css">
+    <!-- Select2 -->
+    <link rel="stylesheet" href="/public/adminLTE/bower_components/select2/dist/css/select2.min.css">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="/public/adminLTE/dist/css/AdminLTE.min.css">
+    <link rel="stylesheet" href="/public/adminLTE/dist/css/skins/_all-skins.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" type="text/javascript"></script>
+
+
+    <script>
+    var keywordsx= 0
+    function Moneytry(){
+        var getdiv = document.getElementsByName('trysortText')
+        getdiv[0].innerHTML='红包付费试用'
+        var gethtml = document.getElementsByName('moneyClass')
+        gethtml[0].innerHTML='<strong style="color:mediumvioletred">金额：</strong>产品单价:<input id="buyPrice" name="buyPrice">元，拍<input id="buyNum" name="buyNum">件 ，搜索展示价:<input name="showPrice" id="showPrice">元'
+    }
+    function distry(){
+        var getdiv = document.getElementsByName('trysortText')
+        getdiv[0].innerHTML='免费或折扣,销售产品给用户'
+        var gethtml = document.getElementsByName('moneyClass')
+        gethtml[0].innerHTML='<strong style="color:mediumvioletred">金额：</strong>产品单价:<input id="buyPrice" name="buyPrice">元，拍<input id="buyNum" name="buyNum">件 ，搜索展示价:<input name="showPrice" id="showPrice">元，返：<input id="ReturnBuyPrice" name="ReturnBuyPrice">元，'
+    }
+    // function sendtry(){
+    //     var getdiv = document.getElementsByName('trysortText')
+    //     getdiv[0].innerHTML='买家拍了产品后发其他礼物给用户'
+    //     var gethtml = document.getElementsByName('moneyClass')
+    //     gethtml[0].innerHTML='<strong style="color:mediumvioletred">金额：</strong>产品单价:<input id="buyPrice">元，返：<input id="ReturnBuyPrice">元，拍<input id="buyNum">件 ，搜索展示价:<input id="showPrice">元'
+    // }
+    //加关键词
+    function addkeywords_new(){
+        keywordsx +=1
+        var getdiv = document.getElementsByName('keywordField')
+        var keywordvalue = document.getElementsByName('keywordvalue')
+        if (keywordvalue.length<10){
+            getdiv[0].innerHTML+='<div name="keywordvalue", id= "keywordvalue'+keywordsx+'">\n' +
+                '                    <Text>关键词\\通道:</Text><input name="keyword">\n' +
+                '                    <Text>笔数：</Text>\n' +
+                '                    <input type="number" name="orderNumber" step="1" min="1" max="1000"/>\n' +
+                '                    <Text>城市：</Text>\n' +
+                '                    <input type="text" name="city"/>\n' +
+                '                    <Text>搜索排序</Text>\n' +
+                '                    <select name="orderSort">\n' +
+                '                        <option value="综合排序">综合排序</option>\n' +
+                '                        <option value="信用排序">信用排序</option>\n' +
+                '                        <option value="价格由低到高">价格由低到高</option>\n' +
+                '                        <option value="价格由高到低">价格由高到低</option>\n' +
+                '                        <option value="销量优先">销量优先</option>\n' +
+                '                    </select>\n' +
+                '                    <Text>价格区间：</Text>\n' +
+                '                    <input type="number" name="PriceMin" step="0.01" min="0.01" max="10000"/> -\n' +
+                '                    <input type="number" name="PriceMax" step="0.01" min="0.01" max="10000"/><text style="color:red" onclick="delectKeywords('+keywordsx+')">删除</text><br/>\n' +
+                '                <br/></div>'
+        }else{
+            alert('关键词已有10个')
+        }
+    }
+    //加关键词
+    //删除关键词
+    function delectKeywords(x){
+        var keywordvalue = document.getElementById('keywordvalue'+x)
+        keywordvalue.remove()
+    }
+    //删除关键词
+    </script>
+    <script>
+     //自动计算数据
+    function gettaskvalues(){
+        var event_value = document.getElementsByName('event')
+        var event_valueL = event_value.length
+        var eventGetValue;
+        do{
+            event_valueL -= 1
+            if(event_value[event_valueL].checked===true){
+                eventGetValue = event_value[event_valueL].value
+            }
+        }while(event_valueL>0)
+        var statisticalBuyPrice = document.getElementById('buyPrice').value  //产品单价
+        var statisticalbuyNum = document.getElementById('buyNum').value  //拍的件数
+        var statisticalhuabeiId = document.getElementById('huabeiId').checked  //是否花呗
+
+        //定单笔数
+        var statisticalorderNumber = document.getElementsByName('orderNumber') //关键词订单数
+        var statisticalorderNumberArray = 0
+        var statisticalorderNumbervalues = statisticalorderNumber.length
+        statisticalorderNumberArray = 0
+        do{
+            statisticalorderNumbervalues -= 1
+            if(statisticalorderNumber[statisticalorderNumbervalues].valueAsNumber>0){
+                statisticalorderNumberArray += statisticalorderNumber[statisticalorderNumbervalues].valueAsNumber
+            }
+        }while(statisticalorderNumbervalues>0)
+        var taskbasemoney1 = '' // 押金公式
+        var taskbasemoney2 = '' // 总押金总计
+        var taskmoney1 ='' //买家试用费
+        var taskmoney2 ='' //买家试用费
+        var huabeiId0 = ''
+        var taskhuabei1 = '' //花呗号
+        var taskhuabei2 = '' //花呗号
+        var taskAI1 = '' //智能黑号限制
+        var taskAI2 = '' //智能黑号限制
+        var totalFee = '' //总费用
+        if (statisticalBuyPrice>0 || statisticalbuyNum>0){
+            taskbasemoney1= statisticalBuyPrice+'元 * ' + statisticalbuyNum + '件 * '+statisticalorderNumberArray + '笔'
+        }
+        document.getElementById('taskbasemoney1').innerHTML = taskbasemoney1;
+        if (statisticalorderNumber>0 || statisticalorderNumberArray>0 || statisticalBuyPrice>0){
+            taskbasemoney2 = statisticalBuyPrice*statisticalorderNumberArray*statisticalbuyNum
+            document.getElementById('taskbasemoney2').innerHTML = taskbasemoney2;
+        }
+        //定单笔数
+        if(document.getElementById('huabeiId').checked===false){
+            huabeiId0 = 0
+        }else{
+            huabeiId0 = 2
+        }
+        taskhuabei1 = huabeiId0+' *'+ statisticalorderNumberArray + '笔'
+        taskhuabei2 = huabeiId0 * statisticalorderNumberArray
+        //买家试用费
+        //买家试用费
+        if(eventGetValue==='1'){
+            taskmoney1 = (parseInt((statisticalBuyPrice *statisticalbuyNum)/100)+7)+'元 *'+statisticalorderNumberArray + '笔'
+            taskmoney2 = (parseInt((statisticalBuyPrice *statisticalbuyNum)/100) + 7) * statisticalorderNumberArray
+
+        }else if(eventGetValue==='2'){
+            taskmoney1 = 0+'元 *'+statisticalorderNumberArray + '笔'
+            taskmoney2 = 0
+        }
+        taskAI1 =  '2 * '+ statisticalorderNumberArray + '笔'
+        taskAI2 =  2*statisticalorderNumberArray
+        totalFee = taskAI2+taskmoney2+taskhuabei2+taskbasemoney2
+        document.getElementById('taskmoney1').innerHTML = taskmoney1;
+        document.getElementById('taskmoney2').innerHTML = taskmoney2;
+        document.getElementById('taskhuabei1').innerHTML = taskhuabei1;
+        document.getElementById('taskhuabei2').innerHTML = taskhuabei2;
+        document.getElementById('taskAI1').innerHTML = taskAI1;
+        document.getElementById('taskAI2').innerHTML = taskAI2;
+        document.getElementById('totalFee').innerHTML = totalFee;
+    }
+    //获取店铺名
+    function ajaxGetshop(){
+        $.ajax({
+            method:"GET",
+            url:"/sell/getshop",
+            success: function(data, status){
+                urlgetshop(data)
+            }
+        })
+    }
+    function urlgetshop(data){
+        if(data!==null){
+            console.log(typeof data)
+            $("#Selectshop").empty()
+            $("#Selectshop").append("<option value='0'>选择店铺</option>")
+            for (var AjaxSelectShopValue in data) {
+                var AjaxSsll = '<option value='+data[AjaxSelectShopValue].SellShopId+'>'+data[AjaxSelectShopValue].ShopSort+' - '+data[AjaxSelectShopValue].ShopUserName+'</option>'
+               $("#Selectshop").append(AjaxSsll)
+            }
+        }
+     }
+
+    //获取店铺名
+    window.onload = function(){
+        ajaxGetshop()
+        window.setInterval(gettaskvalues, 1000);
+    }
+     //自动计算数据
+     //ajax get post product infomaition
+
+     //url 获取产品
+    function geturlfs(urlvalues){
+     if(urlvalues.includes('.com')){
+
+         $(document).ready(function(){
+                 $.ajax({
+                     method:"POST",
+                     url:'/sell/productinfo',
+                     data: {getUrl:urlvalues},
+                     success: function(data, status) {
+                         // Call this function on succes
+                         console.log("post result: ", data, status)
+                         ProductSetInfo(data)
+
+                     }
+                     // error: function() {
+                     //     alert('Error occured');
+                     // }
+                 })
+         })
+    }
+    }
+     function gvalue(data){
+         console.log(data)
+     }
+    </script>
+
+    <style>
+        .UrlTitle {
+            padding: 25px;
+            display:inline;
+            font-size:30;
+        }
+        .geturl{
+            width: 500px;
+            display:inline;
+        }
+        .geturlclass{
+            display:inline;
+        }
+    </style>
+</head>
+
+<body class="hold-transition skin-blue sidebar-mini">
+<div class="wrapper">
+    <%- include menu/header %>
+    <!-- Left side column. contains the logo and sidebar -->
+    <%- include menu/section %>
+
+    <!-- 右侧任务区 -->
+    <div class="content-wrapper">
+        <div class="box box-warning">
+            <div class="box-header with-border">
+                <h3 class="box-title">发布试用产品</h3>
+            </div>
+                <span style="color:mediumvioletred"><%= shopname %></span>
+                <span style="color:red;"><%= message %></span><br>
+                <!-- /.box-header -->
+                <form id="msform1" method="post" action="#">
+                <strong style="color:mediumvioletred">类型：</strong>
+                <label><input type="radio" name="event" value="1" checked="checked" onclick="Moneytry()">
+                    红包试用  </label>
+                <label><input type="radio" name="event" value="2" onclick="distry()">
+                    免费\折扣试用  </label>
+                <!--<label><input type="radio" name="event" value="event3" onclick="sendtry()">-->
+                <!--礼品试用  </label>-->
+                <span name="trysortText" style="color:darkgrey">红包付费试用</span><br><br>
+
+
+                    <!--  获取产品 产品url -->
+                <strong style="color:mediumvioletred">网址：</strong>
+                <input id="geturlinput" type="text" class="geturl" name="geturl" onChange="geturlfs(this.value);"  placeholder="请输入产品链接https://... 、天猫、淘宝、1688、京东"><br><br>
+           <!--  <button type="submit" class='btn bg-maroon margin' name='button' value="0">获取产品信息</button> -->
+                <div id='selectproductdiv'>
+               <strong style="color:mediumvioletred">店铺：</strong>
+                <select id='Selectshop' onchange='urlgetproduct(this.value)'>
+                    <option value='0'>选择店铺</option>
+                </select>
+               <strong style="color:mediumvioletred">产品：</strong>
+                <select id='SubSelectproduct' onchange='urlgetproductid(this.value)'>
+                    <option value='0'>选择产品</option>
+                </select>   
+                </div>
+                <script>
+                     function urlgetproduct(data){
+                        console.log(data)
+                        if(data!==0){
+                         $(document).ready(function(){
+                                 $.ajax({
+                                     method:"POST",
+                                     url:'/sell/getproduct',
+                                     data: {shopid:data},
+                                     success: function(data, status) {
+                                         // Call this function on succes
+                                        console.log("post result: ", data, status)
+                                        if(data!==null){
+                                            $("#SubSelectproduct").empty()
+                                            $("#SubSelectproduct").append("<option value='0'>选择产品</option>")
+                                            for (var N in data) {
+                                                console.log(data[N].Details)
+                                                var AjaxSsll = '<option value='+data[N].SellProductId+'>'+data[N].ProductId+' - '+JSON.parse(data[N].Details).name+'</option>'
+                                               $("#SubSelectproduct").append(AjaxSsll)
+                                            }
+                                        }
+                                    }
+                                 })
+                         })
+                     }}
+
+                     function urlgetproductid(data){
+                        console.log(data)
+                        if(data!==0){
+                            $.ajax({
+                                 method:"POST",
+                                 url:'/sell/getproductid',
+                                 data: {SellProductId:data},
+                                 success: function(data, status){
+                                     ProductSetInfo(data)
+                                }
+                            })
+
+                        }
+                     }
+
+                     function ProductSetInfo(data){
+                        console.log(data)
+                        console.log(JSON.parse(data.Details).mainImage[0])
+                        console.log(typeof data)
+                        $("#productinfoimg").attr('src',JSON.parse(data.Details).mainImage[0]);
+                        $("#productinfoID").attr('value',data.SellProductId);
+                        $("#productinfoplatformID").attr('value',data.ProductId);
+                        $("#infoplatform").text(data.ShopSort);
+                        $("#infoproduct").text(JSON.parse(data.Details).name);
+                     }
+                </script>
+                <br/>
+                <div id='productinfomaitions'>
+               <table class="table table-hover"><tbody>
+                        <td style="text-align:left;">
+                            <div style="wight:100px;float:left;margin-right:10px;">
+                                <img id = 'productinfoimg' height="100px" width="100px" src="https://g.alicdn.com/s.gif"></div>
+                            编号：<input id='productinfoplatformID' name = "productinfoplatformID" type="Text" value="" readonly>
+                            <input id='productinfoID' name='productinfoID' type="hidden" value='' readonly><br>
+                            商品：<span id='infoproduct'></span><br>
+                            平台：<span id='infoplatform' ></span><br>
+                        </td>
+              </tbody></table>
+                </div>
+            <div name="moneyClass">
+                <strong style="color:mediumvioletred">金额：</strong>产品单价:<input id="buyPrice" name="buyPrice" step="0.01" min="0.01" max="10000">元，
+                拍<input id="buyNum" name="buyNum" step="1" min="1" max="10000">件 ，搜索展示价:<input name="showPrice" id="showPrice" step="0.01" min="0.01" max="10000">元
+            </div><br/>
+                    <!--  试用类型
+                  <div class="UrlTitle"><Text>平台：</Text>
+                <label><input type="radio" name="platform" value="taobao" checked="checked"/>淘宝</label>
+                  <label><input type="radio" name="platform" value="tmall"/>天猫</label>
+                  <label><input type="radio" name="platform" value="1688"/>1688</label>
+                  <label><input type="radio" name="platform" value="jd"/>京东</label>
+                  <label><input type="radio" name="platform" value="pdd"/>拼多多</label>
+                  <label><input type="radio" name="platform" value="wph"/>唯品会</label>
+                </div><br/>
+                平台 -->
+
+                <span >时间：</span> <select  id="sdMinTime" name="sdMinTime" aria-invalid="false">
+                    <option value="0" selected="">0点</option>
+                    <option value="1">1点</option>
+                    <option value="2">2点</option>
+                    <option value="3">3点</option>
+                    <option value="4">4点</option>
+                    <option value="5">5点</option>
+                    <option value="6">6点</option>
+                    <option value="7">7点</option>
+                    <option value="8">8点</option>
+                    <option value="9">9点</option>
+                    <option value="10">10点</option>
+                    <option value="11">11点</option>
+                    <option value="12">12点</option>
+                    <option value="13">13点</option>
+                    <option value="14">14点</option>
+                    <option value="15">15点</option>
+                    <option value="16">16点</option>
+                    <option value="17">17点</option>
+                    <option value="18">18点</option>
+                    <option value="19">19点</option>
+                    <option value="20">20点</option>
+                    <option value="21">21点</option>
+                    <option value="22">22点</option>
+                    <option value="23">23点</option>
+                </select> 到 <select  id="sdMaxTime" name="sdMaxTime" aria-invalid="false">
+                    <option value="1">1点</option>
+                    <option value="2">2点</option>
+                    <option value="3">3点</option>
+                    <option value="4">4点</option>
+                    <option value="5">5点</option>
+                    <option value="6">6点</option>
+                    <option value="7">7点</option>
+                    <option value="8">8点</option>
+                    <option value="9">9点</option>
+                    <option value="10">10点</option>
+                    <option value="11">11点</option>
+                    <option value="12">12点</option>
+                    <option value="13">13点</option>
+                    <option value="14">14点</option>
+                    <option value="15">15点</option>
+                    <option value="16">16点</option>
+                    <option value="17">17点</option>
+                    <option value="18">18点</option>
+                    <option value="19">19点</option>
+                    <option value="20">20点</option>
+                    <option value="21">21点</option>
+                    <option value="22">22点</option>
+                    <option value="23">23点</option>
+                    <option value="24" selected="">24点</option>
+                </select><br><br>
+            <!-- send days -->
+            <span>发布：</span>
+                <select id="dalayReceive" name="dalayReceive" aria-invalid="false">
+                    <option value="0" selected="">0</option>
+                    <option value="1" >1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>天，后发布试用任务<br><br>
+
+            <strong style="color:mediumvioletred">账户：</strong>
+                <label><input type="checkbox" name="huabeiId" id="huabeiId">
+                花呗账户</label><br><br>
+            <!--  礼品选项 -->
+            <Text>礼物：</Text>
+                    <label><input type="checkbox" name="gift">
+                        有礼物</label>
+                    <input class="geturl" type="text" name="gifturl" placeholder='如果有礼物，请填写如袜子、靠枕.... 或网址：https://....'/><br><br>
+                <!--  礼品选项 -->
+                <!--  优惠卷选项 -->
+            <Text>附加：</Text><label><input type="checkbox" id ="additional" name="coupons">领优惠劵</label>
+                    <br><br>
+                    <Text>  支付：</Text>
+                    <label><input type="checkbox" id ="pay" name="PayCard">允许使用信用卡</label>
+                    <label><input type="checkbox" id ="pay" name="Payhuabei">允许使用花呗</label>
+                    <text style='color: grey'> - 如果打钩费用由买家自行承担有续费，发现买家用信用卡付款，在确认之前，可申诉</text><br><br>
+                    <!--  优惠卷选项 -->
+                    <!--  试用通道 -->
+                <!--<Text>试用通道：</Text>-->
+                        <!--<label><input type="radio" name="channel" value="keyword" checked="checked"-->
+                                      <!--onclick="addkeywords();" >-->
+                            <!--关键词</label>-->
+                        <!--                       <label><input type="radio" name="channel" value="twocode"
+                                                            onclick="addTwoCode();">
+                                              二维码试用</label>
+                                              <label><input type="radio" name="channel" value="tbk"
+                                                            onclick="Addtbk();">
+                                              淘宝客试用</label>
+                                              <label><input type="radio" name="channel" value="tkl"
+                                                            onclick="addtkl();">
+                                              淘口令试用</label>-->
+
+                <!--  试用通道 -->
+                <!-- 发布时间 -->
+            <button type="button" style="color:mediumvioletred" onclick="addkeywords_new()">加关键字（最多加10个）
+                    </button><text>关键词:填关键词；通道：如打开：手机->点击聚划算</text><br><br>
+                    <!--text div -->
+            <div name="keywordField">
+                <div name="keywordvalue">
+                    <Text>关键词\通道:</Text><input name="keyword">
+                    <Text>笔数：</Text>
+                    <input type="number" name="orderNumber" step="1" min="1" max="10000"/>
+                    <Text>城市：</Text>
+                    <input type="text" name="city"/>
+                    <Text>搜索排序</Text>
+                    <select name="orderSort">
+                        <option value="综合排序">综合排序</option>
+                        <option value="信用排序">信用排序</option>
+                        <option value="价格由低到高">价格由低到高</option>
+                        <option value="价格由高到低">价格由高到低</option>
+                        <option value="销量优先">销量优先</option>
+                    </select>
+                    <Text>价格区间：</Text>
+                    <input type="number" name="PriceMin" step="0.01" min="0.01" max="10000"/> -
+                    <input type="number" name="PriceMax" step="0.01" min="0.01" max="10000"/><br/>
+                </div><br/>
+            </div>
+
+            <!-- 发布时间 -->
+<!--             <button type="button" style="color:mediumvioletred" onclick="addkeywords_new()">指定评价
+            </button><text>好评，追评</text><br/><br/> -->
+            <!--text div -->
+                    <Text>备注:</Text><br/>
+                <textarea class="mr20" rows="3" cols="85" maxlength="200" id="taskRequest" name="orderNote" placeholder="不可留联系方式、限制200字"></textarea>
+                <br/><br/>
+                    <button type="submit" class='btn bg-maroon margin' name='button'>发布产品
+                    </button>
+                        <div>
+                            <table>
+                                <thead>
+                                <tr>
+                                    <td style="width: 5%">试用</td>
+                                    <td style="width: 10%">计算</td>
+                                    <td style="width: 10%">收费</td>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td>试用押金</td>
+                                    <td id="taskbasemoney1">0</td>
+                                    <td id="taskbasemoney2">0</td>
+                                </tr>
+                                <tr>
+                                    <td>买家试用费</td>
+                                    <td id="taskmoney1">0</td>
+                                    <td id="taskmoney2">0</td>
+                                </tr>
+                                <tr>
+                                    <td>花呗号</td>
+                                    <td id="taskhuabei1">0*2</td>
+                                    <td id="taskhuabei2">0</td>
+                                </tr>
+                                <tr>
+                                    <td>智能黑号限制</td>
+                                    <td id="taskAI1">0*2</td>
+                                    <td id="taskAI2">0</td>
+                                </tr>
+                                <tr>
+                                    <td>总费用</td>
+                                    <td></td>
+                                    <td id="totalFee">0*0</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+            </form>
+        </div>
+    </div>
+    <%- include menu/footer %>
+</div>
+
+    <!-- /.box-body -->
+
+</body>
+
+</html>
