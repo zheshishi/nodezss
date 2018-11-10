@@ -109,6 +109,28 @@ module.exports = app => {
                 }
             }
         }
+
+        async closetask() {
+            console.log('closetask: this.ctx.header:'+this.ctx.header)
+            if(this.ctx.header.authorization ==='' || this.ctx.header.authorization ===null ){
+                console.log('noToken')
+                return this.ctx.body = {username:'username'}
+            }
+            //version:系统版本
+            //sort:分类
+            //思考如果是新用户是否免费送
+            if(this.ctx.header.version ==='1.0'){
+                if(this.ctx.header.sort==='0'){
+                    var tokenVerify = this.app.jwt.verify(this.ctx.header.authorization, this.app.config.jwt.secret);
+                    var username = await this.app.mysql.get('UserName',{UserName:tokenVerify.username})
+                    var taskId = this.ctx.header.taskid
+                    var productGetDetailsSql = 'update BuyTask SET BuyTaskState=0 where BuyUserNameId='+ username.UserNameId +' and BuyTaskId='+taskId+';'
+                    var productGetDetails = await this.app.mysql.query(productGetDetailsSql) //获取订单，按订单时间排序获取
+                    return this.ctx.body = productGetDetails
+                }
+            }
+        }
+
         async genratetask(){
             //state 0：not login
             //state 1：没有账号
@@ -174,6 +196,28 @@ module.exports = app => {
                     var CreateTaskSql = 'INSERT into BuyTask (buyUserNameId,SellOrderId,BuyTaskState,SellMoney,BuyMoney)values('+username.UserNameId+','+orderid+',2,'+productGetDetails[0].SellPayPrice+','+productGetDetails[0].BuyGetPrice+')'
                     var BuyTask = await this.app.mysql.query(CreateTaskSql) //之前是否做过这个产品，
                     if(BuyTask.affectedRows===1){
+                    	//redis 设置倒计时
+                        let message_obj = {
+                                message: BuyTask.insertId,
+                                func_name: 'taskstate2',
+                                timeout: 1800
+                            }
+                        let key = JSON.stringify(message_obj);
+                        let content = "";
+                        console.log('raids key')
+                        console.log(key)
+                        this.app.redis.multi()
+                            .set(key, content)
+                            .expire(key, 1800)
+                            .exec((error) => {
+                                if (error) {
+                                    console.log("任务添加失败");
+                                } else {
+                                    console.log("任务添加成功")
+                                }
+                            });
+                    var CreateTaskSql = 'update SellOrder SET orderNumber=orderNumber-1 where SellOrderId = '+orderid+';
+                    var BuyTask = await this.app.mysql.query(CreateTaskSql) //减少任务
                         return this.ctx.body = {status:3,message:'下单成功，跳到订单任务区',taskId:BuyTask.insertId}
                     }else{
                         return this.ctx.body = {status:4,message:'下单失败请重试，或联系管理员'}
