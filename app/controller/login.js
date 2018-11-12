@@ -12,7 +12,7 @@ module.exports = app => {
             } else  {
                 const token = this.app.jwt.sign({ username: this.ctx.request.body.username}, this.app.config.jwt.secret);
                 const tokenVerify = this.app.jwt.verify(token, this.app.config.jwt.secret);
-                this.app.jwt.verify(token, '123456', function(err, decoded) {
+                this.app.jwt.verify(token, this.app.config.jwt.secret, function(err, decoded) {
                     console.log(err)
                 });
                 let returnlog = 'token:' + token + 'tokenVerify :'+ JSON.stringify(tokenVerify)

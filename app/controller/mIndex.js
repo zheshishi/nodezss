@@ -19,7 +19,7 @@ module.exports = app => {
 		            console.log(tokenVerify)
 		            var username = await this.app.mysql.get('UserName',{UserName:tokenVerify.username})//用户信息
 		            //拿到买家45天内买过的店铺名
-                    var sqlsyn = 'SELECT * FROM SellOrder JOIN SellProduct ON SellOrder.SellProductId = SellProduct.SellProductId JOIN SellShop ON SellProduct.SellShopId = SellShop.SellShopId WHERE SellShop.SellShopId NOT IN (SELECT SellOrder.sellShopId FROM BuyTask JOIN SellOrder ON SellOrder.SellOrderId = BuyTask.SellOrderId WHERE buyUserNameId='+username.UserNameId+' AND BuyTaskState <> 0 AND  NOW() - INTERVAL 40 DAY < BuyTaskCreateTime);'
+                    var sqlsyn = 'SELECT * FROM SellOrder JOIN SellProduct ON SellOrder.SellProductId = SellProduct.SellProductId JOIN SellShop ON SellProduct.SellShopId = SellShop.SellShopId WHERE orderNumber>0 AND SellShop.SellShopId NOT IN (SELECT SellOrder.sellShopId FROM BuyTask JOIN SellOrder ON SellOrder.SellOrderId = BuyTask.SellOrderId WHERE buyUserNameId='+username.UserNameId+' AND BuyTaskState <> 0 AND  NOW() - INTERVAL 40 DAY < BuyTaskCreateTime);'
                     var sqluservalue = 'SELECT * FROM BuyTask JOIN SellOrder ON SellOrder.SellOrderId = BuyTask.SellOrderId WHERE buyUserNameId='+ username.UserNameId +' AND BuyTaskState <> 0'
                     console.log(sqlsyn)
 		            var BuyOrder = await this.app.mysql.query(sqlsyn)
@@ -98,6 +98,7 @@ module.exports = app => {
                     var tokenVerify = this.app.jwt.verify(this.ctx.header.authorization, this.app.config.jwt.secret);
                     var username = await this.app.mysql.get('UserName',{UserName:tokenVerify.username})
                     var taskId = this.ctx.header.taskid
+                    console.log('task_taskId: '+taskId)
                     //拿到买家40天内买过的店铺名
                     var productGetDetailsSql = 'SELECT * FROM BuyTask JOIN SellOrder ON BuyTask.SellOrderId = SellOrder.SellOrderId JOIN SellProduct ON SellOrder.SellProductId = SellProduct.SellProductId JOIN SellShop ON SellProduct.SellShopId = SellShop.SellShopId WHERE BuyTaskId ='+taskId+';'
                     var productGetDetails = await this.app.mysql.query(productGetDetailsSql) //获取订单，按订单时间排序获取
@@ -122,10 +123,10 @@ module.exports = app => {
             if(this.ctx.header.version ==='1.0'){
                 if(this.ctx.header.sort==='0'){
                     var tokenVerify = this.app.jwt.verify(this.ctx.header.authorization, this.app.config.jwt.secret);
-                    var username = await this.app.mysql.get('UserName',{UserName:tokenVerify.username})
+                    var username = await this.app.mysql.get('UserName',{UserName:tokenVerify.username});
                     var taskId = this.ctx.header.taskid
-                    var productGetDetailsSql = 'update BuyTask SET BuyTaskState=0 where BuyUserNameId='+ username.UserNameId +' and BuyTaskId='+taskId+';'
-                    var productGetDetails = await this.app.mysql.query(productGetDetailsSql) //获取订单，按订单时间排序获取
+                    var productGetDetailsSql = 'update BuyTask SET BuyTaskState=0 where BuyUserNameId='+ username.UserNameId +' and BuyTaskId='+ taskId +';'
+                    var productGetDetails = await this.app.mysql.query(productGetDetailsSql); //获取订单，按订单时间排序获取
                     return this.ctx.body = productGetDetails
                 }
             }
@@ -140,22 +141,27 @@ module.exports = app => {
 		    if(this.ctx.request.body.headers.Authorization ==='' || this.ctx.request.body.headers.Authorization ===null ){
                 return this.ctx.body = {status: 0, message: '没有token'}
 		    	}
-	        var tokenVerify = this.app.jwt.verify(this.ctx.request.body.headers.Authorization, this.app.config.jwt.secret);
-	        var username = await this.app.mysql.get('UserName',{UserName:tokenVerify.username})//用户信息
-            if(username ===null ){
-                console.log('noToken')
-                return this.ctx.body = {status: 0, message: '没有token'}
+	      var tokenVerify = this.app.jwt.verify(this.ctx.request.body.headers.Authorization, this.app.config.jwt.secret);
+	      var username = await this.app.mysql.get('UserName',{UserName:tokenVerify.username})//用户信息
+        if(username ===null ){
+             console.log('noToken')
+            return this.ctx.body = {status: 0, message: '没有token'}
             }
-	        var orderid = this.ctx.request.body.headers.orderid //订单id
+	      var orderid = this.ctx.request.body.headers.orderid //订单id
 			//判断是否绑定账号
-            var productGetDetailsSql = 'SELECT * FROM SellOrder JOIN SellProduct ON SellProduct.SellProductId = SellOrder.SellProductId WHERE SellOrderId = '+orderid+';'
-            var productGetDetails = await this.app.mysql.query(productGetDetailsSql)
-			if(productGetDetails.ShopSort==='taobao' || productGetDetails.ShopSort==='tmall' || productGetDetails.ShopSort==='1688'){
+        var productGetDetailsSql = 'SELECT * FROM SellOrder JOIN SellProduct ON SellProduct.SellProductId = SellOrder.SellProductId WHERE SellOrderId = '+orderid+';'
+        var productGetDetails = await this.app.mysql.query(productGetDetailsSql)
+        console.log('orderNumber:'+productGetDetails[0]+'pdLength:'+productGetDetails.length)
+        if(productGetDetails[0].orderNumber<1){
+            console.log('shouky,shoumj')
+            return this.ctx.body={status:2,message:'订单被抢完啦，手快有手慢无'}
+        }
+			  if(productGetDetails[0].ShopSort==='taobao' || productGetDetails.ShopSort==='tmall' || productGetDetails.ShopSort==='1688'){
                 var judgePlatformUser = await this.app.mysql.get('UserAccount',{UserNameId:username.UserNameId,PlatForm:'tb'})
 				if(judgePlatformUser.length===0){
                     return this.ctx.body = {status:1,message:'tb请绑定账号'}
 				}
-            }else if(productGetDetails.ShopSort==='jd'){
+            }else if(productGetDetails[0].ShopSort==='jd'){
                 var judgePlatformUser = await this.app.mysql.get('UserAccount',{UserNameId:username.UserNameId,PlatForm:'jd'})
                 if(judgePlatformUser.length===0){
                     return this.ctx.body = {status:1,message:'jd请绑定账号'}
@@ -216,8 +222,8 @@ module.exports = app => {
                                     console.log("任务添加成功")
                                 }
                             });
-                    var CreateTaskSql = 'update SellOrder SET orderNumber=orderNumber-1 where SellOrderId = '+orderid+';
-                    var BuyTask = await this.app.mysql.query(CreateTaskSql) //减少任务
+                    var CreateTaskSql = 'update SellOrder SET orderNumber=orderNumber-1 where SellOrderId = '+orderid
+                    var BuyTaskx = await this.app.mysql.query(CreateTaskSql) //减少任务
                         return this.ctx.body = {status:3,message:'下单成功，跳到订单任务区',taskId:BuyTask.insertId}
                     }else{
                         return this.ctx.body = {status:4,message:'下单失败请重试，或联系管理员'}
@@ -225,6 +231,19 @@ module.exports = app => {
                 }
 	    }
 	}
+
+    async qntoken(){
+        console.log('Auto generate qiniutoken')
+        if(this.ctx.request.body.headers.Authorization ==='' || this.ctx.request.body.headers.Authorization ===null ){
+                console.log('noToken')
+                return this.ctx.body = {username:'username'}
+                }
+        var tokenVerify = this.app.jwt.verify(this.ctx.request.body.headers.Authorization, this.app.config.jwt.secret);
+        var username = await this.app.mysql.get('UserName',{UserName:tokenVerify.username})//用户信息
+        if(username==null){
+                return this.ctx.body = {status:0,message:'账户还没保存，请重新刷新'}}
+    }
+
     	async addTbAccount(){
 		    console.log('addTbAccount')
 			console.log(this.ctx.request.body.headers.Authorization)

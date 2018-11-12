@@ -22,6 +22,8 @@ module.exports = app => {
     router.post("/m/addaccount", "mIndex.addTbAccount");
     router.get("/m/task", "mIndex.task");
     router.get("/m/closetask", "mIndex.closetask");
+
+    router.get("/m/qntoken", "mIndex.qntoken"); //七牛token
     //web size sell admin网页端商家管理页面
 
     router.get("/sell", "sell.index"); // sell Login
