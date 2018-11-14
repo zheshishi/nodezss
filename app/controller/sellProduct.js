@@ -32,8 +32,10 @@ class sellController extends Controller {
             var productinfoID = parseInt(this.ctx.request.body.productinfoID)
             var MinTime = parseInt(this.ctx.request.body.sdMinTime)
             var MaxTime = parseInt(this.ctx.request.body.sdMaxTime)
+            if(MinTime>=MaxTime){return await this.ctx.render('sellProductPost.ejs', {message: '试用时间开始不能小于完成时间', shopname: ''})}
             var buyPrice = parseFloat(this.ctx.request.body.buyPrice).toFixed(2)
             var buyNum = parseInt(this.ctx.request.body.buyNum)
+            var buyRules = this.ctx.request.body.buyRules
             var showPrice = parseFloat(this.ctx.request.body.showPrice).toFixed(2)
             if (showPrice  ==="NaN"){var showPrice = buyPrice}
             var nowdatetime = new Date()
@@ -41,36 +43,35 @@ class sellController extends Controller {
             nowdatetime.setDate(nowdatetime.getDate() + dalayReceive)
             var startDate = (nowdatetime).toJSON().slice(0,10);
             var orderNumber = this.ctx.request.body.orderNumber
-            if (this.ctx.request.body.ReturnBuyPrice === undefined) {
-                var ReturnBuyPrice = null
-            } else {
+            if (this.ctx.request.body.ReturnBuyPrice === "on") { 
                 var ReturnBuyPrice = parseFloat(this.ctx.request.body.ReturnBuyPrice).toFixed(2)
-            }
-            if (this.ctx.request.body.gift === undefined) {
-                var gift = 0
             } else {
-                var gift = 1
+                var ReturnBuyPrice = null
             }
-            if (this.ctx.request.body.coupons === undefined) {
-                var coupons = 0
-            } else {
-                var coupons = 1
-            }
-            if (this.ctx.request.body.PayCard === undefined) {
-                var PayCard = 0
-            } else {
-                var PayCard = 1
-            }
-            if (this.ctx.request.body.huabeiId === undefined) {
-                var huabeiId = 0
-            } else {
-                var huabeiId = 1
-            }
-            if (this.ctx.request.body.Payhuabei === undefined) {
-                var Payhuabei = 0
-            } else {
-                var Payhuabei = 1
-            }
+            if (this.ctx.request.body.gift === "on") {var gift = 1} else {var gift = 1}
+            //附加优惠卷
+            if (this.ctx.request.body.AddCoupons === "on") {var AddCoupons = 1} else {var AddCoupons = 0}
+            //附加打开其他店铺
+            if (this.ctx.request.body.AddOpenOtherProduct === "on") {var AddOpenOtherProduct = 1} else {var AddOpenOtherShopProduct = 0}
+            //附加收藏截图店铺
+            if (this.ctx.request.body.AddSaveShop === "on") {var AddSaveShop = 1} else {var AddSaveShop = 0}
+            if (this.ctx.request.body.AddShoppingCar === "on") {var AddShoppingCar = 1} else {var AddShoppingCar = 0}
+            if (this.ctx.request.body.AddOpenProduct === "on") {var AddOpenProduct = 1} else {var AddOpenproduct = 0}
+            if (this.ctx.request.body.AddCommandsLike === "on") {var AddCommandsLike = 1} else {var AddCommandsLike = 0}
+            if (this.ctx.request.body.AddChat === "on") {var AddChat = 1} else {var AddChat = 0}
+          
+            //允许信用卡支付
+            
+            if(this.ctx.request.body.PayCard === "on") {var PayCard = 1} else {var PayCard = 0}
+            if(this.ctx.request.body.PayCoupons === "on") {var PayCoupons = 1} else {var PayCoupons = 0}
+            if (this.ctx.request.body.Payhuabei === "on") {var Payhuabei = 1} else {var Payhuabei = 0}
+            //if(this.ctx.request.body.huabeiId === "on") {var huabeiId = 1} else {var huabeiId = 1}
+          
+          
+            var huabeiId=1//在没测试的情况下先用只能花呗关系
+            //允许花呗支付
+            console.log('AddSaveShop:'+JSON.stringify(this.ctx.request.body))
+            //console.log('AddSaveShop:'+this.ctx.request.body.AddSaveShop)
 
             var gifturl = this.ctx.request.body.gifturl
             var orderNote = this.ctx.request.body.orderNote
@@ -182,11 +183,19 @@ class sellController extends Controller {
                 buyNum: buyNum,
                 showPrice: showPrice,
                 ReturnBuyPrice: ReturnBuyPrice,
+                buyRules:buyRules,
                 Node: orderNote,
                 MinTime: MinTime,
                 MaxTime: MaxTime,
                 startDate: startDate,
-                coupons: coupons,
+                AddCoupons: AddCoupons,
+                AddOpenOtherProduct: AddOpenOtherProduct,
+                AddSaveShop: AddSaveShop,
+                AddShoppingCar: AddShoppingCar,
+                AddOpenProduct: AddOpenProduct,
+                AddCommandsLike:AddCommandsLike,
+                AddChat: AddChat,
+                PayCoupons: PayCoupons,
                 PayCard: PayCard,
                 Payhuabei: Payhuabei,
                 huabeiId: huabeiId,//输入数据

@@ -33,7 +33,6 @@ module.exports = app => {
     router.post("/selllogin", "sellLogin.sellLoginPost"); // sell Login
     router.get("/sellmobilelogin", "sellLogin.sellMobileLoginGet"); // sell Login
     router.post("/sellmobilelogin", "sellLogin.sellMobileLoginPost"); // sell Login
-    //登录 seller admin view
 
     //商家网页端订单管理页面
     router.get("/sell/productpost", "sellProduct.sellProductPostGet"); // sell Login
@@ -43,16 +42,13 @@ module.exports = app => {
     router.post("/sell/getproduct", "sellProduct.getproduct"); // ajax getproduct
     router.post("/sell/getproductid", "sellProduct.getproductId"); // ajax getproduct
     //router.post("/sell/getproductinfo", "sellProduct.getProductInfo"); // sell Login
-    //商家网页端订单管理页面
 
     //商家充值页面
     router.get("/sell/topup", "selltopup.topupget"); // sell Login
     router.post("/sell/topup", "selltopup.topuppost"); // sell Login
-    //商家充值页面
 
     //网页crawler
     router.post("/crawler/", "crawler.index"); // sell Login
-    //网页crawler
 
     //商家网页端订单管理页面
 //web size sell admin网页端商家管理页面

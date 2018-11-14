@@ -342,6 +342,11 @@
                 <strong style="color:mediumvioletred">金额：</strong>产品单价:<input id="buyPrice" name="buyPrice" step="0.01" min="0.01" max="10000">元，
                 拍<input id="buyNum" name="buyNum" step="1" min="1" max="10000">件 ，搜索展示价:<input name="showPrice" id="showPrice" step="0.01" min="0.01" max="10000">元
             </div><br/>
+
+
+            <!--  购买规格 -->
+            <Text>购买规格：</Text>
+                    <input class="geturl" type="text" name="buyRules" placeholder='购买规格'/><br><br>
                     <!--  试用类型
                   <div class="UrlTitle"><Text>平台：</Text>
                 <label><input type="radio" name="platform" value="taobao" checked="checked"/>淘宝</label>
@@ -416,20 +421,27 @@
                 </select>天，后发布试用任务<br><br>
 
             <strong style="color:mediumvioletred">账户：</strong>
-                <label><input type="checkbox" name="huabeiId" id="huabeiId">
-                花呗账户</label><br><br>
+                <label><input type="checkbox" name="huabeiId" id="huabeiId" checked disabled=disabled>花呗账户</label><br><br>
             <!--  礼品选项 -->
             <Text>礼物：</Text>
                     <label><input type="checkbox" name="gift">
                         有礼物</label>
                     <input class="geturl" type="text" name="gifturl" placeholder='如果有礼物，请填写如袜子、靠枕.... 或网址：https://....'/><br><br>
-                <!--  礼品选项 -->
-                <!--  优惠卷选项 -->
-            <Text>附加：</Text><label><input type="checkbox" id ="additional" name="coupons">领优惠劵</label>
-                    <br><br>
-                    <Text>  支付：</Text>
-                    <label><input type="checkbox" id ="pay" name="PayCard">允许使用信用卡</label>
+                    
+            <text>附加：</text>
+            <label><input type="checkbox" id ="additional" name="AddCoupons">领优惠劵</label>
+            <label><input type="checkbox" id ="additional" name="AddOpenOtherProduct">货比三家</label>
+            <label><input type="checkbox" id ="additional" name="AddSaveShop">收藏店铺</label>
+            <label><input type="checkbox" id ="additional" name="AddShoppingCar">加购物车</label>
+            <label><input type="checkbox" id ="additional" name="AddOpenProduct">浏览副产品</label>
+            <label><input type="checkbox" id ="additional" name="AddCommandsLike">点赞好评</label>
+            <label><input type="checkbox" id ="additional" name="AddChat">聊天截图</label>
+            <text style='color: grey'> - 附加任务：截图1金币/张</text>
+            <br><br>
+            <Text>  支付：</Text>
                     <label><input type="checkbox" id ="pay" name="Payhuabei">允许使用花呗</label>
+                    <label><input type="checkbox" id ="pay" name="PayCard">允许使用信用卡</label>
+                    <label><input type="checkbox" id ="pay" name="PayCoupons">允许使用优惠卷</label>
                     <text style='color: grey'> - 如果打钩费用由买家自行承担有续费，发现买家用信用卡付款，在确认之前，可申诉</text><br><br>
                     <!--  优惠卷选项 -->
                     <!--  试用通道 -->
