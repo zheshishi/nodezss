@@ -49,7 +49,7 @@ class sellController extends Controller {
                 var ReturnBuyPrice = null
             }
             if (this.ctx.request.body.gift === "on") {var gift = 1} else {var gift = 1}
-            //附加优惠卷
+            //附加优惠卷   
             if (this.ctx.request.body.AddCoupons === "on") {var AddCoupons = 1} else {var AddCoupons = 0}
             //附加打开其他店铺
             if (this.ctx.request.body.AddOpenOtherProduct === "on") {var AddOpenOtherProduct = 1} else {var AddOpenOtherShopProduct = 0}
@@ -59,7 +59,6 @@ class sellController extends Controller {
             if (this.ctx.request.body.AddOpenProduct === "on") {var AddOpenProduct = 1} else {var AddOpenproduct = 0}
             if (this.ctx.request.body.AddCommandsLike === "on") {var AddCommandsLike = 1} else {var AddCommandsLike = 0}
             if (this.ctx.request.body.AddChat === "on") {var AddChat = 1} else {var AddChat = 0}
-          
             //允许信用卡支付
             
             if(this.ctx.request.body.PayCard === "on") {var PayCard = 1} else {var PayCard = 0}
@@ -87,6 +86,9 @@ class sellController extends Controller {
             }else{
                 var orderNumberSum = orderNumber.reduce((a, b) => parseInt(a) + parseInt(b))
             }
+
+            var coupons = AddCoupons + AddOpenOtherProduct + AddSaveShop + AddShoppingCar + AddOpenProduct + AddCommandsLike + AddChat
+
             //任务金额算法lso
             var additionalMoney = huabeiId * 2 + coupons + 2 //附加任务金额，event1红包任务附加算法
             var BuyUseraAdditionalMoney = huabeiId * 1 + coupons* 0.5 //附加任务金额，event2试用任务附加算法
