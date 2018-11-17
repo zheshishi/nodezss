@@ -1,15 +1,12 @@
 module.exports = app => {
     class mIndex extends app.Controller {
       //通过任务id和账号id关闭订单 access taskid and usernameid close task
-        async close_task_of_id(taskId,UserNameId){
+        async CloseTaskOfId(taskId,UserNameId){
             var productGetDetailsSql = 'update BuyTask SET BuyTaskState=0 where BuyUserNameId='+ username.UserNameId +' and BuyTaskId='+ taskId +';'
             var productGetDetails = await this.app.mysql.query(productGetDetailsSql); //获取订单，按订单时间排序获取
             }
         async index() {
             console.log('MINDEX')
-            console.log(this.ctx.header.version==='1.0')
-            console.log(this.ctx.header.sort==='0')
-            console.log('usertoken:'+this.ctx.header.authorization)
             if(this.ctx.header.authorization ==='' || this.ctx.header.authorization ===null ){
             	console.log('noToken')
 	            return this.ctx.body = {username:'username'}
@@ -21,12 +18,11 @@ module.exports = app => {
 	            	console.log('verify Version and sort')
 		            //const token = this.app.jwt.sign({ username: this.ctx.request.body.username, password: this.ctx.request.body.password }, this.app.config.jwt.secret);
 		            const tokenVerify = this.app.jwt.verify(this.ctx.header.authorization, this.app.config.jwt.secret);
-		            console.log(tokenVerify)
 		            var username = await this.app.mysql.get('UserName',{UserName:tokenVerify.username})//用户信息
 		            //拿到买家45天内买过的店铺名
                     var sqlsyn = 'SELECT * FROM SellOrder JOIN SellProduct ON SellOrder.SellProductId = SellProduct.SellProductId JOIN SellShop ON SellProduct.SellShopId = SellShop.SellShopId WHERE orderNumber>0 AND SellShop.SellShopId NOT IN (SELECT SellOrder.sellShopId FROM BuyTask JOIN SellOrder ON SellOrder.SellOrderId = BuyTask.SellOrderId WHERE buyUserNameId='+username.UserNameId+' AND BuyTaskState <> 0 AND  NOW() - INTERVAL 40 DAY < BuyTaskCreateTime);'
                     var sqluservalue = 'SELECT * FROM BuyTask JOIN SellOrder ON SellOrder.SellOrderId = BuyTask.SellOrderId WHERE buyUserNameId='+ username.UserNameId +' AND BuyTaskState <> 0'
-                    console.log(sqlsyn)
+                    //console.log(sqlsyn)
 		            var BuyOrder = await this.app.mysql.query(sqlsyn)
                     var BuyTask = await this.app.mysql.query(sqluservalue)
 					//get 最近的任务
@@ -35,7 +31,6 @@ module.exports = app => {
 					var AfterPurchase = 0
 					var returnOrder = []
 					for (var sx =0; sx<BuyOrder.length; sx++){
-		            	console.log('sx:'+sx)
                         for (var sxx =0; sxx<BuyTask.length; sxx++){
                             //console.log('sxx:'+sxx)
                             //console.log('BuyOrder[sx].SellProductId:'+BuyOrder[sx].SellProductId)
@@ -56,8 +51,6 @@ module.exports = app => {
 
                     // 是否复购代码
                     // 订单赛选
-
-		            console.log(returnOrder)
 		            return this.ctx.body = returnOrder//返回：订单编号+产品主图
 		            //this.ctx.body = {username:username}//返回：订单编号+产品主图
 	            }
@@ -81,7 +74,7 @@ module.exports = app => {
 		            //拿到买家40天内买过的店铺名
 		            var productGetDetailsSql = 'SELECT * FROM SellOrder JOIN SellProduct ON SellOrder.SellProductId = SellProduct.SellProductId JOIN SellShop ON SellProduct.SellShopId = SellShop.SellShopId WHERE SellOrderId ='+taskId+';'
 		            var productGetDetails = await this.app.mysql.query(productGetDetailsSql) //获取订单，按订单时间排序获取
-		            console.log(productGetDetails[0])
+		            //console.log(productGetDetails[0])
 		            return this.ctx.body = productGetDetails[0]//返回：订单编号+产品主图
 		            //this.ctx.body = {username:username}//返回：订单编号+产品主图
 	            }
@@ -89,7 +82,7 @@ module.exports = app => {
     }
 
         async task() {
-            console.log('task: this.ctx.header:'+this.ctx.header)
+            //console.log('task: this.ctx.header:'+this.ctx.header)
             if(this.ctx.header.authorization ==='' || this.ctx.header.authorization ===null ){
                 console.log('noToken')
                 return this.ctx.body = {username:'username'}
@@ -103,11 +96,11 @@ module.exports = app => {
                     var tokenVerify = this.app.jwt.verify(this.ctx.header.authorization, this.app.config.jwt.secret);
                     var username = await this.app.mysql.get('UserName',{UserName:tokenVerify.username})
                     var taskId = this.ctx.header.taskid
-                    console.log('task_taskId: '+taskId)
+                    //console.log('task_taskId: '+taskId)
                     //拿到买家40天内买过的店铺名
-                    var productGetDetailsSql = 'SELECT * FROM BuyTask JOIN SellOrder ON BuyTask.SellOrderId = SellOrder.SellOrderId JOIN SellProduct ON SellOrder.SellProductId = SellProduct.SellProductId JOIN SellShop ON SellProduct.SellShopId = SellShop.SellShopId WHERE BuyTaskId ='+taskId+';'
+                    var productGetDetailsSql = 'SELECT * FROM BuyTask JOIN UserAccount ON BuyTask.UserAccountId = UserAccount.UserAccountId JOIN SellOrder ON BuyTask.SellOrderId = SellOrder.SellOrderId JOIN SellProduct ON SellOrder.SellProductId = SellProduct.SellProductId JOIN SellShop ON SellProduct.SellShopId = SellShop.SellShopId WHERE BuyTaskId ='+taskId+';'
                     var productGetDetails = await this.app.mysql.query(productGetDetailsSql) //获取订单，按订单时间排序获取
-                    console.log(productGetDetails[0])
+                    //console.log(productGetDetails[0])
                     if(username.UserNameId!==productGetDetails[0].UserNameId || productGetDetails.length===0){
                         return this.ctx.body = {username:'username'}
                     }
@@ -117,9 +110,9 @@ module.exports = app => {
         }
 
         async closetask() {
-            console.log('closetask: this.ctx.header:'+this.ctx.header)
+            //console.log('closetask: this.ctx.header:'+this.ctx.header)
             if(this.ctx.header.authorization ==='' || this.ctx.header.authorization ===null ){
-                console.log('noToken')
+                //console.log('noToken')
                 return this.ctx.body = {username:'username'}
             }
             //version:系统版本
@@ -144,31 +137,31 @@ module.exports = app => {
 			//状态2: 不能下单
 			//状态3: 生成订单
 		    //console.log('genratetask')
-		    if(this.ctx.request.body.headers.Authorization ==='' || this.ctx.request.body.headers.Authorization ===null ){
+		  if(this.ctx.request.body.headers.Authorization ==='' || this.ctx.request.body.headers.Authorization ===null ){
                 return this.ctx.body = {status: 0, message: '没有token'}
 		    	}
 	      var tokenVerify = this.app.jwt.verify(this.ctx.request.body.headers.Authorization, this.app.config.jwt.secret);
 	      var username = await this.app.mysql.get('UserName',{UserName:tokenVerify.username})//用户信息
-        if(username ===null ){
-             console.log('noToken')
-            return this.ctx.body = {status: 0, message: '没有token'}
+          if(username ===null ){
+                console.log('noToken')
+                return this.ctx.body = {status: 0, message: '没有token'}
             }
 	      var orderid = this.ctx.request.body.headers.orderid //订单id
 			//判断是否绑定账号
-        var productGetDetailsSql = 'SELECT * FROM SellOrder JOIN SellProduct ON SellProduct.SellProductId = SellOrder.SellProductId WHERE SellOrderId = '+orderid+';'
-        var productGetDetails = await this.app.mysql.query(productGetDetailsSql)
-        console.log('orderNumber:'+productGetDetails[0]+'pdLength:'+productGetDetails.length)
-        if(productGetDetails[0].orderNumber<1){
-            console.log('shouky,shoumj')
+          var productGetDetailsSql = 'SELECT * FROM SellOrder JOIN SellProduct ON SellProduct.SellProductId = SellOrder.SellProductId WHERE SellOrderId = '+orderid+';'
+          var productGetDetails = await this.app.mysql.query(productGetDetailsSql)
+          var judgePlatformUser
+          if(productGetDetails[0].orderNumber<1){
             return this.ctx.body={status:2,message:'订单被抢完啦，手快有手慢无'}
-        }
-			  if(productGetDetails[0].ShopSort==='taobao' || productGetDetails.ShopSort==='tmall' || productGetDetails.ShopSort==='1688'){
-                var judgePlatformUser = await this.app.mysql.get('UserAccount',{UserNameId:username.UserNameId,PlatForm:'tb'})
-				if(judgePlatformUser.length===0){
+          }
+          console.log('productGetDetails.ShopSort:'+productGetDetails[0].ShopSort)
+		  if(productGetDetails[0].ShopSort==='taobao' || productGetDetails[0].ShopSort==='tmall' || productGetDetails[0].ShopSort==='1688'){
+                judgePlatformUser = await this.app.mysql.get('UserAccount',{UserNameId:username.UserNameId,PlatForm:'tb'})
+                if(judgePlatformUser.length===0){
                     return this.ctx.body = {status:1,message:'tb请绑定账号'}
 				}
             }else if(productGetDetails[0].ShopSort==='jd'){
-                var judgePlatformUser = await this.app.mysql.get('UserAccount',{UserNameId:username.UserNameId,PlatForm:'jd'})
+                judgePlatformUser = await this.app.mysql.get('UserAccount',{UserNameId:username.UserNameId,PlatForm:'jd'})
                 if(judgePlatformUser.length===0){
                     return this.ctx.body = {status:1,message:'jd请绑定账号'}
                 }
@@ -179,8 +172,6 @@ module.exports = app => {
 		    //sort:分类
 		    //思考如果是新用户是否免费送
 		    if(this.ctx.request.body.headers.version ==='1.0'){
-		    	console.log(orderid)
-		    	console.log(username)
 		    	//店铺40天内是否做过？
                 var sqlsyn = 'SELECT * FROM SellOrder WHERE SellOrderId = '+ orderid +' and SellOrder.SellShopId IN (SELECT SellOrder.sellShopId FROM BuyTask JOIN SellOrder ON SellOrder.SellOrderId = BuyTask.SellOrderId WHERE buyUserNameId='+username.UserNameId+' AND BuyTaskState <> 0 AND  NOW() - INTERVAL 40 DAY < BuyTaskCreateTime);'
                 var BuyShop = await this.app.mysql.query(sqlsyn) //如果存在数据，那么做过这家店铺
@@ -206,7 +197,6 @@ module.exports = app => {
                 }else if(judgeRebuy === 0){
                     //写下单的流程
                     function generate_buy_sell_money(task_event,total_money,add_money,idmoney){
-                      console.log('generate buy money')
                       if(task_event===1){
                       
                         var gbsm_s = total_money + parseInt(total_money*0.01) + 9 + add_money+ idmoney
@@ -225,22 +215,21 @@ module.exports = app => {
                       //卖家 = 付款费用 + 3
                       //买家 = 付款费用
                     }
-                    //任务金额计算 + 总金额计算 + 图片数 + 账号费 + 附加佣金
-                    console.log('productGetDetails:'+productGetDetails[0])
-                     
+                    //任务金额计算 + 总金额计算 + 图片数 + 账号费 + 附加佣金                     
                     var task_total_money = productGetDetails[0].buyPrice * productGetDetails[0].buyNum
-                    var task_add_money = productGetDetails[0].AddCoupons + productGetDetails[0].AddOpenOtherProduct + productGetDetails[0].AddSaveShop + productGetDetails[0].AddOpenProduct + productGetDetails[0].AddShoppingCar + productGetDetails[0].AddChat + productGetDetails[0].AddCommandsLike
+                    var TaskAddMoney = productGetDetails[0].AddCoupons + productGetDetails[0].AddOpenOtherProduct + productGetDetails[0].AddSaveShop + productGetDetails[0].AddOpenProduct + productGetDetails[0].AddShoppingCar + productGetDetails[0].AddChat + productGetDetails[0].AddCommandsLike
                     var id_money = productGetDetails[0].huabeiId * 2
-                    var get_bs_money = generate_buy_sell_money(productGetDetails[0].event,task_total_money,task_add_money,id_money)
-                    console.log(get_bs_money)
-                    var get_buy_money = get_bs_money[0] 
+                    var get_bs_money = generate_buy_sell_money(productGetDetails[0].event,task_total_money,TaskAddMoney,id_money)
+                    var get_buy_money = get_bs_money[0]
                     var get_sell_money = get_bs_money[1]
-                    //task_add_money = 附加任务集合
+                    //TaskAddMoney = 附加任务集合
                     //idmoney = 账号数
                     //imageNumber = 图片张数
-                    var imageNumber = task_add_money+1
-                    var CreateTaskSql = 'INSERT into BuyTask(buyUserNameId,SellOrderId,BuyTaskState,img_num,SellMoney,BuyMoney)values('+username.UserNameId+','+orderid+',2,'+imageNumber+','+get_sell_money+','+get_buy_money+')'
-                    console.log('CTSql:'+CreateTaskSql)
+                    var imageNumber = TaskAddMoney+1
+                    console.log(judgePlatformUser)
+                    console.log(judgePlatformUser.UserAccountId)
+                    var CreateTaskSql = 'INSERT into BuyTask(buyUserNameId,SellOrderId,BuyTaskState,ImageNumber,SellMoney,BuyMoney,UserAccountId,AddMoney)values('+username.UserNameId+','+orderid+',2,'+imageNumber+','+get_sell_money+','+get_buy_money+','+judgePlatformUser.UserAccountId+','+TaskAddMoney+')'
+                    //console.log('CTSql:'+CreateTaskSql)
                     var BuyTask = await this.app.mysql.query(CreateTaskSql) //插入任务
                     if(BuyTask.affectedRows===1){
                     	//redis 设置倒计时

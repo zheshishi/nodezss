@@ -52,11 +52,11 @@ class sellController extends Controller {
             //附加优惠卷   
             if (this.ctx.request.body.AddCoupons === "on") {var AddCoupons = 1} else {var AddCoupons = 0}
             //附加打开其他店铺
-            if (this.ctx.request.body.AddOpenOtherProduct === "on") {var AddOpenOtherProduct = 1} else {var AddOpenOtherShopProduct = 0}
+            if (this.ctx.request.body.AddOpenOtherProduct === "on") {var AddOpenOtherProduct = 1} else {var AddOpenOtherProduct = 0}
             //附加收藏截图店铺
             if (this.ctx.request.body.AddSaveShop === "on") {var AddSaveShop = 1} else {var AddSaveShop = 0}
             if (this.ctx.request.body.AddShoppingCar === "on") {var AddShoppingCar = 1} else {var AddShoppingCar = 0}
-            if (this.ctx.request.body.AddOpenProduct === "on") {var AddOpenProduct = 1} else {var AddOpenproduct = 0}
+            if (this.ctx.request.body.AddOpenProduct === "on") {var AddOpenProduct = 1} else {var AddOpenProduct = 0}
             if (this.ctx.request.body.AddCommandsLike === "on") {var AddCommandsLike = 1} else {var AddCommandsLike = 0}
             if (this.ctx.request.body.AddChat === "on") {var AddChat = 1} else {var AddChat = 0}
             //允许信用卡支付
@@ -69,7 +69,7 @@ class sellController extends Controller {
           
             var huabeiId=1//在没测试的情况下先用只能花呗关系
             //允许花呗支付
-            console.log('AddSaveShop:'+JSON.stringify(this.ctx.request.body))
+            //console.log('AddSaveShop:'+JSON.stringify(this.ctx.request.body))
             //console.log('AddSaveShop:'+this.ctx.request.body.AddSaveShop)
 
             var gifturl = this.ctx.request.body.gifturl
@@ -86,12 +86,17 @@ class sellController extends Controller {
             }else{
                 var orderNumberSum = orderNumber.reduce((a, b) => parseInt(a) + parseInt(b))
             }
-
+            console.log(AddOpenProduct)
+            console.log(AddCommandsLike)
+            console.log(AddChat)
             var coupons = AddCoupons + AddOpenOtherProduct + AddSaveShop + AddShoppingCar + AddOpenProduct + AddCommandsLike + AddChat
 
             //任务金额算法lso
+            console.log('coupons:'+coupons+'buyPrice:'+buyPrice+'buyNum:'+buyNum+'huabeiId:'+huabeiId)
             var additionalMoney = huabeiId * 2 + coupons + 2 //附加任务金额，event1红包任务附加算法
             var BuyUseraAdditionalMoney = huabeiId * 1 + coupons* 0.5 //附加任务金额，event2试用任务附加算法
+            var eventMoney
+            var buyUserMoney
             if (event === 1) {
                 var eventMoney = buyPrice * buyNum + parseInt((buyPrice * buyNum) / 100) + 7 + additionalMoney  //卖家金额* 算法
                 var buyUserMoney = buyPrice * buyNum + parseInt((buyPrice * buyNum) / 100) + 5 + BuyUseraAdditionalMoney //用户金额* 算法
@@ -102,7 +107,7 @@ class sellController extends Controller {
             //任务金额算法
             var getTaskMoney = eventMoney * orderNumberSum
             var keyword = this.ctx.request.body.keyword
-            console.log('keyword:'+keyword)
+            console.log('eventMoney:'+eventMoney+'buyUserMoney:'+buyUserMoney)
             if(keyword===''){
                 return await this.ctx.render('sellProductPost.ejs', {message: '请填满关键词', shopname: ''})
             }
