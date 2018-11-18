@@ -19,6 +19,7 @@ module.exports = app => {
     router.get("/m/index", "mIndex.index"); //
     router.get("/m/product", "mIndex.product");
     router.post("/m/genratetask", "mIndex.genratetask");
+    router.post("/m/taskstate", "mIndex.TaskState");
     router.post("/m/addaccount", "mIndex.addTbAccount");
     router.get("/m/task", "mIndex.task");
     router.get("/m/closetask", "mIndex.closetask");

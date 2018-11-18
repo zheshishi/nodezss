@@ -1,3 +1,19 @@
+function generate_buy_sell_money(task_event,total_money,add_money,idmoney){
+          //卖家 = 7 + 付款金额0.01 + 附加费用 + 2+id费用
+          //买家 = 付款费用 + 5 * 0.005  + 附加费用 *0.5+ id费用
+          //事件2
+          //卖家 = 付款费用 + 3
+          //买家 = 付款费用            
+          if(task_event===1){
+            var gbsm_s = total_money + parseInt(total_money*0.01) + 9 + add_money+ idmoney
+            var gbsm_b = total_money + parseInt(total_money*0.01)*0.5 + 5 + add_money*0.5 + idmoney*0.5
+          }else if(task_event===2){
+            var gbsm_s = productGetDetails[0].ReturnBuyPrice + 4
+            var gbsm_b = productGetDetails[0].ReturnBuyPrice
+          }
+          return [gbsm_b,gbsm_s]
+        }
+
 module.exports = app => {
     class mIndex extends app.Controller {
       //通过任务id和账号id关闭订单 access taskid and usernameid close task
@@ -5,7 +21,16 @@ module.exports = app => {
             var productGetDetailsSql = 'update BuyTask SET BuyTaskState=0 where BuyUserNameId='+ username.UserNameId +' and BuyTaskId='+ taskId +';'
             var productGetDetails = await this.app.mysql.query(productGetDetailsSql); //获取订单，按订单时间排序获取
             }
-        async index() {
+      async TaskState(){
+            if(this.ctx.header.authorization ==='' || this.ctx.header.authorization ===null ){
+                console.log('noToken')
+                return this.ctx.body = {username:'username'}
+            }
+            console.log(this.ctx.request.body.headers)
+                return this.ctx.body = {username:'TaskState'}
+
+      }
+      async index() {
             console.log('MINDEX')
             if(this.ctx.header.authorization ==='' || this.ctx.header.authorization ===null ){
             	console.log('noToken')
@@ -74,7 +99,7 @@ module.exports = app => {
 		            //拿到买家40天内买过的店铺名
 		            var productGetDetailsSql = 'SELECT * FROM SellOrder JOIN SellProduct ON SellOrder.SellProductId = SellProduct.SellProductId JOIN SellShop ON SellProduct.SellShopId = SellShop.SellShopId WHERE SellOrderId ='+taskId+';'
 		            var productGetDetails = await this.app.mysql.query(productGetDetailsSql) //获取订单，按订单时间排序获取
-		            //console.log(productGetDetails[0])
+		            //console.log(productGetDetails [0])
 		            return this.ctx.body = productGetDetails[0]//返回：订单编号+产品主图
 		            //this.ctx.body = {username:username}//返回：订单编号+产品主图
 	            }
@@ -196,30 +221,11 @@ module.exports = app => {
                     return this.ctx.body = {status:2,message:'不能下单'}
                 }else if(judgeRebuy === 0){
                     //写下单的流程
-                    function generate_buy_sell_money(task_event,total_money,add_money,idmoney){
-                      if(task_event===1){
-                      
-                        var gbsm_s = total_money + parseInt(total_money*0.01) + 9 + add_money+ idmoney
-                        var gbsm_b = total_money + parseInt(total_money*0.01)*0.5 + 5 + add_money*0.5 + idmoney*0.5
-                      
-                      }else if(task_event===2){
-                     
-                        var gbsm_s = productGetDetails[0].ReturnBuyPrice + 4
-                        var gbsm_b = productGetDetails[0].ReturnBuyPrice
-
-                      }
-                      return [gbsm_b,gbsm_s]
-                      //卖家 = 7 + 付款金额0.01 + 附加费用 + 2+id费用
-                      //买家 = 付款费用 + 5 * 0.005  + 附加费用 *0.5+ id费用
-                      //事件2
-                      //卖家 = 付款费用 + 3
-                      //买家 = 付款费用
-                    }
                     //任务金额计算 + 总金额计算 + 图片数 + 账号费 + 附加佣金                     
                     var task_total_money = productGetDetails[0].buyPrice * productGetDetails[0].buyNum
                     var TaskAddMoney = productGetDetails[0].AddCoupons + productGetDetails[0].AddOpenOtherProduct + productGetDetails[0].AddSaveShop + productGetDetails[0].AddOpenProduct + productGetDetails[0].AddShoppingCar + productGetDetails[0].AddChat + productGetDetails[0].AddCommandsLike
                     var id_money = productGetDetails[0].huabeiId * 2
-                    var get_bs_money = generate_buy_sell_money(productGetDetails[0].event,task_total_money,TaskAddMoney,id_money)
+                    var get_bs_money = await generate_buy_sell_money(productGetDetails[0].event,task_total_money,TaskAddMoney,id_money)
                     var get_buy_money = get_bs_money[0]
                     var get_sell_money = get_bs_money[1]
                     //TaskAddMoney = 附加任务集合
@@ -228,7 +234,7 @@ module.exports = app => {
                     var imageNumber = TaskAddMoney+1
                     console.log(judgePlatformUser)
                     console.log(judgePlatformUser.UserAccountId)
-                    var CreateTaskSql = 'INSERT into BuyTask(buyUserNameId,SellOrderId,BuyTaskState,ImageNumber,SellMoney,BuyMoney,UserAccountId,AddMoney)values('+username.UserNameId+','+orderid+',2,'+imageNumber+','+get_sell_money+','+get_buy_money+','+judgePlatformUser.UserAccountId+','+TaskAddMoney+')'
+                    var CreateTaskSql = 'INSERT into BuyTask(buyUserNameId,SellOrderId,BuyTaskState,ImageNumber,SellMoney,BuyMoney,UserAccountId,AddMoney,PayMoney)values('+username.UserNameId+','+orderid+',2,'+imageNumber+','+get_sell_money+','+get_buy_money+','+judgePlatformUser.UserAccountId+','+TaskAddMoney+','+productGetDetails[0].buyPrice*productGetDetails[0].buyNum+')'
                     //console.log('CTSql:'+CreateTaskSql)
                     var BuyTask = await this.app.mysql.query(CreateTaskSql) //插入任务
                     if(BuyTask.affectedRows===1){

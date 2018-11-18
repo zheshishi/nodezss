@@ -172,8 +172,6 @@ class sellController extends Controller {
             return await this.ctx.render('sellProductPost.ejs', {message: '店铺在其他用户名下，请联系客服', shopname: ''})
         }
         //判断店铺用户
-
-
         //3. 判断店铺是否存在 - > 绑定店铺是否>10家
         //https://shopsearch.taobao.com/search?app=shopsearch&q=宅原品日式烧桐木家居
 
