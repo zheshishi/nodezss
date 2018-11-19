@@ -30,15 +30,17 @@ module.exports = app => {
     router.get("/sell", "sell.index"); // sell Login
 
     //登录 seller admin view
-    router.get("/selllogin", "sellLogin.sellLoginGet"); // sell Login
-    router.post("/selllogin", "sellLogin.sellLoginPost"); // sell Login
-    router.get("/sellmobilelogin", "sellLogin.sellMobileLoginGet"); // sell Login
-    router.post("/sellmobilelogin", "sellLogin.sellMobileLoginPost"); // sell Login
+    router.get("/selllogin", "sellLogin.sellLoginGet"); 
+    router.post("/selllogin", "sellLogin.sellLoginPost");
+    router.get("/sellmobilelogin", "sellLogin.sellMobileLoginGet");
+    router.post("/sellmobilelogin", "sellLogin.sellMobileLoginPost"); 
 
     //商家网页端订单管理页面
-    router.get("/sell/productpost", "sellProduct.sellProductPostGet"); // sell Login
-    router.post("/sell/productpost", "sellProduct.sellProductPostPost"); // sell Login
-    router.post("/sell/productinfo", "sellProduct.productGetinfo"); // sell Login
+    router.get("/sell/productpost", "sellProduct.sellProductPostGet"); 
+    router.post("/sell/productpost", "sellProduct.sellProductPostPost"); 
+    router.get("/sell/productcomment", "sellProduct.productCommentGet"); 
+    router.get("/sell/productmanager", "sellProduct.ProductManagerGet"); 
+    router.post("/sell/productinfo", "sellProduct.productGetinfo");
     router.get("/sell/getshop", "sellProduct.getshop"); // ajax getshop
     router.post("/sell/getproduct", "sellProduct.getproduct"); // ajax getproduct
     router.post("/sell/getproductid", "sellProduct.getproductId"); // ajax getproduct

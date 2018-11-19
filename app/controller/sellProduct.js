@@ -244,6 +244,24 @@ class sellController extends Controller {
         //5. 条件附加收费模式
         return await this.ctx.render('sellProductPost.ejs', {message: '发布任务成功，请到任务区查看进行中的任务', shopname: ''})
     }
+    //cry comment
+    async productCommentGet() {
+        if (!this.ctx.cookies.get('username', {encrypt: true})) {
+            return this.ctx.redirect('/selllogin')
+        }
+        let cookieget = this.ctx.cookies.get('username', {encrypt: true})
+        await this.ctx.render('sellProductComment.ejs', {message: '', shopname: ''})
+    }
+
+    async ProductManagerGet() {
+        if (!this.ctx.cookies.get('username', {encrypt: true})) {
+            return this.ctx.redirect('/selllogin')
+        }
+        let cookieget = this.ctx.cookies.get('username', {encrypt: true})
+        await this.ctx.render('sellProductManager.ejs', {message: '', shopname: ''})
+    }
+
+
     async productGetinfo(){
         console.log('productGetinfo' + Date())
         //如果没有cookie不给数据
