@@ -24,7 +24,16 @@ module.exports = appInfo => {
     buffer: false,
     maxFiles: 1000,
     },
-
+  config.qiniu = {
+  // I ussually set the key into `~/.zshrc`, and I can get the value via `process.env.key`, It's very safe~
+    ak: 'fjiEbz75c-y8-297Jsgyih7Qq05NIxXjprPl0hSw',
+    sk: '089X4S0fLRMFRwb1Y3CyRcev6yhOtNH58Otr-BeR',
+    bucket: 'crysystem',
+    baseUrl: 'http://img.zhess.com',
+    zone: 'z2',
+    app: true, // default value
+    agent: false, //default value
+  },
   config.middleware = [];
   config.mysql = {
       // database configuration

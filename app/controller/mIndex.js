@@ -278,6 +278,9 @@ module.exports = app => {
         var username = await this.app.mysql.get('UserName',{UserName:tokenVerify.username})//用户信息
         if(username==null){
                 return this.ctx.body = {status:0,message:'账户还没保存，请重新刷新'}}
+        let tokenx = await this.app.qiniu.createToken()
+        console.log(tokenx)
+        return tokenx
     }
 
     	async addTbAccount(){

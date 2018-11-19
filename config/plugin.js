@@ -11,6 +11,10 @@ exports.jwt = {
     enable: true,
     package: "egg-jwt"
 };
+exports.qiniu = {
+  enable: true,
+  package: "egg-qiniu-upload"
+}
 exports.security = {
   xframe: {
     enable: false,
