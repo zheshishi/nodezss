@@ -22,12 +22,40 @@ module.exports = app => {
             var productGetDetails = await this.app.mysql.query(productGetDetailsSql); //获取订单，按订单时间排序获取
             }
       async TaskState(){
-            if(this.ctx.header.authorization ==='' || this.ctx.header.authorization ===null ){
+            //Regular 
+            var rePayMoney = /^([1-5]\d{0,9}|0)([.]?|(\.\d{1,2})?)$/
+            var reOrderId = /^([1-9]\d{1,30})/
+            var reAddMoney = /^([1-9]\d{0,1})$/
+            if(this.ctx.request.body.headers.Authorization ==='' || this.ctx.request.body.headers.Authorization ===null ){
                 console.log('noToken')
-                return this.ctx.body = {username:'username'}
+                return this.ctx.body = {status:0,message:'未知错误'}
             }
-            console.log(this.ctx.request.body.headers)
-                return this.ctx.body = {username:'TaskState'}
+            var tokenVerify = this.app.jwt.verify(this.ctx.request.body.headers.Authorization, this.app.config.jwt.secret);
+            var username = await this.app.mysql.get('UserName',{UserName:tokenVerify.username})//用户信息           
+            var taskId = await this.app.mysql.get('BuyTask',{BuyTaskId:this.ctx.request.body.headers.TaskId})
+            if(taskId===null || taskId.BuyUserNameId!==username.UserNameId || taskId.BuyTaskState!==this.ctx.request.body.headers.TaskState){
+                return this.ctx.body = {status:1,message:'未知错误'}
+            }
+            if(taskId.BuyTaskState === 2){
+                var PayMoney = parseFloat(this.ctx.request.body.headers.PayMoney)
+                var AddMoney = parseFloat(this.ctx.request.body.headers.AddMoney)
+                var filesurl = JSON.stringify(this.ctx.request.body.headers.filesurl)
+                var PlatFormOrderId = parseInt(this.ctx.request.body.headers.PlatFormOrderId)
+                if(reOrderId.test(PlatFormOrderId) ===false||rePayMoney.test(PayMoney) ===false ||reAddMoney.test(AddMoney) ===false){
+                    return this.ctx.body = {status:1,message:'金额格式、订单编号不对'}
+                }
+                if((PayMoney - taskId.PayMoney)>50||AddMoney>20){
+                    return this.ctx.body = {status:1,message:'订单修改金额不能>50，附加任务不能>20'}
+                }
+                //如果状态2就到3吗？
+                var TaskStateSql = 'update BuyTask SET BuyTaskState=3,AddMoney='+ AddMoney +',PayMoney='+ PayMoney +',TaskScreen1='+ filesurl +',PlatFormOrderId='+ PlatFormOrderId + ' where BuyUserNameId='+ username.UserNameId +' and BuyTaskId='+ this.ctx.request.body.headers.TaskId +';'
+                var TaskState = await this.app.mysql.query(TaskStateSql); //获取订单，按订单时间排序获取
+                if(TaskState){
+                    return this.ctx.body = {status:2,message:'提交成功'}
+                }
+            }
+ 
+            return this.ctx.body = {username:'TaskState'}
 
       }
       async index() {
@@ -280,7 +308,7 @@ module.exports = app => {
                 return this.ctx.body = {status:0,message:'账户还没保存，请重新刷新'}}
         let tokenx = await this.app.qiniu.createToken()
         console.log(tokenx)
-        return tokenx
+        return this.ctx.body = tokenx
     }
 
     	async addTbAccount(){
