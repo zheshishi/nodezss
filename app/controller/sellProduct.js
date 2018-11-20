@@ -249,9 +249,63 @@ class sellController extends Controller {
         if (!this.ctx.cookies.get('username', {encrypt: true})) {
             return this.ctx.redirect('/selllogin')
         }
-        let cookieget = this.ctx.cookies.get('username', {encrypt: true})
-        await this.ctx.render('sellProductComment.ejs', {message: '', shopname: ''})
+        var cookieget = this.ctx.cookies.get('username', {encrypt: true})
+        await this.ctx.render('sellProductComment.ejs', {message: ''})
     }
+    async productCommentPost() {
+        try{
+            if (!this.ctx.cookies.get('username', {encrypt: true})) {
+                return this.ctx.redirect('/selllogin')
+            }
+            var CookieUserName = this.ctx.cookies.get('username', {encrypt: true})
+            var UserName = await this.app.mysql.get('UserName', {UserName: CookieUserName})
+            var productId = this.ctx.request.body.productinfoID
+            var Text = this.ctx.request.body.txtGoodCommentWords
+            var img1 = this.ctx.request.body.but1
+            var img2 = this.ctx.request.body.but2
+            var img3 = this.ctx.request.body.but3
+            var img4 = this.ctx.request.body.but4
+            var img5 = this.ctx.request.body.but5
+            var event = this.ctx.request.body.event
+            console.log(this.ctx.request.body)
+            var re = /http/
+            var img = []
+            if(re.test(img1)){
+                img.push(img1)
+            }
+            if(re.test(img2)){
+                img.push(img2)
+            }
+            if(re.test(img3)){
+                img.push(img3)
+            }
+            if(re.test(img4)){
+                img.push(img3)
+            }
+            if(re.test(img5)){
+                img.push(img4)
+            }
+            var imgjson = JSON.stringify(img)
+            if(Text ===''&& img1===''&& img2===''&& img3===''&& img4===''&& img5===''){
+                return await this.ctx.render('sellProductComment.ejs', {message: '请填写有效信息'})
+            }
+            if(event!=1&&event!=2){
+                return await this.ctx.render('sellProductComment.ejs', {message: '请填写有效信息'})
+            }
+            var imgjson = imgjson
+            var commentsql = "insert into BuyTaskComment(UserNameId, event, Text,img,SellProductId)value("+UserName.UserNameId+","+event+",'"+Text+"','"+imgjson+"',"+productId+")"
+            console.log(commentsql)
+            var commentsqlreturn =  await this.app.mysql.query(commentsql)
+            return await this.ctx.render('sellProductComment.ejs', {message: '保存成功'})
+
+        }catch(e){
+            console.log(e)
+            return await this.ctx.render('sellProductComment.ejs', {message: '未知错误'})
+        }
+        
+    }
+
+
 
     async ProductManagerGet() {
         if (!this.ctx.cookies.get('username', {encrypt: true})) {
@@ -259,6 +313,14 @@ class sellController extends Controller {
         }
         let cookieget = this.ctx.cookies.get('username', {encrypt: true})
         await this.ctx.render('sellProductManager.ejs', {message: '', shopname: ''})
+    }
+
+    async productCommentManagerGet() {
+        if (!this.ctx.cookies.get('username', {encrypt: true})) {
+            return this.ctx.redirect('/selllogin')
+        }
+        let cookieget = this.ctx.cookies.get('username', {encrypt: true})
+        await this.ctx.render('sellProductCommentManager.ejs', {message: '', shopname: ''})
     }
 
 

@@ -25,6 +25,7 @@ module.exports = app => {
     router.get("/m/closetask", "mIndex.closetask");
 
     router.post("/m/qntoken", "mIndex.qntoken"); //七牛token
+    router.get("/m/qntoken", "mIndex.qntoken"); //七牛token
     //web size sell admin网页端商家管理页面
 
     router.get("/sell", "sell.index"); // sell Login
@@ -39,6 +40,8 @@ module.exports = app => {
     router.get("/sell/productpost", "sellProduct.sellProductPostGet"); 
     router.post("/sell/productpost", "sellProduct.sellProductPostPost"); 
     router.get("/sell/productcomment", "sellProduct.productCommentGet"); 
+    router.post("/sell/productcomment", "sellProduct.productCommentPost"); 
+    router.get("/sell/productcommentmanager", "sellProduct.productCommentManagerGet"); 
     router.get("/sell/productmanager", "sellProduct.ProductManagerGet"); 
     router.post("/sell/productinfo", "sellProduct.productGetinfo");
     router.get("/sell/getshop", "sellProduct.getshop"); // ajax getshop
