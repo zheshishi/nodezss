@@ -8,14 +8,14 @@ const puppeteer = require('puppeteer')
 
 
 class sellController extends Controller {
-    async sellProductPostGet() {
+    async CreateTaskGet() {
         if (!this.ctx.cookies.get('username', {encrypt: true})) {
             return this.ctx.redirect('/selllogin')
         }
         let cookieget = this.ctx.cookies.get('username', {encrypt: true})
-        await this.ctx.render('sellProductPost.ejs', {message: '', shopname: ''})
+        await this.ctx.render('sellTaskPost.ejs', {message: '', shopname: ''})
     }
-    async sellProductPostPost() {
+    async CreateTaskPost() {
         if (!this.ctx.cookies.get('username', {encrypt: true})) {
             return this.ctx.redirect('/selllogin')
         }
@@ -32,7 +32,7 @@ class sellController extends Controller {
             var productinfoID = parseInt(this.ctx.request.body.productinfoID)
             var MinTime = parseInt(this.ctx.request.body.sdMinTime)
             var MaxTime = parseInt(this.ctx.request.body.sdMaxTime)
-            if(MinTime>=MaxTime){return await this.ctx.render('sellProductPost.ejs', {message: '试用时间开始不能小于完成时间', shopname: ''})}
+            if(MinTime>=MaxTime){return await this.ctx.render('sellTaskPost.ejs', {message: '试用时间开始不能小于完成时间', shopname: ''})}
             var buyPrice = parseFloat(this.ctx.request.body.buyPrice).toFixed(2)
             var buyNum = parseInt(this.ctx.request.body.buyNum)
             var buyRules = this.ctx.request.body.buyRules
@@ -76,13 +76,13 @@ class sellController extends Controller {
             var orderNote = this.ctx.request.body.orderNote
 
             if (event < 0.1 || productinfoID < 0.1 || buyPrice < 1 || buyNum < 1) {
-                return await this.ctx.render('sellProductPost.ejs', {message: '请填写正确数字信息', shopname: ''})
+                return await this.ctx.render('sellTaskPost.ejs', {message: '请填写正确数字信息', shopname: ''})
             }
             //task array
             if(typeof orderNumber === 'string'){
                 var orderNumberSum=parseInt(orderNumber)
             }else if(orderNumber.includes('')){
-                return await this.ctx.render('sellProductPost.ejs', {message: '请填满关键词任务数量', shopname: ''})
+                return await this.ctx.render('sellTaskPost.ejs', {message: '请填满关键词任务数量', shopname: ''})
             }else{
                 var orderNumberSum = orderNumber.reduce((a, b) => parseInt(a) + parseInt(b))
             }
@@ -109,7 +109,7 @@ class sellController extends Controller {
             var keyword = this.ctx.request.body.keyword
             console.log('eventMoney:'+eventMoney+'buyUserMoney:'+buyUserMoney)
             if(keyword===''){
-                return await this.ctx.render('sellProductPost.ejs', {message: '请填满关键词', shopname: ''})
+                return await this.ctx.render('sellTaskPost.ejs', {message: '请填满关键词', shopname: ''})
             }
             var city = this.ctx.request.body.city
             var orderSort = this.ctx.request.body.orderSort
@@ -118,7 +118,7 @@ class sellController extends Controller {
             //task array
         } catch (e) {
             console.log('error:' + e)
-            return await this.ctx.render('sellProductPost.ejs', {message: '请填写正确数字的信息', shopname: ''})
+            return await this.ctx.render('sellTaskPost.ejs', {message: '请填写正确数字的信息', shopname: ''})
         }
         //task array
 
@@ -154,7 +154,7 @@ class sellController extends Controller {
 
         if (money.Balance < getTaskMoney + 500) {
             var returnmoney = getTaskMoney+ 500 - money.Balance
-            return await this.ctx.render('sellProductPost.ejs', {
+            return await this.ctx.render('sellTaskPost.ejs', {
                 message: '余额不足，请充值：' + returnmoney + '（保证邮费与差价）',
                 shopname: ''
             })
@@ -169,7 +169,7 @@ class sellController extends Controller {
             var rowsql = 'UPDATE SellShop SET UserNameId="' + UserName.UserNameId + '" WHERE SellShopId="' + getproduct[0].SellShopId + '";'
             var result = await this.app.mysql.query(rowsql);
         } else {
-            return await this.ctx.render('sellProductPost.ejs', {message: '店铺在其他用户名下，请联系客服', shopname: ''})
+            return await this.ctx.render('sellTaskPost.ejs', {message: '店铺在其他用户名下，请联系客服', shopname: ''})
         }
         //判断店铺用户
         //3. 判断店铺是否存在 - > 绑定店铺是否>10家
@@ -242,17 +242,17 @@ class sellController extends Controller {
 
         //4. 保存任务数
         //5. 条件附加收费模式
-        return await this.ctx.render('sellProductPost.ejs', {message: '发布任务成功，请到任务区查看进行中的任务', shopname: ''})
+        return await this.ctx.render('sellTaskPost.ejs', {message: '发布任务成功，请到任务区查看进行中的任务', shopname: ''})
     }
     //cry comment
-    async productCommentGet() {
+    async taskCommentGet() {
         if (!this.ctx.cookies.get('username', {encrypt: true})) {
             return this.ctx.redirect('/selllogin')
         }
         var cookieget = this.ctx.cookies.get('username', {encrypt: true})
-        await this.ctx.render('sellProductComment.ejs', {message: ''})
+        await this.ctx.render('sellTaskComment.ejs', {message: ''})
     }
-    async productCommentPost() {
+    async taskCommentPost() {
         try{
             if (!this.ctx.cookies.get('username', {encrypt: true})) {
                 return this.ctx.redirect('/selllogin')
@@ -280,49 +280,63 @@ class sellController extends Controller {
                 img.push(img3)
             }
             if(re.test(img4)){
-                img.push(img3)
+                img.push(img4)
             }
             if(re.test(img5)){
-                img.push(img4)
+                img.push(img5)
             }
             var imgjson = JSON.stringify(img)
             if(Text ===''&& img1===''&& img2===''&& img3===''&& img4===''&& img5===''){
-                return await this.ctx.render('sellProductComment.ejs', {message: '请填写有效信息'})
+                return await this.ctx.render('sellTaskComment.ejs', {message: '请填写有效信息'})
             }
             if(event!=1&&event!=2){
-                return await this.ctx.render('sellProductComment.ejs', {message: '请填写有效信息'})
+                return await this.ctx.render('sellTaskComment.ejs', {message: '请填写有效信息'})
             }
             var imgjson = imgjson
             var commentsql = "insert into BuyTaskComment(UserNameId, event, Text,img,SellProductId)value("+UserName.UserNameId+","+event+",'"+Text+"','"+imgjson+"',"+productId+")"
             console.log(commentsql)
             var commentsqlreturn =  await this.app.mysql.query(commentsql)
-            return await this.ctx.render('sellProductComment.ejs', {message: '保存成功'})
+            return await this.ctx.render('sellTaskComment.ejs', {message: '保存成功'})
 
         }catch(e){
             console.log(e)
-            return await this.ctx.render('sellProductComment.ejs', {message: '未知错误'})
+            return await this.ctx.render('sellTaskComment.ejs', {message: '未知错误'})
         }
         
     }
 
-
-
-    async ProductManagerGet() {
+    async TaskManagerGet() {
         if (!this.ctx.cookies.get('username', {encrypt: true})) {
             return this.ctx.redirect('/selllogin')
         }
         let cookieget = this.ctx.cookies.get('username', {encrypt: true})
-        await this.ctx.render('sellProductManager.ejs', {message: '', shopname: ''})
+        await this.ctx.render('SellTaskManager.ejs', {message: '', shopname: ''})
     }
 
-    async productCommentManagerGet() {
+    async TaskCommentManagerGet() {
         if (!this.ctx.cookies.get('username', {encrypt: true})) {
             return this.ctx.redirect('/selllogin')
         }
         let cookieget = this.ctx.cookies.get('username', {encrypt: true})
-        await this.ctx.render('sellProductCommentManager.ejs', {message: '', shopname: ''})
+        return await this.ctx.render('sellTaskCommentManager.ejs', {message: '', shopname: ''})
     }
-
+    async TaskList() {
+        if (!this.ctx.cookies.get('username', {encrypt: true})) {
+            return this.ctx.redirect('/selllogin')
+        }
+        let CookieUserName = this.ctx.cookies.get('username', {encrypt: true})
+        let UserName = await this.app.mysql.get('UserName', {UserName: CookieUserName})
+        let header = this.ctx.header.shopId
+        let id = this.ctx.header.id
+        let TimeStart = this.ctx.header.TimeStart
+        let taskState = this.ctx.header.State//0.关闭、1.完成、2.等待支付、3.等待发货、4
+        let TimeEnd = this.ctx.header.TimeEnd
+        let PageNum = this.ctx.header.PageNum
+        let pageSize = this.ctx.header.pageSize
+        //试用产品、
+        //sql syntax
+        return await this.ctx.render('sellTaskCommentManager.ejs', {message: ''})
+    }
 
     async productGetinfo(){
         console.log('productGetinfo' + Date())
@@ -649,10 +663,8 @@ class sellController extends Controller {
             }
 
             var getshop_shopName = await this.app.mysql.get('SellProduct', {SellProductId:returnSellProductId})
-            console.log(Date())
             return this.ctx.body = getshop_shopName
             //save product
-
         }
     }
         //save shop
