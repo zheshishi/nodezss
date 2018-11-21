@@ -297,14 +297,11 @@ class sellController extends Controller {
             console.log(commentsql)
             var commentsqlreturn =  await this.app.mysql.query(commentsql)
             return await this.ctx.render('sellTaskComment.ejs', {message: '保存成功'})
-
         }catch(e){
             console.log(e)
             return await this.ctx.render('sellTaskComment.ejs', {message: '未知错误'})
         }
-        
     }
-
     async TaskManagerGet() {
         //get cookie username
         var CookieUserName = this.ctx.cookies.get('username', {encrypt: true})
@@ -330,18 +327,25 @@ class sellController extends Controller {
             return this.ctx.redirect('/selllogin')
         }
         let CookieUserName = this.ctx.cookies.get('username', {encrypt: true})
-        console.log(this.ctx.queries);
         let UserName = await this.app.mysql.get('UserName', {UserName: CookieUserName})
+        let sort = this.ctx.queries.sort[0]//0.关闭、1.完成、2.等待支付、3.等待发货、4
         let shopId = this.ctx.queries.shopId[0]
-        let id = this.ctx.queries.id[0]
+        let productId = this.ctx.queries.productId[0]
         let TimeStart = this.ctx.queries.TimeStart[0]
-        let taskState = this.ctx.queries.State[0]//0.关闭、1.完成、2.等待支付、3.等待发货、4
         let TimeEnd = this.ctx.queries.TimeEnd[0]
-        let PageNum = this.ctx.queries.PageNum[0]
-        let pageSize = this.ctx.queries.pageSize[0]
-        //试用产品、
+        let page = this.ctx.queries.page[0]
+        let pageNum = this.ctx.queries.pageNum[0]
+        let sortSql
+        if(sort===''){
+            sortSql = 'BuyTaskState <>0'
+        }else{
+            sortSql = 'BuyTaskState = ' + sort
+        }
+        let taskListSql = 'SELECT * FROM BuyTask JOIN SellOrder ON BuyTask.SellOrderId = SellOrder.SellOrderId WHERE '+sortSql+' AND SellOrder.UserNameId ='+UserName.UserNameId+';'
+        let taskList = await this.app.mysql.query(taskListSql)
+        //试用产品
         //sql syntax
-        return await this.ctx.render('sellTaskCommentManager.ejs', {message: ''})
+        return this.ctx.body = taskList
     }
 
     async productGetinfo(){

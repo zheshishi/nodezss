@@ -96,20 +96,22 @@ function ProductSetInfo(data) {
 
 //manager view 获取任务表 sellTaskManager.ejs
 
-function ajaxGetTaskList() {
+function ajaxGetTaskList(sort,shopId,productId,page,pageNum,TimeStart,TimeEnd) {
+    //任务属性、店铺、产品、页数、时间1和2
     $.ajax({
         method: "get",
         url: "/sell/tasklist",
         data: {
-            id: 1,
-            shopId: 2,
-            TimeStart: '2018-01-01',
-            TimeEnd: '2018-01-02',
-            PageNum: 1,
-            PageSize: 2
+            sort: sort,
+            shopId: shopId,
+            productId:productId,
+            TimeStart: TimeStart,
+            TimeEnd: TimeEnd,
+            page: page,
+            pageNum: pageNum
         },
         success: function (data, status) {
-            urlgetshop(data)
+            console.log(data)
         }
     })
 }
