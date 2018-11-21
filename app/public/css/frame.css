@@ -1,6 +1,7 @@
 body{background-color:#FFF;color:#555;font:14px/24px tahoma,Verdana,Arial,"\5b8b\4f53",sans-serif;word-wrap:break-word;-webkit-font-smoothing:antialised;}@font-face{font-family:'iconfont';src:url('/public/images/font/iconfont.eot');src:url('/public/images/font/iconfont.eot?#iefix') format('embedded-opentype'),url('/public/images/font/iconfont.woff') format('woff'),url('/public/images/font/iconfont.ttf') format('truetype')}.iconfont{font-family:"iconfont";font-size:16px;font-style:normal;-webkit-font-smoothing: antialiased;-webkit-text-stroke-width: 0.2px;padding-right:5px;}input,textarea{color:#404148;font:14px/20px 'Segoe UI',Verdana,Arial;}.clearFix{clear:both}.clearfix{*zoom:1;*height:1%}
 .clearfix:after {display: block;height: 0;clear: both;content: " ";}
-.text-overflow{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;-o-text-overflow: ellipsis;}.floatLeft{float:left}.floatRight{float:right}input[type=button] {-webkit-appearance: button;}
+.text-overflow{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;-o-text-overflow: ellipsis;}.floatLeft{float:left}
+.floatRight{float:left}input[type=button] {-webkit-appearance: button;}
 hr{ height: 0; margin:10px 0; border:none; border-top:dashed 1px #DEDEDE;}
 /*------=====================================================------------*/
 #container{min-width: 1200px;}

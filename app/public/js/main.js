@@ -112,9 +112,67 @@ function ajaxGetTaskList(sort,shopId,productId,page,pageNum,TimeStart,TimeEnd) {
         },
         success: function (data, status) {
             console.log(data)
+            ajaxGetTaskListView(data)
         }
     })
 }
+
+function ajaxGetTaskListView(data){
+        $("#taskContainer").empty()
+        for(var x=0;data.length>x;x++){
+            var AjaxSsll = `<div class="taskCell"><div class="title clearfix"><span class="shop floatLeft mr-20 ml10">店铺：<span>tmall - 511679594</span></span><span class="taskNo floatLeft mr-4">编号：<span>511679594</span>
+            </span><span class="floatRight mr-8">状态：
+                        <span class="FINISHED">`+data[x].BuyTaskState+`</span>
+                        </span>
+                        <span class="floatRight mr-8">
+                        创建时间：
+                        <span>`+data[x].BuyTaskCreateTime+`</span>
+                        </span>
+                        <span class="floatRight mr-8">
+                        任务类型：
+                        <span>`+data[x].BuyTaskState+`</span>
+                        </span>
+                    </div>
+                    <div class="body">
+                        <div class="wrq_task_list" style="height:auto"> 
+                            <table class="normTable">
+                                <thead>
+                                    <tr>
+                                        <td width="60%"></td>
+                                        <td width="10%"></td>
+                                        <td width="20%"></td>
+                                        <td width="10%"></td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="text-align:left;">
+                                            <div style="wight:100px;float:left;margin-right:10px;"><img height="100px" width="100px" src="http://digg-public.qiniudn.com/FvkjyilA6T_cqKl5qwiAiOsB_qlS"></div>
+                                            <span style="height:100px">自主胆马甲紫标羽绒12381273891273服外套潮牌</span><br>
+                                            <span>订单编号：<text class="doing">1</text></span><br>
+                                            <span style="height:100px">单价：￥<text class="doing">`+data[x].BuyMoney+`</text>，拍1件</span><span><text>`+data[x].KeyWord+`</text></span<br>
+                                        </td>
+                                        <td style="text-align:left;">
+                                            <em class="cap"><span>-</span></em>
+
+                                        </td>
+                                        <td style="text-align:left;">
+                                            <em class="cap">账号：<span class="">`+data[x].PlatFormUserName+`</span></em>
+                                        </td>
+                                        <td class="doing">
+                                            <a class="btnRepublish stdColorButton" href="/publish/app/sdPlanTask?taskId=511679594" target="_blank">一键发布</a>
+                                            <a class="btnRepublish stdColorButton cancel " href="javascript:;" data-taskid="511679594" target="_blank">撤销任务</a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>`
+            $("#taskContainer").append(AjaxSsll)
+    }
+}
+
 //manager view 按钮数 sellTaskManager.ejs
 
 function pageNumber(PageNum) {

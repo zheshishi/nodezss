@@ -341,7 +341,7 @@ class sellController extends Controller {
         }else{
             sortSql = 'BuyTaskState = ' + sort
         }
-        let taskListSql = 'SELECT * FROM BuyTask JOIN SellOrder ON BuyTask.SellOrderId = SellOrder.SellOrderId WHERE '+sortSql+' AND SellOrder.UserNameId ='+UserName.UserNameId+';'
+        let taskListSql = 'SELECT * FROM BuyTask JOIN SellOrder ON BuyTask.SellOrderId = SellOrder.SellOrderId JOIN UserAccount ON BuyTask.UserAccountId = UserAccount.UserAccountId WHERE '+sortSql+' AND SellOrder.UserNameId ='+UserName.UserNameId+';'
         let taskList = await this.app.mysql.query(taskListSql)
         //试用产品
         //sql syntax
