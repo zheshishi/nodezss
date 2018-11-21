@@ -28,7 +28,137 @@
     <link rel="stylesheet" href="/public/adminLTE/dist/css/AdminLTE.min.css">
     <link rel="stylesheet" href="/public/adminLTE/dist/css/skins/_all-skins.min.css">
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" type="text/javascript"></script>
+   <script>
+     //自动计算数据
+    function gettaskvalues(){
+        var event_value = document.getElementsByName('event')
+        var event_valueL = event_value.length
+        var eventGetValue;
+        do{
+            event_valueL -= 1
+            if(event_value[event_valueL].checked===true){
+                eventGetValue = event_value[event_valueL].value
+            }
+        }while(event_valueL>0)
+        var statisticalBuyPrice = document.getElementById('buyPrice').value  //产品单价
+        var statisticalbuyNum = document.getElementById('buyNum').value  //拍的件数
+        var statisticalhuabeiId = document.getElementById('huabeiId').checked  //是否花呗
 
+        //定单笔数
+        var statisticalorderNumber = document.getElementsByName('orderNumber') //关键词订单数
+        var statisticalorderNumberArray = 0
+        var statisticalorderNumbervalues = statisticalorderNumber.length
+        statisticalorderNumberArray = 0
+        do{
+            statisticalorderNumbervalues -= 1
+            if(statisticalorderNumber[statisticalorderNumbervalues].valueAsNumber>0){
+                statisticalorderNumberArray += statisticalorderNumber[statisticalorderNumbervalues].valueAsNumber
+            }
+        }while(statisticalorderNumbervalues>0)
+        var taskbasemoney1 = '' // 押金公式
+        var taskbasemoney2 = '' // 总押金总计
+        var taskmoney1 ='' //买家试用费
+        var taskmoney2 ='' //买家试用费
+        var huabeiId0 = ''
+        var taskhuabei1 = '' //花呗号
+        var taskhuabei2 = '' //花呗号
+        var taskAI1 = '' //智能黑号限制
+        var taskAI2 = '' //智能黑号限制
+        var totalFee = '' //总费用
+        if (statisticalBuyPrice>0 || statisticalbuyNum>0){
+            taskbasemoney1= statisticalBuyPrice+'元 * ' + statisticalbuyNum + '件 * '+statisticalorderNumberArray + '笔'
+        }
+        document.getElementById('taskbasemoney1').innerHTML = taskbasemoney1;
+        if (statisticalorderNumber>0 || statisticalorderNumberArray>0 || statisticalBuyPrice>0){
+            taskbasemoney2 = statisticalBuyPrice*statisticalorderNumberArray*statisticalbuyNum
+            document.getElementById('taskbasemoney2').innerHTML = taskbasemoney2;
+        }
+        //定单笔数
+        if(document.getElementById('huabeiId').checked===false){
+            huabeiId0 = 0
+        }else{
+            huabeiId0 = 2
+        }
+        taskhuabei1 = huabeiId0+' *'+ statisticalorderNumberArray + '笔'
+        taskhuabei2 = huabeiId0 * statisticalorderNumberArray
+        //买家试用费
+        //买家试用费
+        if(eventGetValue==='1'){
+            taskmoney1 = (parseInt((statisticalBuyPrice *statisticalbuyNum)/100)+7)+'元 *'+statisticalorderNumberArray + '笔'
+            taskmoney2 = (parseInt((statisticalBuyPrice *statisticalbuyNum)/100) + 7) * statisticalorderNumberArray
+
+        }else if(eventGetValue==='2'){
+            taskmoney1 = 0+'元 *'+statisticalorderNumberArray + '笔'
+            taskmoney2 = 0
+        }
+        taskAI1 =  '2 * '+ statisticalorderNumberArray + '笔'
+        taskAI2 =  2*statisticalorderNumberArray
+        totalFee = taskAI2+taskmoney2+taskhuabei2+taskbasemoney2
+        document.getElementById('taskmoney1').innerHTML = taskmoney1;
+        document.getElementById('taskmoney2').innerHTML = taskmoney2;
+        document.getElementById('taskhuabei1').innerHTML = taskhuabei1;
+        document.getElementById('taskhuabei2').innerHTML = taskhuabei2;
+        document.getElementById('taskAI1').innerHTML = taskAI1;
+        document.getElementById('taskAI2').innerHTML = taskAI2;
+        document.getElementById('totalFee').innerHTML = totalFee;
+    }
+    //获取店铺名
+    function ajaxGetTaskList(){
+        $.ajax({
+            method:"get",
+            url:"/sell/tasklist",
+            data: {id:1,shopId:2,TimeStart:'2018-01-01',TimeEnd:'2018-01-02',PageNum:1,PageSize:2},
+            success: function(data, status){
+                urlgetshop(data)
+            }
+        })
+    }
+    function urlgetshop(data){
+        if(data!==null){
+            console.log(typeof data)
+            $("#Selectshop").empty()
+            $("#Selectshop").append("<option value='0'>选择店铺</option>")
+            for (var AjaxSelectShopValue in data) {
+                var AjaxSsll = '<option value='+data[AjaxSelectShopValue].SellShopId+'>'+data[AjaxSelectShopValue].ShopSort+' - '+data[AjaxSelectShopValue].ShopUserName+'</option>'
+               $("#Selectshop").append(AjaxSsll)
+            }
+        }
+     }
+
+    //获取店铺名
+    window.onload = function(){
+        ajaxGetTaskList()
+        //window.setInterval(gettaskvalues, 1000);
+    }
+     //自动计算数据
+     //ajax get post product infomaition
+
+     //url 获取产品
+    function geturlfs(urlvalues){
+     if(urlvalues.includes('.com')){
+
+         $(document).ready(function(){
+                 $.ajax({
+                     method:"POST",
+                     url:'/sell/productinfo',
+                     data: {getUrl:urlvalues},
+                     success: function(data, status) {
+                         // Call this function on succes
+                         console.log("post result: ", data, status)
+                         ProductSetInfo(data)
+
+                     }
+                     // error: function() {
+                     //     alert('Error occured');
+                     // }
+                 })
+         })
+    }
+    }
+     function gvalue(data){
+         console.log(data)
+     }
+    </script>
 
     <style>
         .UrlTitle {
@@ -59,6 +189,58 @@
                 <h3 class="box-title">首页</h3>
             </div>
                 <!-- /.box-header -->
+
+                <div class="area-main">
+
+
+
+    <div class="contentCard">
+        <div class="tabSwitchWrapper">
+             <a>进行中的任务</a>
+             <a>待支付任务</a>
+             <a>已完成的任务</a>
+             <a>已经取消的任务</a>
+             <a>全部任务</a>
+        </div>
+        <div class="taskFilterPanel mt10">
+            <span class="floatLeft mr10">店铺选择</span> 
+            <select class="floatLeft mr-8" id="shopName">
+                <option value="">全部</option>
+                <option value="5940">专注防晒衣16年 面料</option>
+                <option value="9816">PALATU 陈哥潮品</option>
+                <option value="9817">骚哥自制 品质严检</option>
+                <option value="16712">怕辣兔旗舰店</option> 
+            </select>
+            <span class="floatLeft mr10" title="任务号">任务号</span>
+            <input type="text" id="taskId" class="floatLeft mr10 inputText">
+            <span>时间</span><input type="text" data-inputmask="'alias': 'yyyy-mm-dd'" data-mask="">-
+                  <input type="text" data-inputmask="'alias': 'yyyy-mm-dd'" data-mask="">
+            <a style="height: 20px;">查询</a>
+        </div>
+
+<div class="row">
+    <div class="col-sm-5">
+            <input type="hidden" id="tasknum" value=0> <input type="hidden" id="pagenum" value={pageNumber}>
+    </div>
+    <div class="col-sm-7">
+        <div class="dataTables_paginate paging_simple_numbers" id="example2_paginate">
+            <ul class="pagination">
+                <li class="paginate_button active"><a href="#" tabindex="0">1</a></li>
+                <li class="paginate_button "><a href="#" tabindex="0">2</a></li>
+                <li class="paginate_button "><a href="#" tabindex="0">3</a></li>
+                <li class="paginate_button "><a href="#" tabindex="0">4</a></li>
+                <li class="paginate_button "><a href="#" tabindex="0">5</a></li>
+                <li class="paginate_button "><a href="#" tabindex="0">6</a></li>
+                <li class="paginate_button next" ><a href="#" tabindex="0">下一页</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+</div>
+</div>
+
+
 
         </div>
     </div>

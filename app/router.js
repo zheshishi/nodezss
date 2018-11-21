@@ -35,14 +35,13 @@ module.exports = app => {
     router.post("/selllogin", "sellLogin.sellLoginPost");
     router.get("/sellmobilelogin", "sellLogin.sellMobileLoginGet");
     router.post("/sellmobilelogin", "sellLogin.sellMobileLoginPost"); 
-
     //商家网页端订单管理页面
     router.get("/sell/createtask", "sellProduct.CreateTaskGet"); 
     router.post("/sell/createtask", "sellProduct.CreateTaskPost"); 
     router.get("/sell/taskcomment", "sellProduct.taskCommentGet"); 
     router.post("/sell/taskcomment", "sellProduct.taskCommentPost"); 
     router.get("/sell/taskcommentmanager", "sellProduct.TaskCommentManagerGet"); 
-    router.get("/sell/taskmanager", "sellProduct.TaskManagerGet"); 
+    router.get("/sell/taskmanager", "sellProduct.TaskManagerGet");
     router.get("/sell/tasklist", "sellProduct.TaskList");
     router.post("/sell/productinfo", "sellProduct.productGetinfo");
     router.get("/sell/getshop", "sellProduct.getshop"); // ajax getshop

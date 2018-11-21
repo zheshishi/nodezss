@@ -306,11 +306,16 @@ class sellController extends Controller {
     }
 
     async TaskManagerGet() {
+        //get cookie username
+        var CookieUserName = this.ctx.cookies.get('username', {encrypt: true})
         if (!this.ctx.cookies.get('username', {encrypt: true})) {
             return this.ctx.redirect('/selllogin')
         }
-        let cookieget = this.ctx.cookies.get('username', {encrypt: true})
-        await this.ctx.render('SellTaskManager.ejs', {message: '', shopname: ''})
+        let UserNameCookie = this.ctx.cookies.get('username', {encrypt: true})
+        let UserName = await this.app.mysql.get('UserName', {UserName: UserNameCookie})
+        let getPageSize = 'SELECT COUNT(*) FROM BuyTask JOIN SellOrder ON BuyTask.SellOrderId = SellOrder.SellOrderId  WHERE BuyTask.BuyTaskState NOT IN (0,1) AND SellOrder.UserNameId ='+UserName.UserNameId+';'
+        let pageNumber = await this.app.mysql.query(getPageSize)
+        await this.ctx.render('SellTaskManager.ejs', {message: '', pageNumber: pageNumber})
     }
 
     async TaskCommentManagerGet() {
@@ -325,14 +330,15 @@ class sellController extends Controller {
             return this.ctx.redirect('/selllogin')
         }
         let CookieUserName = this.ctx.cookies.get('username', {encrypt: true})
+        console.log(this.ctx.queries);
         let UserName = await this.app.mysql.get('UserName', {UserName: CookieUserName})
-        let header = this.ctx.header.shopId
-        let id = this.ctx.header.id
-        let TimeStart = this.ctx.header.TimeStart
-        let taskState = this.ctx.header.State//0.关闭、1.完成、2.等待支付、3.等待发货、4
-        let TimeEnd = this.ctx.header.TimeEnd
-        let PageNum = this.ctx.header.PageNum
-        let pageSize = this.ctx.header.pageSize
+        let shopId = this.ctx.queries.shopId[0]
+        let id = this.ctx.queries.id[0]
+        let TimeStart = this.ctx.queries.TimeStart[0]
+        let taskState = this.ctx.queries.State[0]//0.关闭、1.完成、2.等待支付、3.等待发货、4
+        let TimeEnd = this.ctx.queries.TimeEnd[0]
+        let PageNum = this.ctx.queries.PageNum[0]
+        let pageSize = this.ctx.queries.pageSize[0]
         //试用产品、
         //sql syntax
         return await this.ctx.render('sellTaskCommentManager.ejs', {message: ''})
