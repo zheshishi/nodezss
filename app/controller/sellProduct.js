@@ -29,7 +29,7 @@ class sellController extends Controller {
         try {
             //先确定数据是否正确 -金额、件数、产品id、关键词、活动类型、交易笔数
             var event = parseInt(this.ctx.request.body.event)
-            var productinfoID = parseInt(this.ctx.request.body.productinfoID)
+            var productinfoID = parseInt(this.ctx.request.body.SubSelectproduct)
             var MinTime = parseInt(this.ctx.request.body.sdMinTime)
             var MaxTime = parseInt(this.ctx.request.body.sdMaxTime)
             if(MinTime>=MaxTime){return await this.ctx.render('sellTaskPost.ejs', {message: '试用时间开始不能小于完成时间', shopname: ''})}

@@ -28,10 +28,15 @@
     <link rel="stylesheet" href="/public/adminLTE/dist/css/AdminLTE.min.css">
     <link rel="stylesheet" href="/public/adminLTE/dist/css/skins/_all-skins.min.css">
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" type="text/javascript"></script>
-
-
+    <script src="/public/js/main.js"></script>
     <script>
     var keywordsx= 0
+
+    //获取店铺名
+    window.onload = function(){
+        ajaxGetshop()
+        window.setInterval(gettaskvalues, 1000);
+    }
     function Moneytry(){
         var getdiv = document.getElementsByName('trysortText')
         getdiv[0].innerHTML='红包付费试用'
@@ -84,9 +89,7 @@
         var keywordvalue = document.getElementById('keywordvalue'+x)
         keywordvalue.remove()
     }
-    //删除关键词
-    </script>
-    <script>
+
      //自动计算数据
     function gettaskvalues(){
         var event_value = document.getElementsByName('event')
@@ -160,61 +163,9 @@
         document.getElementById('taskAI2').innerHTML = taskAI2;
         document.getElementById('totalFee').innerHTML = totalFee;
     }
-    //获取店铺名
-    function ajaxGetshop(){
-        $.ajax({
-            method:"GET",
-            url:"/sell/getshop",
-            success: function(data, status){
-                urlgetshop(data)
-            }
-        })
-    }
-    function urlgetshop(data){
-        if(data!==null){
-            console.log(typeof data)
-            $("#Selectshop").empty()
-            $("#Selectshop").append("<option value='0'>选择店铺</option>")
-            for (var AjaxSelectShopValue in data) {
-                var AjaxSsll = '<option value='+data[AjaxSelectShopValue].SellShopId+'>'+data[AjaxSelectShopValue].ShopSort+' - '+data[AjaxSelectShopValue].ShopUserName+'</option>'
-               $("#Selectshop").append(AjaxSsll)
-            }
-        }
-     }
-
-    //获取店铺名
-    window.onload = function(){
-        ajaxGetshop()
-        window.setInterval(gettaskvalues, 1000);
-    }
      //自动计算数据
      //ajax get post product infomaition
 
-     //url 获取产品
-    function geturlfs(urlvalues){
-     if(urlvalues.includes('.com')){
-
-         $(document).ready(function(){
-                 $.ajax({
-                     method:"POST",
-                     url:'/sell/productinfo',
-                     data: {getUrl:urlvalues},
-                     success: function(data, status) {
-                         // Call this function on succes
-                         console.log("post result: ", data, status)
-                         ProductSetInfo(data)
-
-                     }
-                     // error: function() {
-                     //     alert('Error occured');
-                     // }
-                 })
-         })
-    }
-    }
-     function gvalue(data){
-         console.log(data)
-     }
     </script>
 
     <style>
@@ -248,7 +199,7 @@
                 <span style="color:mediumvioletred"><%= shopname %></span>
                 <span style="color:red;"><%= message %></span><br>
                 <!-- /.box-header -->
-                <form id="msform1" method="post" action="#">
+                <form method="post" action="#">
                 <strong style="color:mediumvioletred">类型：</strong>
                 <label><input type="radio" name="event" value="1" checked="checked" onclick="Moneytry()">
                     红包试用  </label>
@@ -263,81 +214,22 @@
                 <strong style="color:mediumvioletred">网址：</strong>
                 <input id="geturlinput" type="text" class="geturl" name="geturl" onChange="geturlfs(this.value);"  placeholder="请输入产品链接https://... 、天猫、淘宝、1688、京东"><br><br>
            <!--  <button type="submit" class='btn bg-maroon margin' name='button' value="0">获取产品信息</button> -->
-                <div id='selectproductdiv'>
-               <strong style="color:mediumvioletred">店铺：</strong>
-                <select id='Selectshop' onchange='urlgetproduct(this.value)'>
-                    <option value='0'>选择店铺</option>
-                </select>
-               <strong style="color:mediumvioletred">产品：</strong>
-                <select id='SubSelectproduct' onchange='urlgetproductid(this.value)'>
-                    <option value='0'>选择产品</option>
-                </select>   
-                </div>
-                <script>
-                     function urlgetproduct(data){
-                        console.log(data)
-                        if(data!==0){
-                         $(document).ready(function(){
-                                 $.ajax({
-                                     method:"POST",
-                                     url:'/sell/getproduct',
-                                     data: {shopid:data},
-                                     success: function(data, status) {
-                                         // Call this function on succes
-                                        console.log("post result: ", data, status)
-                                        if(data!==null){
-                                            $("#SubSelectproduct").empty()
-                                            $("#SubSelectproduct").append("<option value='0'>选择产品</option>")
-                                            for (var N in data) {
-                                                console.log(data[N].Details)
-                                                var AjaxSsll = '<option value='+data[N].SellProductId+'>'+data[N].ProductId+' - '+JSON.parse(data[N].Details).name+'</option>'
-                                               $("#SubSelectproduct").append(AjaxSsll)
-                                            }
-                                        }
-                                    }
-                                 })
-                         })
-                     }}
-
-                     function urlgetproductid(data){
-                        console.log(data)
-                        if(data!==0){
-                            $.ajax({
-                                 method:"POST",
-                                 url:'/sell/getproductid',
-                                 data: {SellProductId:data},
-                                 success: function(data, status){
-                                     ProductSetInfo(data)
-                                }
-                            })
-
-                        }
-                     }
-
-                     function ProductSetInfo(data){
-                        console.log(data)
-                        console.log(JSON.parse(data.Details).mainImage[0])
-                        console.log(typeof data)
-                        $("#productinfoimg").attr('src',JSON.parse(data.Details).mainImage[0]);
-                        $("#productinfoID").attr('value',data.SellProductId);
-                        $("#productinfoplatformID").attr('value',data.ProductId);
-                        $("#infoplatform").text(data.ShopSort);
-                        $("#infoproduct").text(JSON.parse(data.Details).name);
-                     }
-                </script>
+                <%- include menu/selectShopProduct %>
+                
                 <br/>
-                <div id='productinfomaitions'>
+<!--                 <div id='productinfomaitions'>
                <table class="table table-hover"><tbody>
                         <td style="text-align:left;">
                             <div style="wight:100px;float:left;margin-right:10px;">
-                                <img id = 'productinfoimg' height="100px" width="100px" src="https://g.alicdn.com/s.gif"></div>
-                            编号：<input id='productinfoplatformID' name = "productinfoplatformID" type="Text" value="" readonly>
-                            <input id='productinfoID' name='productinfoID' type="hidden" value='' readonly><br>
-                            商品：<span id='infoproduct'></span><br>
-                            平台：<span id='infoplatform' ></span><br>
+                            <img id = 'productinfoimg' height="100px" width="100px" src="https://g.alicdn.com/s.gif"></div>
+                            编号：
+                            <input id='productinfoplatformID' name = "productinfoplatformID" type="Text" value="" readonly>
+                            <input id='productinfoID' name='productinfoID' type="hidden" value='' readonly>
+                            <input id='infoproduct' name='infoproduct' type="hidden" value='' readonly>
+                            <input id='infoplatform' name='infoplatform' type="hidden" value='' readonly>
                         </td>
               </tbody></table>
-                </div>
+                </div> -->
             <div name="moneyClass">
                 <strong style="color:mediumvioletred">金额：</strong>产品单价:<input id="buyPrice" name="buyPrice" step="0.01" min="0.01" max="10000">元，
                 拍<input id="buyNum" name="buyNum" step="1" min="1" max="10000">件 ，搜索展示价:<input name="showPrice" id="showPrice" step="0.01" min="0.01" max="10000">元

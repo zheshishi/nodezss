@@ -3,9 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>试用平台 | 试用点评</title>
-    <!-- Tell the browser to be responsive to screen width -->
     <!-- Bootstrap 3.3.7 -->
     <link rel="stylesheet" href="/public/adminLTE/bower_components/bootstrap/dist/css/bootstrap.min.css">
     <!-- Font Awesome -->
@@ -28,199 +26,15 @@
     <link rel="stylesheet" href="/public/adminLTE/dist/css/AdminLTE.min.css">
     <link rel="stylesheet" href="/public/adminLTE/dist/css/skins/_all-skins.min.css">
     <script src="https://cdn.staticfile.org/jquery/3.3.1/jquery.min.js" type="text/javascript"></script>
-
     <script type="text/javascript" src="https://unpkg.com/qiniu-js@2.3.0/dist/qiniu.min.js"></script>
-
-    <script> 
-
-    //获取店铺名
-    function ajaxGetshop(){
-        $.ajax({
-            method:"GET",
-            url:"/sell/getshop",
-            success: function(data, status){
-                urlgetshop(data)
-            }
-        })
-    }
-    function urlgetshop(data){
-        if(data!==null){
-            $("#Selectshop").empty()
-            $("#Selectshop").append("<option value='0'>选择店铺</option>")
-            for (var AjaxSelectShopValue in data) {
-                var AjaxSsll = '<option value='+data[AjaxSelectShopValue].SellShopId+'>'+data[AjaxSelectShopValue].ShopSort+' - '+data[AjaxSelectShopValue].ShopUserName+'</option>'
-               $("#Selectshop").append(AjaxSsll)
-            }
-        }
-     }
-
-     //gettoken
-     function urlGetlToken(){
-        $(document).ready(function(){
-                         $.ajax({
-                             method:"get",
-                             url:'/m/qntoken',
-                             success: function(data, status) {
-                                 document.getElementById("token").value = data;
-                             }
-                            })
-                     })
-    }
-
-    //获取店铺名
-    window.onload = function(){
-        ajaxGetshop()
-        urlGetlToken()
-    }
-     //自动计算数据
-     //ajax get post product infomaition
-
-     //url 获取产品
-    function geturlfs(urlvalues){
-     if(urlvalues.includes('.com')){
-         $(document).ready(function(){
-                 $.ajax({
-                     method:"POST",
-                     url:'/sell/productinfo',
-                     data: {getUrl:urlvalues},
-                     success: function(data, status) {
-                         // Call this function on succes
-                         console.log("post result: ", data, status)
-                         ProductSetInfo(data)
-
-                     }
-                     // error: function() {
-                     //     alert('Error occured');
-                     // }
-                 })
-         })
-    }
-    }
-    function gvalue(data){
-         console.log(data)
-     }
-
-    function urlgetproduct(data){
-        console.log(data)
-        if(data!==0){
-         $(document).ready(function(){
-                 $.ajax({
-                     method:"POST",
-                     url:'/sell/getproduct',
-                     data: {shopid:data},
-                     success: function(data, status) {
-                         // Call this function on succes
-                        console.log("post result: ", data, status)
-                        if(data!==null){
-                            $("#SubSelectproduct").empty()
-                            $("#SubSelectproduct").append("<option value='0'>选择产品</option>")
-                            for (var N in data) {
-                                console.log(data[N].Details)
-                                var AjaxSsll = '<option value='+data[N].SellProductId+'>'+data[N].ProductId+' - '+JSON.parse(data[N].Details).name+'</option>'
-                               $("#SubSelectproduct").append(AjaxSsll)
-                            }}}})})}}
-
-    function urlgetproductid(data){
-        console.log(data)
-        if(data!==0){
-            $.ajax({
-                 method:"POST",
-                 url:'/sell/getproductid',
-                 data: {SellProductId:data},
-                 success: function(data, status){
-                     ProductSetInfo(data)
-                }
-            })
-
-        }
-     }
-
-    function ProductSetInfo(data){
-        console.log(data)
-        console.log(JSON.parse(data.Details).mainImage[0])
-        console.log(typeof data)
-        $("#productinfoimg").attr('src',JSON.parse(data.Details).mainImage[0]);
-        $("#productinfoID").attr('value',data.SellProductId);
-        $("#productinfoplatformID").attr('value',data.ProductId);
-        $("#infoplatform").text(data.ShopSort);
-        $("#infoproduct").text(JSON.parse(data.Details).name);
-     }
-
-
-    function clickqiniu(id){
-        var number = /[1-9]/.exec(id)[0]
-        var Qiniu_UploadUrl = "https://up-z2.qiniup.com";
-        var progressbar = $("#progressbar");
-        var token = $("#token").val();
-        //普通上传
-        var Qiniu_upload = function(f, token, key) {
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', Qiniu_UploadUrl, true);
-            var formData, startDate;
-            formData = new FormData();
-            formData.append('key', key);
-            formData.append('token', token);
-            formData.append('file', f);
-            var taking;
-            xhr.upload.addEventListener("progress", function(evt) {
-                if (evt.lengthComputable) {
-                    var nowDate = new Date().getTime();
-                    taking = nowDate - startDate;
-                    var x = (evt.loaded) / 1024;
-                    var y = taking / 1000;
-                    var uploadSpeed = (x / y);
-                    var formatSpeed;
-                    if (uploadSpeed > 1024) {
-                        formatSpeed = (uploadSpeed / 1024).toFixed(2) + "Mb\/s";
-                    } else {
-                        formatSpeed = uploadSpeed.toFixed(2) + "Kb\/s";
-                    }
-                    //图片上传值
-                    var percentComplete = Math.round(evt.loaded * 100 / evt.total);
-                    console.log(percentComplete+'id'+id)
-                    if(percentComplete ===100){
-                        url = 'http://img.zhess.com/'+key
-                        console.log('done 100'+id+url)
-                        document.getElementById('img'+number).src = url;
-                        document.getElementById('but'+number).value = url;
-                    }
-                }
-            }, false);
-
-            xhr.onreadystatechange = function(response) {
-                if (xhr.readyState == 4 && xhr.status == 200 && xhr.responseText != "") {
-                    var blkRet = JSON.parse(xhr.responseText);
-                    console && console.log(blkRet);
-                } else if (xhr.status != 200 && xhr.responseText) {
-
-                }
-            };
-            startDate = new Date().getTime();
-            $("#progressbar").show();
-            xhr.send(formData);
-        };
-        function randomIntFromInterval(min,max){
-            let result =  Math.floor(Math.random()*(max-min+1)+min);
-            if(result < min){
-                result = min;
-            }
-            else if(result > max){
-                result = max;
-            }
-            return result
-            }
-        if ($("#"+id)[0].files.length > 0) {
-            var key = new Date().getTime() +''+ randomIntFromInterval(10000,99999)+'.jpg'
-            Qiniu_upload($("#"+id)[0].files[0], token, key);
-        } else {
-            console && console.log("form input error");
-        }
-    }
-
+    <script src="/public/js/main.js"></script>
+<script> 
+//获取店铺名
+window.onload = function(){
+    ajaxGetshop()
+    urlGetlToken()
+}
 </script>
-
-
-
     <style>
         .UrlTitle {
             padding: 25px;
@@ -257,32 +71,8 @@
                 <label><input type="radio" name="event" value="1" checked="checked" >
                     试用追评  </label>
                 <label><input type="radio" name="event" value="2" onclick="">
-                    试用好评  </label>
-                    <br>
-
-               <strong style="color:mediumvioletred">店铺：</strong>
-                <select id='Selectshop' onchange='urlgetproduct(this.value)'>
-                    <option value='0'>选择店铺</option>
-                </select>
-               <strong style="color:mediumvioletred">产品：</strong>
-                <select id='SubSelectproduct' onchange='urlgetproductid(this.value)'>
-                    <option value='0'>选择产品</option>
-                </select>   
-                </div>
-
-                <br/>
-                <div id='productinfomaitions'>
-               <table class="table table-hover"><tbody>
-                        <td style="text-align:left;">
-                            <div style="wight:100px;float:left;margin-right:10px;">
-                                <img id = 'productinfoimg' height="100px" width="100px" src="https://g.alicdn.com/s.gif"></div>
-                            编号：<input id='productinfoplatformID' name = "productinfoplatformID" type="Text" value="" readonly>
-                            <input id='productinfoID' name='productinfoID' type="hidden" value='' readonly><br>
-                            商品：<span id='infoproduct'></span><br>
-                            平台：<span id='infoplatform' ></span><br>
-                        </td>
-              </tbody></table>
-                </div>
+                    试用好评  </label><br>
+            <%- include menu/selectShopProduct %>
             <div name="moneyClass">
                 <strong style="color:mediumvioletred">评价：</strong><br>
                 <textarea rows="5" cols="100" maxlength="200" id="txtGoodCommentWords" name='txtGoodCommentWords'></textarea><br>
@@ -322,16 +112,6 @@
                 </ul>
             </div><br/>
                 </form>
-
-
-
-
-
-
-
-
-
-
 
         </div>
     </div>
