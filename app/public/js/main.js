@@ -146,7 +146,6 @@ function ajaxGetTaskListNumView(data,page,pageNum){
         pageview = pageview +`<li class="paginate_button "><a href="#" tabindex="`+(page+1)+`">下一页</a></li>`
     }
     $("#pagination").append(pageview)
-
 }
 
 //manager view 获取任务表 sellTaskManager.ejs 给页面加数据
@@ -208,14 +207,6 @@ function ajaxGetTaskListView(data){
     }
 }
 
-//manager view 按钮数 sellTaskManager.ejs
-
-function pageNumber(PageNum) {
-    let pageTotal = document.getElementById('tasknum').value
-    let pageNumTotal = parseInt(pageTotal / 10) + 1
-    if (pageNumTotal >= pageNum) {
-    }
-}
 
 //gettoken
 function urlGetlToken() {

@@ -40,6 +40,14 @@
         ajaxGetTaskList('',0,0,1,10,'','') //任务属性、店铺、产品、页数、读取数量、时间1和2
         //window.setInterval(gettaskvalues, 1000);
         }
+    function ClickAjaxGetTaskList(){
+            let taskSort = document.getElementById('taskSort').value
+            let TimeStart = document.getElementById('TimeStart').value
+            let TimeEnd = document.getElementById('TimeEnd').value
+            let SubSelectproduct = document.getElementById('SubSelectproduct').value
+            let Selectshop = document.getElementById('Selectshop').value
+            ajaxGetTaskList(taskSort,Selectshop,SubSelectproduct,1,10,TimeStart,TimeEnd)
+        }
     </script>
         <style>
             .UrlTitle {
@@ -74,7 +82,7 @@
                 <div class="area-main">
     <div class="contentCard">
     <strong style="color:mediumvioletred">任务：</strong>
-    <select id='taskSort' name='taskSort' onchange=''>
+    <select id='taskSort' name='taskSort' onchange='ClickAjaxGetTaskList()'>
         <option value=''>进行中的任务</option>
         <option value='1'>待支付任务</option>
         <option value='2'>已完成的任务</option>
@@ -87,8 +95,8 @@
         <div class="taskFilterPanel mt10">
 <!--             <span class="floatLeft mr10" title="任务号">任务号</span>
             <input type="text" id="taskId" class="floatLeft mr10 inputText"> -->
-            <span>时间</span><input type="date" value="" min="2017-09-16"/>
-                -<input type="date" value="" min="2017-09-16"/>
+            <span>时间</span><input type="date" id='TimeStart' value="" min="2017-09-16"/>
+                -<input type="date" id='TimeEnd' value="" min="2017-09-16"/>
             <a style="height: 20px;">查询</a>
 
         </span>
