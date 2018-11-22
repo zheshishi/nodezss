@@ -37,7 +37,7 @@
     //获取店铺名
     window.onload = function(){
         ajaxGetshop()
-        ajaxGetTaskList('',0,0,1,10,'','') //任务属性、店铺、产品、页数、时间1和2
+        ajaxGetTaskList('',0,0,1,10,'','') //任务属性、店铺、产品、页数、读取数量、时间1和2
         //window.setInterval(gettaskvalues, 1000);
         }
     </script>
@@ -87,10 +87,13 @@
         <div class="taskFilterPanel mt10">
 <!--             <span class="floatLeft mr10" title="任务号">任务号</span>
             <input type="text" id="taskId" class="floatLeft mr10 inputText"> -->
-            <span>时间</span><input type="text" data-inputmask="'alias': 'yyyy-mm-dd'" data-mask="">-
-                  <input type="text" data-inputmask="'alias': 'yyyy-mm-dd'" data-mask="">
+            <span>时间</span><input type="date" value="" min="2017-09-16"/>
+                -<input type="date" value="" min="2017-09-16"/>
             <a style="height: 20px;">查询</a>
-            <input type="hidden" id="tasknum" value=0> <input type="hidden" id="pagenum" value={pageNumber}>
+
+        </span>
+        <input type="hidden" id="pageNum" name="pageNum" value=<%= parseInt(pageNumber/10)+1 %>> 
+        <input type="hidden" id="taskNum" name="pageNum" value=<%= pageNumber %>>
         </div>
 
 <div id="taskContainer">  
@@ -98,28 +101,13 @@
 </div>
 
             <!--这里是分页区域-->
-            <div class="taskPagination"></div>
-
-            <div class="popWrapper" style="height: 1775px; width: 1200px; display: none;" id="tr_loading_mask">
-                <div class="maskLayer"></div>
-            </div>
-        </div>
-
-
-    </div>
 
 <div class="row">
 
     <div class="col-sm-7">
         <div class="dataTables_paginate paging_simple_numbers" id="example2_paginate">
-            <ul class="pagination">
-                <li class="paginate_button active"><a href="#" tabindex="0">1</a></li>
-                <li class="paginate_button "><a href="#" tabindex="0">2</a></li>
-                <li class="paginate_button "><a href="#" tabindex="0">3</a></li>
-                <li class="paginate_button "><a href="#" tabindex="0">4</a></li>
-                <li class="paginate_button "><a href="#" tabindex="0">5</a></li>
-                <li class="paginate_button "><a href="#" tabindex="0">6</a></li>
-                <li class="paginate_button next" ><a href="#" tabindex="0">下一页</a></li>
+            <ul class="pagination" id='pagination'>
+
             </ul>
         </div>
     </div>

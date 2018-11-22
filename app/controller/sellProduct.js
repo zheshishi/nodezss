@@ -238,8 +238,6 @@ class sellController extends Controller {
                     await addOrder(this.app, keyword[j], parseInt(orderNumber[j]), cityx, orderSortx, PriceMinx, PriceMaxx)
                 }
             }
-
-
         //4. 保存任务数
         //5. 条件附加收费模式
         return await this.ctx.render('sellTaskPost.ejs', {message: '发布任务成功，请到任务区查看进行中的任务', shopname: ''})
@@ -312,7 +310,8 @@ class sellController extends Controller {
         let UserName = await this.app.mysql.get('UserName', {UserName: UserNameCookie})
         let getPageSize = 'SELECT COUNT(*) FROM BuyTask JOIN SellOrder ON BuyTask.SellOrderId = SellOrder.SellOrderId  WHERE BuyTask.BuyTaskState NOT IN (0,1) AND SellOrder.UserNameId ='+UserName.UserNameId+';'
         let pageNumber = await this.app.mysql.query(getPageSize)
-        await this.ctx.render('SellTaskManager.ejs', {message: '', pageNumber: pageNumber})
+        console.log(pageNumber[0]['COUNT(*)'])
+        await this.ctx.render('SellTaskManager.ejs', {message: '', pageNumber: pageNumber[0]['COUNT(*)']})
     }
 
     async TaskCommentManagerGet() {
@@ -341,8 +340,18 @@ class sellController extends Controller {
         }else{
             sortSql = 'BuyTaskState = ' + sort
         }
-        let taskListSql = 'SELECT * FROM BuyTask JOIN SellOrder ON BuyTask.SellOrderId = SellOrder.SellOrderId JOIN UserAccount ON BuyTask.UserAccountId = UserAccount.UserAccountId WHERE '+sortSql+' AND SellOrder.UserNameId ='+UserName.UserNameId+';'
+        let taskListSql = `SELECT BuyTaskId,BuyTaskState,PlatFormOrderId,BuyTaskCreateTime,BuyMoney,PlatFormUserName,KeyWord,SellShop.ShopSort,Details,ShopUserName FROM BuyTask 
+                            JOIN SellOrder ON BuyTask.SellOrderId = SellOrder.SellOrderId 
+                            JOIN UserAccount ON BuyTask.UserAccountId = UserAccount.UserAccountId 
+                            JOIN SellProduct ON SellOrder.SellProductId = SellProduct.SellProductId 
+                            JOIN SellShop ON SellProduct.SellShopId = SellShop.SellShopId 
+                            WHERE `+sortSql+` AND SellOrder.UserNameId =`+UserName.UserNameId+`;`
+        let taskListCountSql = `SELECT count(*) FROM BuyTask
+                                JOIN SellOrder ON BuyTask.SellOrderId = SellOrder.SellOrderId 
+                                WHERE `+sortSql+` AND SellOrder.UserNameId =`+UserName.UserNameId+`;`
+        let taskListCount = await this.app.mysql.query(taskListCountSql)
         let taskList = await this.app.mysql.query(taskListSql)
+        taskList.push(taskListCount[0]['count(*)'])
         //试用产品
         //sql syntax
         return this.ctx.body = taskList

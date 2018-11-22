@@ -21,7 +21,6 @@ function urlgetshop(data) {
     }
 }
 //url 获取产品
-
 function geturlfs(urlvalues) {
     if (urlvalues.includes('.com')) {
         $.ajax({
@@ -113,14 +112,50 @@ function ajaxGetTaskList(sort,shopId,productId,page,pageNum,TimeStart,TimeEnd) {
         success: function (data, status) {
             console.log(data)
             ajaxGetTaskListView(data)
+            ajaxGetTaskListNumView(data[data.length-1],page,pageNum)
         }
     })
 }
 
+
+function ajaxGetTaskListNumView(data,page,pageNum){
+    console.log('data:'+data+'page:'+page+'pageNum:'+pageNum)
+    let totalPage = parseInt(data/pageNum)+1
+    console.log(totalPage)
+    $("#pagination").empty()
+    let pageview = ''
+    if((page-1)<=totalPage && (page-1)>0){
+        pageview = pageview +`<li class="paginate_button "><a href="#" tabindex="`+(page-1)+`">上一页</a></li>`
+    }
+    if((page-2)<=totalPage && (page-2)>0){
+        pageview = pageview +`<li class="paginate_button "><a href="#" tabindex="`+(page-2)+`">`+(page-2)+`</a></li>`
+    }
+    if((page-1)<=totalPage && (page-1)>0){
+        pageview = pageview +`<li class="paginate_button "><a href="#" tabindex="`+(page-1)+`">`+(page-1)+`</a></li>`
+    }
+    if(page<=totalPage && page>0){
+        pageview = pageview +`<li class="paginate_button active"><a href="#" tabindex="`+page+`">`+page+`</a></li>`
+    }
+    if((page+1)<=totalPage){
+        pageview = pageview +`<li class="paginate_button "><a href="#" tabindex="`+(page+1)+`">`+(page+1)+`</a></li>`
+    }
+    if((page+2)<=totalPage){
+        pageview = pageview +`<li class="paginate_button "><a href="#" tabindex="`+(page+2)+`">`+(page+2)+`</a></li>`
+    }
+    if((page+1)<=totalPage){
+        pageview = pageview +`<li class="paginate_button "><a href="#" tabindex="`+(page+1)+`">下一页</a></li>`
+    }
+    $("#pagination").append(pageview)
+
+}
+
+//manager view 获取任务表 sellTaskManager.ejs 给页面加数据
 function ajaxGetTaskListView(data){
+        var Details;
         $("#taskContainer").empty()
-        for(var x=0;data.length>x;x++){
-            var AjaxSsll = `<div class="taskCell"><div class="title clearfix"><span class="shop floatLeft mr-20 ml10">店铺：<span>tmall - 511679594</span></span><span class="taskNo floatLeft mr-4">编号：<span>511679594</span>
+        for(var x=0;data.length-1>x;x++){
+            Details = JSON.parse(data[x].Details)
+            var AjaxSsll = `<div class="taskCell"><div class="title clearfix"><span class="shop floatLeft mr-20 ml10">店铺：<span>`+data[x].ShopSort+` - `+ data[x].ShopUserName +`</span></span><span class="taskNo floatLeft mr-4">编号：<span>`+ data[x].BuyTaskId +`</span>
             </span><span class="floatRight mr-8">状态：
                         <span class="FINISHED">`+data[x].BuyTaskState+`</span>
                         </span>
@@ -138,8 +173,8 @@ function ajaxGetTaskListView(data){
                             <table class="normTable">
                                 <thead>
                                     <tr>
-                                        <td width="60%"></td>
-                                        <td width="10%"></td>
+                                        <td width="65%"></td>
+                                        <td width="5%"></td>
                                         <td width="20%"></td>
                                         <td width="10%"></td>
                                     </tr>
@@ -147,17 +182,17 @@ function ajaxGetTaskListView(data){
                                 <tbody>
                                     <tr>
                                         <td style="text-align:left;">
-                                            <div style="wight:100px;float:left;margin-right:10px;"><img height="100px" width="100px" src="http://digg-public.qiniudn.com/FvkjyilA6T_cqKl5qwiAiOsB_qlS"></div>
-                                            <span style="height:100px">自主胆马甲紫标羽绒12381273891273服外套潮牌</span><br>
-                                            <span>订单编号：<text class="doing">1</text></span><br>
-                                            <span style="height:100px">单价：￥<text class="doing">`+data[x].BuyMoney+`</text>，拍1件</span><span><text>`+data[x].KeyWord+`</text></span<br>
+                                            <div style="wight:100px;float:left;margin-right:10px;"><img height="100px" width="100px" src="`+ Details.mainImage[0]+`"></div>
+                                            <span style="height:100px">`+Details.name+`</span><br>
+                                            <span>订单编号：<text class="doing">`+data[x].PlatFormOrderId+`</text></span><br>
+                                            <span style="height:100px">单价：￥<text class="doing">`+data[x].BuyMoney+`</text> </span><span> 关键词：<text>`+data[x].KeyWord+`</text></span<br>
                                         </td>
                                         <td style="text-align:left;">
                                             <em class="cap"><span>-</span></em>
 
                                         </td>
                                         <td style="text-align:left;">
-                                            <em class="cap">账号：<span class="">`+data[x].PlatFormUserName+`</span></em>
+                                            <em class="cap">账号：<span class="doing">`+data[x].PlatFormUserName+`</span></em>
                                         </td>
                                         <td class="doing">
                                             <a class="btnRepublish stdColorButton" href="/publish/app/sdPlanTask?taskId=511679594" target="_blank">一键发布</a>
@@ -179,12 +214,10 @@ function pageNumber(PageNum) {
     let pageTotal = document.getElementById('tasknum').value
     let pageNumTotal = parseInt(pageTotal / 10) + 1
     if (pageNumTotal >= pageNum) {
-
     }
 }
 
 //gettoken
-
 function urlGetlToken() {
     $(document).ready(function () {
         $.ajax({
@@ -197,10 +230,7 @@ function urlGetlToken() {
     })
 }
 
-
-
 //读取随机数
-
 function randomIntFromInterval(min, max) {
     let result = Math.floor(Math.random() * (max - min + 1) + min);
     if (result < min) {
@@ -212,7 +242,6 @@ function randomIntFromInterval(min, max) {
 }
 
 //七牛 上传图片
-
 function clickqiniu(id) {
     var number = /[1-9]/.exec(id)[0]
     var Qiniu_UploadUrl = "https://up-z2.qiniup.com";
@@ -275,7 +304,6 @@ function clickqiniu(id) {
 }
 
 //按钮费用统计
-
 function gettaskvalues() {
     var event_value = document.getElementsByName('event')
     var event_valueL = event_value.length
