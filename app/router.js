@@ -43,6 +43,7 @@ module.exports = app => {
     router.get("/sell/taskcommentmanager", "sellProduct.TaskCommentManagerGet"); 
     router.get("/sell/taskmanager", "sellProduct.TaskManagerGet");
     router.get("/sell/tasklist", "sellProduct.TaskList");
+    router.get("/sell/taskcommentlist", "sellProduct.TaskCommentList");
     router.post("/sell/productinfo", "sellProduct.productGetinfo");
     router.get("/sell/getshop", "sellProduct.getshop"); // ajax getshop
     router.post("/sell/getproduct", "sellProduct.getproduct"); // ajax getproduct

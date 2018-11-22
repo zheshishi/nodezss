@@ -37,22 +37,23 @@
     //获取店铺名
     window.onload = function(){
         ajaxGetshop()
-        ajaxGetTaskList('',0,0,1,10,'','') //任务属性、店铺、产品、页数、读取数量、时间1和2
+        ajaxGetCommentList('',0,0,1,10,'','') //任务属性、店铺、产品、页数、读取数量、时间1和2
         //window.setInterval(gettaskvalues, 1000);
         }
     function ClickAjaxGetTaskList(sendPage){
             console.log('sendPage:'+sendPage)
+            let page;
             if(sendPage==undefined){
-                let page = document.getElementById('nowpage').value
+                page = document.getElementById('nowpage').value
             }else{
-                let page = sendPage
+                page = sendPage
             }
             let taskSort = document.getElementById('taskSort').value
             let TimeStart = document.getElementById('TimeStart').value
             let TimeEnd = document.getElementById('TimeEnd').value
             let SubSelectproduct = document.getElementById('SubSelectproduct').value
             let Selectshop = document.getElementById('Selectshop').value
-            ajaxGetTaskList(taskSort,Selectshop,SubSelectproduct,page,10,TimeStart,TimeEnd)
+            ajaxGetCommentList(taskSort,Selectshop,SubSelectproduct,page,10,TimeStart,TimeEnd)
         }
     </script>
         <style>
@@ -104,7 +105,6 @@
             <span>时间</span><input type="date" id='TimeStart' value="" min="2017-09-16"/>
                 -<input type="date" id='TimeEnd' value="" min="2017-09-16"/>
             <button style="height: 20px; color:red" onclick='ClickAjaxGetTaskList()' >查询</button>
-
         </span>
         </div>
 

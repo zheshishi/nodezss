@@ -42,10 +42,11 @@
         }
     function ClickAjaxGetTaskList(sendPage){
             console.log('sendPage:'+sendPage)
+            let page
             if(sendPage==undefined){
-                let page = document.getElementById('nowpage').value
+                page = document.getElementById('nowpage').value
             }else{
-                let page = sendPage
+                page = sendPage
             }
             let taskSort = document.getElementById('taskSort').value
             let TimeStart = document.getElementById('TimeStart').value

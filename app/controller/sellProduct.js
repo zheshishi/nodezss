@@ -306,7 +306,7 @@ class sellController extends Controller {
         if (!this.ctx.cookies.get('username', {encrypt: true})) {
             return this.ctx.redirect('/selllogin')
         }
-        await this.ctx.render('SellTaskManager.ejs', {message: '',)
+        await this.ctx.render('SellTaskManager.ejs', {message: ''})
     }
 
     async TaskCommentManagerGet() {
@@ -330,14 +330,13 @@ class sellController extends Controller {
         let TimeStart = this.ctx.queries.TimeStart[0]
         let TimeEnd = this.ctx.queries.TimeEnd[0]
         let sortSql;
-        let shopId = this.ctx.queries.shopId[0]
         if(shopId!=0) {
-            shopId=' AND SellShopId='+TimeStart+''
+            shopId=' AND SellShopId='+shopId
         }else{
             shopId=''
         }
         if(productId!=0) {
-            productId= ' AND SellProductId<='+productId+''
+            productId= ' AND SellProductId<='+productId
         }else{
             productId=''
         }
@@ -358,13 +357,62 @@ class sellController extends Controller {
                             JOIN UserAccount ON BuyTask.UserAccountId = UserAccount.UserAccountId 
                             JOIN SellProduct ON SellOrder.SellProductId = SellProduct.SellProductId 
                             JOIN SellShop ON SellProduct.SellShopId = SellShop.SellShopId 
-                            WHERE `+sortSql+` AND SellOrder.UserNameId =`+UserName.UserNameId+TimeStart+TimeEnd+shopId+productId`;`
+                            WHERE `+sortSql+` AND SellOrder.UserNameId =`+UserName.UserNameId+TimeStart+TimeEnd+shopId+productId+`;`
         let taskListCountSql = `SELECT count(*) FROM BuyTask
                             JOIN SellOrder ON BuyTask.SellOrderId = SellOrder.SellOrderId 
                             JOIN UserAccount ON BuyTask.UserAccountId = UserAccount.UserAccountId 
                             JOIN SellProduct ON SellOrder.SellProductId = SellProduct.SellProductId 
                             JOIN SellShop ON SellProduct.SellShopId = SellShop.SellShopId 
-                            WHERE `+sortSql+` AND SellOrder.UserNameId =`+UserName.UserNameId+TimeStart+TimeEnd+shopId+productId`;`
+                            WHERE `+sortSql+` AND SellOrder.UserNameId =`+UserName.UserNameId+TimeStart+TimeEnd+shopId+productId+`;`
+        let taskListCount = await this.app.mysql.query(taskListCountSql)
+        let taskList = await this.app.mysql.query(taskListSql)
+        taskList.push(taskListCount[0]['count(*)'])
+        //试用产品
+        //sql syntax
+        return this.ctx.body = taskList
+    }
+    async TaskCommentList(){
+        if (!this.ctx.cookies.get('username', {encrypt: true})) {
+            return this.ctx.redirect('/selllogin')
+        }
+        let CookieUserName = this.ctx.cookies.get('username', {encrypt: true})
+        let UserName = await this.app.mysql.get('UserName', {UserName: CookieUserName})
+        let sort = this.ctx.queries.sort[0]//0.关闭、1.完成、2.等待支付、3.等待发货、4
+        let shopId = this.ctx.queries.shopId[0]
+        let productId = this.ctx.queries.productId[0]
+        let page = this.ctx.queries.page[0]
+        let pageNum = this.ctx.queries.pageNum[0]
+        let TimeStart = this.ctx.queries.TimeStart[0]
+        let TimeEnd = this.ctx.queries.TimeEnd[0]
+        let sortSql;
+        if(shopId!=0) {
+            shopId=' AND SellShop.SellShopId='+shopId
+        }else{
+            shopId=''
+        }
+        if(productId!=0) {
+            productId= ' AND SellProductId<='+productId
+        }else{
+            productId=''
+        }
+
+        if(TimeStart!==''){
+            TimeStart = ' AND CommentCreateTime>="'+TimeStart+'"'
+        }
+        if(TimeEnd!==''){
+            TimeEnd = ' AND CommentCreateTime<="'+TimeEnd+'"'
+        }
+        if(sort===''){
+            sortSql = 'TaskCommentState <>0'
+        }else{
+            sortSql = 'TaskCommentState = ' + sort
+        }
+        let taskListSql = `SELECT TaskCommentId,Details,ShopUserName,event,Text,img,TaskCommentState,img,SellShop.ShopSort,CommentCreateTime FROM BuyTaskComment
+                            JOIN SellProduct ON BuyTaskComment.SellProductId = SellProduct.SellProductId 
+                            JOIN SellShop ON SellProduct.SellShopId = SellShop.SellShopId 
+                            WHERE `+sortSql+` AND BuyTaskComment.UserNameId =`+UserName.UserNameId+TimeStart+TimeEnd+shopId+productId+`;`
+        let taskListCountSql = `SELECT count(*) FROM BuyTaskComment
+                            WHERE `+sortSql+` AND BuyTaskComment.UserNameId =`+UserName.UserNameId+TimeStart+TimeEnd+shopId+productId+`;`
         let taskListCount = await this.app.mysql.query(taskListCountSql)
         let taskList = await this.app.mysql.query(taskListSql)
         taskList.push(taskListCount[0]['count(*)'])

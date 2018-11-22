@@ -94,7 +94,6 @@ function ProductSetInfo(data) {
 }
 
 //manager view 获取任务表 sellTaskManager.ejs
-
 function ajaxGetTaskList(sort,shopId,productId,page,pageNum,TimeStart,TimeEnd){
     console.log('sort:'+sort+'shopId:'+shopId+'productId:'+productId+'page:'+page+'pageNum:'+pageNum+'TimeStart:'+TimeStart+'TimeEnd:'+TimeEnd);
     //任务属性、店铺、产品、页数、时间1和2
@@ -208,6 +207,90 @@ function ajaxGetTaskListView(data){
     }
 }
 
+
+function ajaxGetCommentList(sort,shopId,productId,page,pageNum,TimeStart,TimeEnd){
+    console.log('sort:'+sort+'shopId:'+shopId+'productId:'+productId+'page:'+page+'pageNum:'+pageNum+'TimeStart:'+TimeStart+'TimeEnd:'+TimeEnd);
+    //任务属性、店铺、产品、页数、时间1和2
+    $.ajax({
+        method: "get",
+        url: "/sell/taskcommentlist",
+        data: {
+            sort: sort,
+            shopId: shopId,
+            productId:productId,
+            TimeStart: TimeStart,
+            TimeEnd: TimeEnd,
+            page: page,
+            pageNum: pageNum
+        },
+        success: function (data, status) {
+            console.log(data)
+            ajaxGetCommentListView(data)
+            ajaxGetTaskListNumView(data[data.length-1],page,pageNum)
+        }
+    })
+}
+
+//ajax读取好评列表加入详情页
+function ajaxGetCommentListView(data){
+        var Details;
+        $("#taskContainer").empty()
+        for(var x=0;data.length-1>x;x++){
+            img = JSON.parse(data[x].img)
+            Details = JSON.parse(data[x].Details)
+            var AjaxSsll = `<div class="taskCell"><div class="title clearfix"><span class="shop floatLeft mr-20 ml10">店铺：<span>`+data[x].ShopSort+` - `+ data[x].ShopUserName +`</span></span><span class="taskNo floatLeft mr-4">编号：<span>`+ data[x].TaskCommentId +`</span>
+            </span><span class="floatRight mr-8">状态：
+                        <span class="FINISHED">`+data[x].TaskCommentState+`</span>
+                        </span>
+                        <span class="floatRight mr-8">
+                        创建时间：
+                        <span>`+data[x].CommentCreateTime+`</span>
+                        </span>
+                        <span class="floatRight mr-8">
+                        任务类型：
+                        <span>`+data[x].event+`</span>
+                        </span>
+                    </div>
+                    <div class="body">
+                        <div class="wrq_task_list" style="height:auto"> 
+                            <table class="normTable">
+                                <thead>
+                                    <tr>
+                                        <td width="65%"></td>
+                                        <td width="5%"></td>
+                                        <td width="20%"></td>
+                                        <td width="10%"></td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="text-align:left;">
+                                            <div style="wight:100px;float:left;margin-right:10px;"><img height="100px" width="100px" src="`+ Details.mainImage[0]+`"></div>
+                                            <div style="wight:100px;float:left;margin-right:10px;"><img height="100px" width="100px" src="`+ img[0]+`"></div>
+                                            <span style="height:100px">`+data[x].Text+`</span><br>
+                                            <span>订单编号：<text class="doing"></text></span><br>
+                                            <span style="height:100px">单价：￥<text class="doing"></text> </span><span> 关键词：<text></text></span<br>
+                                        </td>
+                                        <td style="text-align:left;">
+                                            <em class="cap"><span>-</span></em>
+
+                                        </td>
+                                        <td style="text-align:left;">
+                                            <em class="cap">账号：<span class="doing"></span></em>
+                                        </td>
+                                        <td class="doing">
+                                            <a class="btnRepublish stdColorButton" href="/publish/app/sdPlanTask?taskId=511679594" target="_blank">一键发布</a>
+                                            <a class="btnRepublish stdColorButton cancel " href="javascript:;" data-taskid="511679594" target="_blank">撤销任务</a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>`
+            $("#taskContainer").append(AjaxSsll)
+    }
+}
 
 //gettoken
 function urlGetlToken() {
