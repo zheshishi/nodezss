@@ -306,12 +306,7 @@ class sellController extends Controller {
         if (!this.ctx.cookies.get('username', {encrypt: true})) {
             return this.ctx.redirect('/selllogin')
         }
-        let UserNameCookie = this.ctx.cookies.get('username', {encrypt: true})
-        let UserName = await this.app.mysql.get('UserName', {UserName: UserNameCookie})
-        let getPageSize = 'SELECT COUNT(*) FROM BuyTask JOIN SellOrder ON BuyTask.SellOrderId = SellOrder.SellOrderId  WHERE BuyTask.BuyTaskState NOT IN (0,1) AND SellOrder.UserNameId ='+UserName.UserNameId+';'
-        let pageNumber = await this.app.mysql.query(getPageSize)
-        console.log(pageNumber[0]['COUNT(*)'])
-        await this.ctx.render('SellTaskManager.ejs', {message: '', pageNumber: pageNumber[0]['COUNT(*)']})
+        await this.ctx.render('SellTaskManager.ejs', {message: '',)
     }
 
     async TaskCommentManagerGet() {
