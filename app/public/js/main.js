@@ -95,7 +95,8 @@ function ProductSetInfo(data) {
 
 //manager view 获取任务表 sellTaskManager.ejs
 
-function ajaxGetTaskList(sort,shopId,productId,page,pageNum,TimeStart,TimeEnd) {
+function ajaxGetTaskList(sort,shopId,productId,page,pageNum,TimeStart,TimeEnd){
+    console.log('sort:'+sort+'shopId:'+shopId+'productId:'+productId+'page:'+page+'pageNum:'+pageNum+'TimeStart:'+TimeStart+'TimeEnd:'+TimeEnd);
     //任务属性、店铺、产品、页数、时间1和2
     $.ajax({
         method: "get",
@@ -125,25 +126,25 @@ function ajaxGetTaskListNumView(data,page,pageNum){
     $("#pagination").empty()
     let pageview = ''
     if((page-1)<=totalPage && (page-1)>0){
-        pageview = pageview +`<li class="paginate_button "><a href="#" tabindex="`+(page-1)+`">上一页</a></li>`
+        pageview = pageview +`<li class="paginate_button "><a onclick='ClickAjaxGetTaskList(`+(page-1)+`)'>上一页</a></li>`
     }
     if((page-2)<=totalPage && (page-2)>0){
-        pageview = pageview +`<li class="paginate_button "><a href="#" tabindex="`+(page-2)+`">`+(page-2)+`</a></li>`
+        pageview = pageview +`<li class="paginate_button "><a onclick='ClickAjaxGetTaskList(`+(page-2)+`)'>`+(page-2)+`</a></li>`
     }
     if((page-1)<=totalPage && (page-1)>0){
-        pageview = pageview +`<li class="paginate_button "><a href="#" tabindex="`+(page-1)+`">`+(page-1)+`</a></li>`
+        pageview = pageview +`<li class="paginate_button "><a onclick='ClickAjaxGetTaskList(`+page+`)'>`+(page-1)+`</a></li>`
     }
     if(page<=totalPage && page>0){
-        pageview = pageview +`<li class="paginate_button active"><a href="#" tabindex="`+page+`">`+page+`</a></li>`
+        pageview = pageview +`<li class="paginate_button active" id = 'nowpage' value=`+page+` ><a onclick='ClickAjaxGetTaskList(`+page+`)'>`+page+`</a></li>`
     }
     if((page+1)<=totalPage){
-        pageview = pageview +`<li class="paginate_button "><a href="#" tabindex="`+(page+1)+`">`+(page+1)+`</a></li>`
+        pageview = pageview +`<li class="paginate_button "><a onclick='ClickAjaxGetTaskList(`+(page+1)+`)'>`+(page+1)+`</a></li>`
     }
     if((page+2)<=totalPage){
-        pageview = pageview +`<li class="paginate_button "><a href="#" tabindex="`+(page+2)+`">`+(page+2)+`</a></li>`
+        pageview = pageview +`<li class="paginate_button "><a onclick='ClickAjaxGetTaskList(`+(page+2)+`)'>`+(page+2)+`</a></li>`
     }
     if((page+1)<=totalPage){
-        pageview = pageview +`<li class="paginate_button "><a href="#" tabindex="`+(page+1)+`">下一页</a></li>`
+        pageview = pageview +`<li class="paginate_button "><a onclick='ClickAjaxGetTaskList(`+(page+1)+`)'>下一页</a></li>`
     }
     $("#pagination").append(pageview)
 }

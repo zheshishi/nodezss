@@ -40,13 +40,19 @@
         ajaxGetTaskList('',0,0,1,10,'','') //任务属性、店铺、产品、页数、读取数量、时间1和2
         //window.setInterval(gettaskvalues, 1000);
         }
-    function ClickAjaxGetTaskList(){
+    function ClickAjaxGetTaskList(sendPage){
+            console.log('sendPage:'+sendPage)
+            if(sendPage==undefined){
+                let page = document.getElementById('nowpage').value
+            }else{
+                let page = sendPage
+            }
             let taskSort = document.getElementById('taskSort').value
             let TimeStart = document.getElementById('TimeStart').value
             let TimeEnd = document.getElementById('TimeEnd').value
             let SubSelectproduct = document.getElementById('SubSelectproduct').value
             let Selectshop = document.getElementById('Selectshop').value
-            ajaxGetTaskList(taskSort,Selectshop,SubSelectproduct,1,10,TimeStart,TimeEnd)
+            ajaxGetTaskList(taskSort,Selectshop,SubSelectproduct,page,10,TimeStart,TimeEnd)
         }
     </script>
         <style>
@@ -97,7 +103,7 @@
             <input type="text" id="taskId" class="floatLeft mr10 inputText"> -->
             <span>时间</span><input type="date" id='TimeStart' value="" min="2017-09-16"/>
                 -<input type="date" id='TimeEnd' value="" min="2017-09-16"/>
-            <a style="height: 20px;">查询</a>
+            <button style="height: 20px; color:red" onclick='ClickAjaxGetTaskList()' >查询</button>
 
         </span>
         <input type="hidden" id="pageNum" name="pageNum" value=<%= parseInt(pageNumber/10)+1 %>> 
