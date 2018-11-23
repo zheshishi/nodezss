@@ -34,20 +34,29 @@ class sellController extends Controller {
             var MaxTime = parseInt(this.ctx.request.body.sdMaxTime)
             if(MinTime>=MaxTime){return await this.ctx.render('sellTaskPost.ejs', {message: '试用时间开始不能小于完成时间', shopname: ''})}
             var buyPrice = parseFloat(this.ctx.request.body.buyPrice).toFixed(2)
+            buyPrice = parseFloat(buyPrice)
             var buyNum = parseInt(this.ctx.request.body.buyNum)
             var buyRules = this.ctx.request.body.buyRules
-            var showPrice = parseFloat(this.ctx.request.body.showPrice).toFixed(2)
-            if (showPrice  ==="NaN"){var showPrice = buyPrice}
+            var showPrice = this.ctx.request.body.showPrice
+            if (showPrice  ===NaN||showPrice  === ''||showPrice  ===0){showPrice = buyPrice}
+            showPrice = parseFloat(showPrice).toFixed(2)
+            showPrice = parseFloat(showPrice)
             var nowdatetime = new Date()
             var dalayReceive = parseInt(this.ctx.request.body.dalayReceive)
             nowdatetime.setDate(nowdatetime.getDate() + dalayReceive)
             var startDate = (nowdatetime).toJSON().slice(0,10);
             var orderNumber = this.ctx.request.body.orderNumber
-            if (this.ctx.request.body.ReturnBuyPrice === "on") { 
-                var ReturnBuyPrice = parseFloat(this.ctx.request.body.ReturnBuyPrice).toFixed(2)
-            } else {
-                var ReturnBuyPrice = null
+            var ReturnBuyPrice =this.ctx.request.body.ReturnBuyPrice
+            if(ReturnBuyPrice === undefined){ReturnBuyPrice=''}
+            if(event===2){
+                if(this.ctx.request.body.ReturnBuyPrice==='' ||parseFloat(this.ctx.request.body.ReturnBuyPrice)<1){return await this.ctx.render('sellTaskPost.ejs', {message: '免费返现试用，请填写返现金额', shopname: ''})}
+                        ReturnBuyPrice = parseFloat(ReturnBuyPrice).toFixed(2)
+                        ReturnBuyPrice = parseFloat(ReturnBuyPrice)
+                if(ReturnBuyPrice<1){return await this.ctx.render('sellTaskPost.ejs', {message: '免费返现试用，请填写返现金额', shopname: ''})}
+            }else if(event===1){
+                ReturnBuyPrice=0
             }
+
             if (this.ctx.request.body.gift === "on") {var gift = 1} else {var gift = 1}
             //附加优惠卷   
             if (this.ctx.request.body.AddCoupons === "on") {var AddCoupons = 1} else {var AddCoupons = 0}
@@ -65,7 +74,6 @@ class sellController extends Controller {
             if(this.ctx.request.body.PayCoupons === "on") {var PayCoupons = 1} else {var PayCoupons = 0}
             if (this.ctx.request.body.Payhuabei === "on") {var Payhuabei = 1} else {var Payhuabei = 0}
             //if(this.ctx.request.body.huabeiId === "on") {var huabeiId = 1} else {var huabeiId = 1}
-          
           
             var huabeiId=1//在没测试的情况下先用只能花呗关系
             //允许花呗支付
@@ -86,9 +94,7 @@ class sellController extends Controller {
             }else{
                 var orderNumberSum = orderNumber.reduce((a, b) => parseInt(a) + parseInt(b))
             }
-            console.log(AddOpenProduct)
-            console.log(AddCommandsLike)
-            console.log(AddChat)
+
             var coupons = AddCoupons + AddOpenOtherProduct + AddSaveShop + AddShoppingCar + AddOpenProduct + AddCommandsLike + AddChat
 
             //任务金额算法lso
@@ -96,18 +102,25 @@ class sellController extends Controller {
             var additionalMoney = huabeiId * 2 + coupons + 2 //附加任务金额，event1红包任务附加算法
             var BuyUseraAdditionalMoney = huabeiId * 1 + coupons* 0.5 //附加任务金额，event2试用任务附加算法
             var eventMoney
-            var buyUserMoney
-            if (event === 1) {
-                var eventMoney = buyPrice * buyNum + parseInt((buyPrice * buyNum) / 100) + 7 + additionalMoney  //卖家金额* 算法
-                var buyUserMoney = buyPrice * buyNum + parseInt((buyPrice * buyNum) / 100) + 5 + BuyUseraAdditionalMoney //用户金额* 算法
-            }else if(event === 2){
-                var eventMoney = buyPrice * buyNum + additionalMoney//总资金
-                var buyUserMoney = buyPrice * buyNum + BuyUseraAdditionalMoney
+            var MoneyAlgorithm
+            if(event===1){
+                console.log('event1:'+event+ReturnBuyPrice+coupons+huabeiId)
+                MoneyAlgorithm = this.app.config.MoneyAlgorithm(event,buyPrice*buyNum,coupons,huabeiId)
+            }else if(event===2){
+                console.log('event2:'+event+ReturnBuyPrice+coupons+huabeiId)
+                MoneyAlgorithm = this.app.config.MoneyAlgorithm(event,ReturnBuyPrice,coupons,huabeiId)
             }
+            // if (event === 1) {
+            //     var eventMoney = buyPrice * buyNum + parseInt((buyPrice * buyNum) / 100) + 7 + additionalMoney  //卖家金额* 算法
+            //     var buyUserMoney = buyPrice * buyNum + parseInt((buyPrice * buyNum) / 100) + 5 + BuyUseraAdditionalMoney //用户金额* 算法
+            // }else if(event === 2){
+            //     var eventMoney = buyPrice * buyNum + additionalMoney//总资金
+            //     var buyUserMoney = buyPrice * buyNum + BuyUseraAdditionalMoney
+            // }
+            eventMoney = MoneyAlgorithm[0]
             //任务金额算法
             var getTaskMoney = eventMoney * orderNumberSum
             var keyword = this.ctx.request.body.keyword
-            console.log('eventMoney:'+eventMoney+'buyUserMoney:'+buyUserMoney)
             if(keyword===''){
                 return await this.ctx.render('sellTaskPost.ejs', {message: '请填满关键词', shopname: ''})
             }
@@ -125,33 +138,8 @@ class sellController extends Controller {
         //查看余额商家
         //进行中的订单 - 搜商家用户名的任务
         //进行中的任务 - 搜订单用户名的订单
-        // var runOrderMoney = 0
-        // console.log(this.app.config.webUrl)
-        // var getorderquery = 'SELECT * FROM SellOrder JOIN SellProduct ON SellOrder.SellProductId= SellProduct.SellProductId JOIN SellShop ON SellProduct.SellShopId = SellShop.SellShopId WHERE orderNumber > 0 AND SellShop.UserNameId=' + UserName.UserNameId + ';'
-        // try {
-        //     var getorder = await this.app.mysql.query(getproductquery)
-        //     for (var oml = 0; oml < getorder.length; oml++) {
-        //         runOrderMoney += getorder[oml].SellPayPrice * getorder[oml].orderNumber
-        //     }
-        // } catch (e) {
-        //     console.log(e)
-        //     var getorder = null
-        // }
-        // var getTaskQuery = 'SELECT * FROM BuyTask JOIN SellOrder ON BuyTask.SellOrderId = SellOrder.SellOrderId WHERE BuyTaskState NOT IN （0，1） AND SellShop.UserNameId= =' + UserName.UserNameId + ';'
-        // try {
-        //     var getTask = await this.app.mysql.query(getTaskQuery)
 
-        // for (var tml = 0; tml < getorder.length; tml++) {
-        //     runOrderMoney += getTask[tml].SellMoney
-        // }
-        // } catch (e) {
-        //     console.log(e)
-        //     var getTask = null
-        // }
         var money = await this.app.mysql.get('FinancialBalance', {UserNameId: UserName.UserNameId})
-        console.log('line90 money:')
-        console.log(money)
-
         if (money.Balance < getTaskMoney + 500) {
             var returnmoney = getTaskMoney+ 500 - money.Balance
             return await this.ctx.render('sellTaskPost.ejs', {
@@ -162,7 +150,7 @@ class sellController extends Controller {
         //1. 判断资金是否足够 - > 任务确定有木有钱
 
         //判断店铺用户
-        var getproductquery = 'SELECT * FROM SellProduct JOIN SellShop ON SellProduct.SellShopId = SellShop.SellShopId WHERE SellProductId =' + this.ctx.request.body.productinfoID + ';'
+        var getproductquery = 'SELECT * FROM SellProduct JOIN SellShop ON SellProduct.SellShopId = SellShop.SellShopId WHERE SellProductId =' + this.ctx.request.body.SubSelectproduct + ';'
         var getproduct = await this.app.mysql.query(getproductquery)
         if (getproduct[0].UserNameId == UserName.UserNameId) {
         } else if (getproduct[0].UserNameId == null) {
@@ -177,6 +165,38 @@ class sellController extends Controller {
 
         async function addOrder(app, keywordx, orderNumberx, cityx, orderSortx, PriceMinx, PriceMaxx) {
             var MysqlProduct = await app.mysql.get('SellProduct', {SellProductId: productinfoID})
+            await app.config.resql(productinfoID)
+            await app.config.resql(MysqlProduct.SellShopId)
+            await app.config.resql(UserName.UserNameId)
+            await app.config.resql(event)
+            await app.config.resql(gift)
+            await app.config.resql(gifturl)
+            await app.config.resql(buyPrice)
+            await app.config.resql(buyNum)
+            await app.config.resql(showPrice)
+            await app.config.resql(ReturnBuyPrice)
+            await app.config.resql(buyRules)
+            await app.config.resql(orderNote)
+            await app.config.resql(MinTime)
+            await app.config.resql(MaxTime)
+            await app.config.resql(startDate)
+            await app.config.resql(AddCoupons)
+            await app.config.resql(AddOpenOtherProduct)
+            await app.config.resql(AddSaveShop)
+            await app.config.resql(AddShoppingCar)
+            await app.config.resql(AddOpenProduct)
+            await app.config.resql(AddCommandsLike)
+            await app.config.resql(AddChat)
+            await app.config.resql(PayCoupons)
+            await app.config.resql(PayCard)
+            await app.config.resql(Payhuabei)
+            await app.config.resql(huabeiId)
+            await app.config.resql(keywordx)
+            await app.config.resql(orderNumberx)
+            await app.config.resql(cityx)
+            await app.config.resql(orderSortx)
+            await app.config.resql(PriceMinx)
+            await app.config.resql(PriceMaxx)
             var eventinsert = await app.mysql.insert('SellOrder', {
                 SellProductId: productinfoID,
                 SellShopId: MysqlProduct.SellShopId,
@@ -210,14 +230,14 @@ class sellController extends Controller {
                 orderSort: orderSortx,
                 PriceMin: PriceMinx,
                 PriceMax: PriceMaxx,
-                SellPayPrice: eventMoney,
-                BuyGetPrice: buyUserMoney,
             });
-            console.log(eventinsert.affectedRows === 1)
-            var updateMoneySql ='UPDATE FinancialBalance SET Balance=Balance-'+orderNumberx*eventMoney + ',PerformMoney=PerformMoney+'+orderNumberx*eventMoney + ' WHERE UserNameId="' + UserName.UserNameId + '";'
-            console.log(updateMoneySql)
-            console.log('updateMoneySql')
-            var eventinsert = await app.mysql.query(updateMoneySql)
+            if(eventinsert.affectedRows === 1){
+                var updateMoneySql ='UPDATE FinancialBalance SET Balance=Balance-'+orderNumberx*eventMoney + ',PerformMoney=PerformMoney+'+orderNumberx*eventMoney + ' WHERE UserNameId="' + UserName.UserNameId + '";'
+                var eventinsert = await app.mysql.query(updateMoneySql)
+                if(eventinsert.affectedRows !== 1){
+                    console.log(eventinsert.affectedRows)
+                }
+            }
         }
 
         //task save mysql

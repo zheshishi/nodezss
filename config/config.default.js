@@ -1,13 +1,16 @@
 'use strict';
 const path = require('path');
 var weburl = require("./weburl")
-
+var resql = require('./resql')
+var MoneyAlgorithm = require("./MoneyAlgorithm")
 module.exports = appInfo => {
   const config = exports = {};
 
   // use for cookie sign key, should change to your own and keep security
   config.keys = appInfo.name + '_1536142102057_2341';
   config.webUrl = "http:"+weburl+":7001";
+  config.MoneyAlgorithm = MoneyAlgorithm;
+  config.resql = resql;
   config.security = {
     csrf: {
       enable: false,

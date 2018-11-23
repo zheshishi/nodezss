@@ -21,7 +21,7 @@ module.exports = app => {
             var productGetDetailsSql = 'update BuyTask SET BuyTaskState=0 where BuyUserNameId='+ username.UserNameId +' and BuyTaskId='+ taskId +';'
             var productGetDetails = await this.app.mysql.query(productGetDetailsSql); //获取订单，按订单时间排序获取
             }
-      async TaskState(){
+        async TaskState(){
             //Regular 
             var rePayMoney = /^([1-5]\d{0,9}|0)([.]?|(\.\d{1,2})?)$/
             var reOrderId = /^([1-9]\d{1,30})/
@@ -58,6 +58,64 @@ module.exports = app => {
             return this.ctx.body = {username:'TaskState'}
 
       }
+
+      async GetBuyTask() {
+            console.log('GetBuyTask')
+            if(this.ctx.header.authorization ==='' || this.ctx.header.authorization ===null ){
+                console.log('noToken')
+                return this.ctx.body = {username:'username'}
+                }
+                //version:系统版本
+                //sort:分类
+            if(this.ctx.header.version ==='1.0'){
+                if(this.ctx.header.sort==='0'){
+                    console.log('verify Version and sort')
+                    //const token = this.app.jwt.sign({ username: this.ctx.request.body.username, password: this.ctx.request.body.password }, this.app.config.jwt.secret);
+                    const tokenVerify = this.app.jwt.verify(this.ctx.header.authorization, this.app.config.jwt.secret);
+                    var username = await this.app.mysql.get('UserName',{UserName:tokenVerify.username})//用户信息
+                    //拿到买家45天内买过的店铺名
+                    var BuyTaskSql = 'SELECT * FROM BuyTask JOIN SellOrder ON SellOrder.SellOrderId = BuyTask.SellOrderId WHERE buyUserNameId='+ username.UserNameId +' AND BuyTaskState <> 0'
+                    var sqlsyn = 'SELECT * FROM SellOrder JOIN SellProduct ON SellOrder.SellProductId = SellProduct.SellProductId JOIN SellShop ON SellProduct.SellShopId = SellShop.SellShopId WHERE orderNumber>0 AND SellShop.SellShopId NOT IN (SELECT SellOrder.sellShopId FROM BuyTask JOIN SellOrder ON SellOrder.SellOrderId = BuyTask.SellOrderId WHERE buyUserNameId='+username.UserNameId+' AND BuyTaskState <> 0 AND  NOW() - INTERVAL 40 DAY < BuyTaskCreateTime);'
+                    var sqluservalue = 'SELECT * FROM BuyTask JOIN SellOrder ON SellOrder.SellOrderId = BuyTask.SellOrderId WHERE buyUserNameId='+ username.UserNameId +' AND BuyTaskState <> 0'
+                    //console.log(sqlsyn)
+                    var BuyOrder = await this.app.mysql.query(sqlsyn)
+                    var BuyTask = await this.app.mysql.query(sqluservalue)
+                    //get 最近的任务
+                    // 订单赛选
+                    // 是否复购代码
+                    // var AfterPurchase = 0
+                    // var returnOrder = []
+                    // for (var sx =0; sx<BuyOrder.length; sx++){
+                    //     for (var sxx =0; sxx<BuyTask.length; sxx++){
+                    //         //console.log('sxx:'+sxx)
+                    //         //console.log('BuyOrder[sx].SellProductId:'+BuyOrder[sx].SellProductId)
+                    //         //console.log('BuyTask[sxx].SellProductId:'+BuyTask[sxx].SellProductId)
+                    //         if(BuyOrder[sx].SellProductId ==  BuyTask[sxx].SellProductId){
+                    //             if(BuyOrder[sx].ProductBuy1> 5){
+                    //                 if(BuyOrder[sx].ProductBuy2/BuyOrder[sx].ProductBuy1>0.3){//如果产品复购率>30%不展示
+                    //                     AfterPurchase = 1}
+                    //                 }
+                    //             }
+                    //         }
+                    //     if(AfterPurchase===1){
+                    //         AfterPurchase=0
+                    //     }else{returnOrder.push(BuyOrder[sx])}
+                    //     }
+                    // }
+                    //去掉
+
+                    // 是否复购代码
+                    // 订单赛选
+                    console.log('GetBuyTaskEnd')
+                    return this.ctx.body = BuyTask//返回：订单编号+产品主图
+                    //this.ctx.body = {username:username}//返回：订单编号+产品主图
+                }
+            }
+        }
+
+
+
+
       async index() {
             console.log('MINDEX')
             if(this.ctx.header.authorization ==='' || this.ctx.header.authorization ===null ){
@@ -296,18 +354,20 @@ module.exports = app => {
 	    }
 	}
 
-    async qntoken(){
-        // if(this.ctx.request.body.headers.Authorization ==='' || this.ctx.request.body.headers.Authorization ===null ){
-        //         console.log('noToken')
-        //         return this.ctx.body = {username:'username'}
-        //         }
-        // var tokenVerify = this.app.jwt.verify(this.ctx.request.body.headers.Authorization, this.app.config.jwt.secret);
-        // var username = await this.app.mysql.get('UserName',{UserName:tokenVerify.username})//用户信息
-        // if(username==null){
-        //         return this.ctx.body = {status:0,message:'账户还没保存，请重新刷新'}}
-        let tokenx = await this.app.qiniu.createToken()
-        return this.ctx.body = tokenx
-    }
+        async qntoken(){
+            // if(this.ctx.request.body.headers.Authorization ==='' || this.ctx.request.body.headers.Authorization ===null ){
+            //         console.log('noToken')
+            //         return this.ctx.body = {username:'username'}
+            //         }
+            // var tokenVerify = this.app.jwt.verify(this.ctx.request.body.headers.Authorization, this.app.config.jwt.secret);
+            // var username = await this.app.mysql.get('UserName',{UserName:tokenVerify.username})//用户信息
+            // if(username==null){
+            //         return this.ctx.body = {status:0,message:'账户还没保存，请重新刷新'}}
+            let tokenx = await this.app.qiniu.createToken()
+            return this.ctx.body = tokenx
+        }
+
+
 
     	async addTbAccount(){
 		    console.log('addTbAccount')
