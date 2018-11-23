@@ -1,19 +1,3 @@
-function generate_buy_sell_money(task_event,total_money,add_money,idmoney){
-          //卖家 = 7 + 付款金额0.01 + 附加费用 + 2+id费用
-          //买家 = 付款费用 + 5 * 0.005  + 附加费用 *0.5+ id费用
-          //事件2
-          //卖家 = 付款费用 + 3
-          //买家 = 付款费用            
-          if(task_event===1){
-            var gbsm_s = total_money + parseInt(total_money*0.01) + 9 + add_money+ idmoney
-            var gbsm_b = total_money + parseInt(total_money*0.01)*0.5 + 5 + add_money*0.5 + idmoney*0.5
-          }else if(task_event===2){
-            var gbsm_s = productGetDetails[0].ReturnBuyPrice + 4
-            var gbsm_b = productGetDetails[0].ReturnBuyPrice
-          }
-          return [gbsm_b,gbsm_s]
-        }
-
 module.exports = app => {
     class mIndex extends app.Controller {
       //通过任务id和账号id关闭订单 access taskid and usernameid close task
@@ -307,21 +291,19 @@ module.exports = app => {
                     return this.ctx.body = {status:2,message:'不能下单'}
                 }else if(judgeRebuy === 0){
                     //写下单的流程
-                    //任务金额计算 + 总金额计算 + 图片数 + 账号费 + 附加佣金                     
-                    var task_total_money = productGetDetails[0].buyPrice * productGetDetails[0].buyNum
+                    //任务金额计算 + 总金额计算 + 图片数 + 账号费 + 附加佣金
+                    var task_total_money
                     var TaskAddMoney = productGetDetails[0].AddCoupons + productGetDetails[0].AddOpenOtherProduct + productGetDetails[0].AddSaveShop + productGetDetails[0].AddOpenProduct + productGetDetails[0].AddShoppingCar + productGetDetails[0].AddChat + productGetDetails[0].AddCommandsLike
                     var id_money = productGetDetails[0].huabeiId * 2
-                    var get_bs_money = await generate_buy_sell_money(productGetDetails[0].event,task_total_money,TaskAddMoney,id_money)
-                    var get_buy_money = get_bs_money[0]
-                    var get_sell_money = get_bs_money[1]
+                    if(productGetDetails[0].event ===1){
+                        task_total_money = productGetDetails[0].buyPrice * productGetDetails[0].buyNum
+                    }else if(productGetDetails[0].event ===2){
+                        task_total_money = productGetDetails[0].ReturnBuyPrice
+                    }
                     //TaskAddMoney = 附加任务集合
                     //idmoney = 账号数
                     //imageNumber = 图片张数
-                    var imageNumber = TaskAddMoney+1
-                    console.log(judgePlatformUser)
-                    console.log(judgePlatformUser.UserAccountId)
-                    var CreateTaskSql = 'INSERT into BuyTask(buyUserNameId,SellOrderId,BuyTaskState,ImageNumber,SellMoney,BuyMoney,UserAccountId,AddMoney,PayMoney)values('+username.UserNameId+','+orderid+',2,'+imageNumber+','+get_sell_money+','+get_buy_money+','+judgePlatformUser.UserAccountId+','+TaskAddMoney+','+productGetDetails[0].buyPrice*productGetDetails[0].buyNum+')'
-                    //console.log('CTSql:'+CreateTaskSql)
+                    var CreateTaskSql = 'INSERT into BuyTask(buyUserNameId,SellOrderId,BuyTaskState,UserAccountId,PayMoney,AddMoney)values('+username.UserNameId+','+orderid+',2,'+judgePlatformUser.UserAccountId+','+task_total_money+','+TaskAddMoney+');'
                     var BuyTask = await this.app.mysql.query(CreateTaskSql) //插入任务
                     if(BuyTask.affectedRows===1){
                     	//redis 设置倒计时

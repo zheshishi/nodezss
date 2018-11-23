@@ -14,10 +14,8 @@ function MoneyAlgorithm(task_event,totalMoney,add_money,idmoney){
             var gbsm_s = totalMoney + parseInt(totalMoney*0.01) + 9 + add_money+ idmoney
             var gbsm_b = totalMoney + (parseInt(totalMoney*0.01)*0.5) + 5 + add_money*0.5 + idmoney*0.5
           }else if(task_event===2){
-
             var gbsm_s = totalMoney + add_money + 3
-            console.log('gbsm_s'+gbsm_s+'totalMoney:'+totalMoney+'add_money'+add_money)
-            var gbsm_b = totalMoney+(add_money * 0.5)
+            var gbsm_b = totalMoney
           }
           return [gbsm_s,gbsm_b]
         }
