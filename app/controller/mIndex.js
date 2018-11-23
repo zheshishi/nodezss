@@ -32,6 +32,7 @@ module.exports = app => {
                     return this.ctx.body = {status:1,message:'订单修改金额不能>50，附加任务不能>20'}
                 }
                 //如果状态2就到3吗？
+                console.log(filesurl)
                 var TaskStateSql = 'update BuyTask SET BuyTaskState=3,AddMoney='+ AddMoney +',PayMoney='+ PayMoney +',TaskScreen1='+ filesurl +',PlatFormOrderId='+ PlatFormOrderId + ' where BuyUserNameId='+ username.UserNameId +' and BuyTaskId='+ this.ctx.request.body.headers.TaskId +';'
                 var TaskState = await this.app.mysql.query(TaskStateSql); //获取订单，按订单时间排序获取
                 if(TaskState){
