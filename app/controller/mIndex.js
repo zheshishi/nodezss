@@ -292,14 +292,9 @@ module.exports = app => {
                 }else if(judgeRebuy === 0){
                     //写下单的流程
                     //任务金额计算 + 总金额计算 + 图片数 + 账号费 + 附加佣金
-                    var task_total_money
                     var TaskAddMoney = productGetDetails[0].AddCoupons + productGetDetails[0].AddOpenOtherProduct + productGetDetails[0].AddSaveShop + productGetDetails[0].AddOpenProduct + productGetDetails[0].AddShoppingCar + productGetDetails[0].AddChat + productGetDetails[0].AddCommandsLike
                     var id_money = productGetDetails[0].huabeiId * 2
-                    if(productGetDetails[0].event ===1){
-                        task_total_money = productGetDetails[0].buyPrice * productGetDetails[0].buyNum
-                    }else if(productGetDetails[0].event ===2){
-                        task_total_money = productGetDetails[0].ReturnBuyPrice
-                    }
+                    var task_total_money = productGetDetails[0].buyPrice * productGetDetails[0].buyNum
                     //TaskAddMoney = 附加任务集合
                     //idmoney = 账号数
                     //imageNumber = 图片张数

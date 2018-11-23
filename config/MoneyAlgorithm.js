@@ -1,9 +1,6 @@
 function MoneyAlgorithm(task_event,totalMoney,add_money,idmoney){
-          //卖家 = 7 + 付款金额0.01 + 附加费用 + 2+id费用
-          //买家 = 付款费用 + 5 * 0.005  + 附加费用 *0.5+ id费用
-          //事件2
-          //卖家 = 付款费用 + 3
-          //买家 = 付款费用
+          //config/MoneyAlgorithm.js
+          //component/MoneyAlgorithm.js
           totalMoney =  parseFloat(totalMoney).toFixed(2)
           totalMoney =  parseFloat(totalMoney)
           add_money =  parseFloat(add_money).toFixed(2)
