@@ -350,6 +350,7 @@ class sellController extends Controller {
         let TimeStart = this.ctx.queries.TimeStart[0]
         let TimeEnd = this.ctx.queries.TimeEnd[0]
         let sortSql;
+
         if(shopId!=0) {
             shopId=' AND SellShopId='+shopId
         }else{
@@ -372,12 +373,12 @@ class sellController extends Controller {
         }else{
             sortSql = 'BuyTaskState = ' + sort
         }
-        let taskListSql = `SELECT BuyTaskId,BuyTaskState,PlatFormOrderId,BuyTaskCreateTime,BuyMoney,PlatFormUserName,KeyWord,SellShop.ShopSort,Details,ShopUserName FROM BuyTask 
+        let taskListSql = `SELECT BuyTaskId,BuyTaskState,PlatFormOrderId,BuyTaskCreateTime,PlatFormUserName,KeyWord,SellShop.ShopSort,Details,ShopUserName FROM BuyTask 
                             JOIN SellOrder ON BuyTask.SellOrderId = SellOrder.SellOrderId 
                             JOIN UserAccount ON BuyTask.UserAccountId = UserAccount.UserAccountId 
                             JOIN SellProduct ON SellOrder.SellProductId = SellProduct.SellProductId 
                             JOIN SellShop ON SellProduct.SellShopId = SellShop.SellShopId 
-                            WHERE `+sortSql+` AND SellOrder.UserNameId =`+UserName.UserNameId+TimeStart+TimeEnd+shopId+productId+`;`
+                            WHERE `+sortSql+` AND SellOrder.UserNameId =`+UserName.UserNameId+TimeStart+TimeEnd+shopId+productId+` limit `+((page-1)*pageNum)+`,`+pageNum+`;`
         let taskListCountSql = `SELECT count(*) FROM BuyTask
                             JOIN SellOrder ON BuyTask.SellOrderId = SellOrder.SellOrderId 
                             JOIN UserAccount ON BuyTask.UserAccountId = UserAccount.UserAccountId 
@@ -430,7 +431,7 @@ class sellController extends Controller {
         let taskListSql = `SELECT TaskCommentId,Details,ShopUserName,event,Text,img,TaskCommentState,img,SellShop.ShopSort,CommentCreateTime FROM BuyTaskComment
                             JOIN SellProduct ON BuyTaskComment.SellProductId = SellProduct.SellProductId 
                             JOIN SellShop ON SellProduct.SellShopId = SellShop.SellShopId 
-                            WHERE `+sortSql+` AND BuyTaskComment.UserNameId =`+UserName.UserNameId+TimeStart+TimeEnd+shopId+productId+`;`
+                            WHERE `+sortSql+` AND BuyTaskComment.UserNameId =`+UserName.UserNameId+TimeStart+TimeEnd+shopId+productId+` limit `+((page-1)*pageNum)+`,`+pageNum+`;`
         let taskListCountSql = `SELECT count(*) FROM BuyTaskComment
                             WHERE `+sortSql+` AND BuyTaskComment.UserNameId =`+UserName.UserNameId+TimeStart+TimeEnd+shopId+productId+`;`
         let taskListCount = await this.app.mysql.query(taskListCountSql)

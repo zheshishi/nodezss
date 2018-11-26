@@ -131,7 +131,7 @@ function ajaxGetTaskListNumView(data,page,pageNum){
         pageview = pageview +`<li class="paginate_button "><a onclick='ClickAjaxGetTaskList(`+(page-2)+`)'>`+(page-2)+`</a></li>`
     }
     if((page-1)<=totalPage && (page-1)>0){
-        pageview = pageview +`<li class="paginate_button "><a onclick='ClickAjaxGetTaskList(`+page+`)'>`+(page-1)+`</a></li>`
+        pageview = pageview +`<li class="paginate_button "><a onclick='ClickAjaxGetTaskList(`+(page-1)+`)'>`+(page-1)+`</a></li>`
     }
     if(page<=totalPage && page>0){
         pageview = pageview +`<li class="paginate_button active" id = 'nowpage' value=`+page+` ><a onclick='ClickAjaxGetTaskList(`+page+`)'>`+page+`</a></li>`

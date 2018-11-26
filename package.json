@@ -4,6 +4,7 @@
   "description": "",
   "private": true,
   "dependencies": {
+    "cnpm": "^6.0.0",
     "egg": "^2.2.1",
     "egg-jwt": "^3.1.2",
     "egg-mysql": "^3.0.0",
@@ -12,7 +13,8 @@
     "egg-scripts": "^2.5.0",
     "egg-static": "^2.1.1",
     "egg-view-ejs": "^2.0.0",
-    "ihuyi106": "^1.0.1"
+    "ihuyi106": "^1.0.1",
+    "puppeteer": "^1.10.0"
   },
   "devDependencies": {
     "autod": "^3.0.1",
