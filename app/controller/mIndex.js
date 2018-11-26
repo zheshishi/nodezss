@@ -1,10 +1,21 @@
+async function CloseTaskId(app,taskId,UserNameId){
+    //1. search taskId
+    //2. closeid
+    //3. add orderid
+    var GetTaskId =  await app.mysql.get('BuyTask',{BuyTaskId:taskId})
+    var productGetDetailsSql = 'update BuyTask SET BuyTaskState=0 where BuyUserNameId='+ UserNameId +' and BuyTaskId='+ taskId +';'
+    var productGetDetails =  await app.mysql.query(productGetDetailsSql); //获取订单，按订单时间排序获取
+    var ChangeOrderSql = 'update SellOrder SET orderNumber=orderNumber+1 where SellOrderId = '+GetTaskId.SellOrderId
+    var ChangeOrder =  await app.mysql.query(ChangeOrderSql); //获取订单，按订单时间排序获取
+    console.log('ChangeOrder')
+    return ChangeOrder
+}
+
+
 module.exports = app => {
     class mIndex extends app.Controller {
       //通过任务id和账号id关闭订单 access taskid and usernameid close task
-        async CloseTaskOfId(taskId,UserNameId){
-            var productGetDetailsSql = 'update BuyTask SET BuyTaskState=0 where BuyUserNameId='+ username.UserNameId +' and BuyTaskId='+ taskId +';'
-            var productGetDetails = await this.app.mysql.query(productGetDetailsSql); //获取订单，按订单时间排序获取
-            }
+
         async TaskState(){
             //Regular 
             var rePayMoney = /^([1-5]\d{0,9}|0)([.]?|(\.\d{1,2})?)$/
@@ -221,7 +232,9 @@ module.exports = app => {
                     var taskId = this.ctx.header.taskid
                     var productGetDetailsSql = 'update BuyTask SET BuyTaskState=0 where BuyUserNameId='+ username.UserNameId +' and BuyTaskId='+ taskId +';'
                     var productGetDetails = await this.app.mysql.query(productGetDetailsSql); //获取订单，按订单时间排序获取
-
+                    console.log('CloseTaskId')
+                    let getTask =  CloseTaskId(this.app,taskId,username.UserNameId)
+                    console.log('CloseTaskId')
                     return this.ctx.body = productGetDetails
                 }
             }
@@ -324,9 +337,11 @@ module.exports = app => {
                             });
                     var CreateTaskSql = 'update SellOrder SET orderNumber=orderNumber-1 where SellOrderId = '+orderid
                     var BuyTaskx = await this.app.mysql.query(CreateTaskSql) //减少任务
-                        return this.ctx.body = {status:3,message:'下单成功，跳到订单任务区',taskId:BuyTask.insertId}
-                    }else{
-                        return this.ctx.body = {status:4,message:'下单失败请重试，或联系管理员'}
+                    //关闭之前在做的订单
+                    return this.ctx.body = {status:3,message:'下单成功，跳到订单任务区',taskId:BuyTask.insertId}
+
+                }else{
+                    return this.ctx.body = {status:4,message:'下单失败请重试，或联系管理员'}
                     }
                 }
 	    }
