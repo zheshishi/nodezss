@@ -153,6 +153,7 @@ function ajaxGetTaskListView(data){
         var Details;
         $("#taskContainer").empty()
         for(var x=0;data.length-1>x;x++){
+            let button_body='';
             Details = JSON.parse(data[x].Details)
             let front_body = `<div class="taskCell"><div class="title clearfix"><span class="shop floatLeft mr-20 ml10">店铺：<span>`+data[x].ShopSort+` - `+ data[x].ShopUserName +`</span></span><span class="taskNo floatLeft mr-4">编号：<span>`+ data[x].BuyTaskId +`</span>
             </span><span class="floatRight mr-8">状态：
@@ -194,18 +195,39 @@ function ajaxGetTaskListView(data){
                                             <em class="cap">账号：<span class="doing">`+data[x].PlatFormUserName+`</span></em>
                                         </td>
                                         <td class="doing">`
-
-            let button_body = `<a class="btnRepublish stdColorButton" href="/publish/app/sdPlanTask?taskId=511679594" target="_blank">确认发货</a>
+            if(data[x].BuyTaskState===0){
+                button_body = `<Text>关闭</Text>`
+            }else if(data[x].BuyTaskState===1){
+                button_body = `<Text>完成</Text>`
+            }else if(data[x].BuyTaskState===2){
+                button_body = `<Text>等待付款</Text>`
+            }else if(data[x].BuyTaskState===3){
+                button_body = `<a class="btnRepublish stdColorButton" href="/publish/app/sdPlanTask?taskId=511679594" target="_blank">确认发货</a>
                                <a class="btnRepublish stdColorButton cancel " href="javascript:;" data-taskid="511679594" target="_blank">信息不对</a>
                                <a class="btnRepublish stdColorButton cancel " href="javascript:;" data-taskid="511679594" target="_blank">关闭试用</a>
-                                        </td>
+                               `
+            }else if(data[x].BuyTaskState===4){
+                button_body = `<a class="btnRepublish stdColorButton" href="/publish/app/sdPlanTask?taskId=511679594" target="_blank">确认发货</a>
+                               <a class="btnRepublish stdColorButton cancel " href="javascript:;" data-taskid="511679594" target="_blank">关闭试用</a>
+                               `
+            }else if(data[x].BuyTaskState===5){
+                button_body = `<Text>等待收货</Text>`
+            }else if(data[x].BuyTaskState===6){
+                button_body = `<a class="btnRepublish stdColorButton cancel " href="javascript:;" data-taskid="511679594" target="_blank">审核通过</a>
+                                  <a class="btnRepublish stdColorButton cancel " href="javascript:;" data-taskid="511679594" target="_blank">关闭试用</a>`
+            }else if(data[x].BuyTaskState===7){
+                button_body = `<a class="btnRepublish stdColorButton cancel " href="javascript:;" data-taskid="511679594" target="_blank">审核通过</a>
+                                  <a class="btnRepublish stdColorButton cancel " href="javascript:;" data-taskid="511679594" target="_blank">关闭试用</a>`
+            }
+
+            let end_body = `</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>`
-            let AllBody= front_body+button_body
+            let AllBody= front_body+button_body+end_body
 
 
             $("#taskContainer").append(AllBody)
