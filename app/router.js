@@ -24,13 +24,18 @@ module.exports = app => {
     router.get("/m/task", "mIndex.task");
     router.get("/m/closetask", "mIndex.closetask");
     router.get("/m/getbuytask", "mIndex.GetBuyTask"); //获取任务
-
     router.post("/m/qntoken", "mIndex.qntoken"); //七牛token
     router.get("/m/qntoken", "mIndex.qntoken"); //七牛token
     //web size sell admin网页端商家管理页面
 
-    router.get("/sell", "sell.index"); // sell Login
+    router.get('/sell/selltaskstate3verify','sellTaskState.SellTaskState3Verify');
+    router.get('/sell/selltaskstate6verify','sellTaskState.SellTaskState6Verify');
+    router.get('/sell/selltaskstate3refuse','sellTaskState.SellTaskState3Refuse');
+    router.get('/sell/selltaskstate6refuse','sellTaskState.SellTaskState6Refuse');
+    router.get('/sell/sellerclosetask','sellTaskState.SellerCloseTask');
 
+
+    router.get("/sell", "sell.index"); // sell Login
     //登录 seller admin view
     router.get("/selllogin", "sellLogin.sellLoginGet"); 
     router.post("/selllogin", "sellLogin.sellLoginPost");

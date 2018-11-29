@@ -61,7 +61,6 @@ Date.prototype.toMysqlFormat = function() {
 module.exports = app => {
     class mIndex extends app.Controller {
       //通过任务id和账号id关闭订单 access taskid and usernameid close task
-
         async TaskState(){
             /*state0:需登录
               state1:错误提醒

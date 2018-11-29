@@ -202,22 +202,126 @@ function ajaxGetTaskListView(data){
             }else if(data[x].BuyTaskState===2){
                 button_body = `<Text>等待付款</Text>`
             }else if(data[x].BuyTaskState===3){
-                button_body = `<a class="btnRepublish stdColorButton" href="/publish/app/sdPlanTask?taskId=511679594" target="_blank">确认发货</a>
-                               <a class="btnRepublish stdColorButton cancel " href="javascript:;" data-taskid="511679594" target="_blank">信息不对</a>
-                               <a class="btnRepublish stdColorButton cancel " href="javascript:;" data-taskid="511679594" target="_blank">关闭试用</a>
+                button_body = `               
+                                <style> 
+                                .white_content { 
+                                    display: none; 
+                                    position: absolute; 
+                                    top: 25%; 
+                                    left: 25%; 
+                                    width: 50%; 
+                                    height: 25%; 
+                                    padding: 20px; 
+                                    border: 2px solid orange; 
+                                    background-color: white; 
+                                    z-index:1002; 
+                                    overflow: auto; 
+                                    }
+                                </style>
+                                <script>
+                                function SellTaskState3Verify(value){
+                                    console.log('SellTaskState3Verify:'+value)
+                                    $.ajax({
+                                      url: '/sell/selltaskstate3verify',
+                                      type: 'get',
+                                      data: {'id':value},
+                                      success: function(data) {
+                                        alert('request data：'+data);
+                                      }
+                                    });
+                                }
+                                function SellTaskState6Verify(value){
+                                    console.log('selltaskstate6verify:'+value)
+                                    $.ajax({
+                                      url: '/sell/selltaskstate6verify',
+                                      type: 'get',
+                                      data: {'id':value},
+                                      success: function(data) {
+                                        alert('request data：'+data);
+                                      }
+                                    });
+                                }
+                                
+                                function SellTaskState3Refuse(value){
+                                    console.log('selltaskstate3refuse:'+value)
+                                    let text_value = document.getElementById('SellTaskState3RefuseText').value
+                                    $.ajax({
+                                      url: '/sell/selltaskstate3refuse',
+                                      type: 'get',
+                                      data: {'id':value,'text':text_value},
+                                      success: function(data) {
+                                        alert('request data：'+data);
+                                      }
+                                    });
+                                }
+                                
+                                function SellTaskState6Refuse(value){
+                                    console.log('selltaskstate6refuse:'+value)
+                                    let text_value = document.getElementById('SellTaskState6RefuseText').value
+                                    $.ajax({
+                                      url: '/sell/selltaskstate6refuse',
+                                      type: 'get',
+                                      data: {'id':value,'text':text_value},
+                                      success: function(data) {
+                                        alert('request data：'+data);
+                                      }
+                                    });
+                                }
+                                
+                                
+                                function SellerCloseTask(value){
+                                    console.log('SellerCloseTask:'+value)
+                                    let text_value = document.getElementById('SellerCloseTaskText').value
+                                    $.ajax({
+                                      url: '/sell/sellerclosetask',
+                                      type: 'get',
+                                      data: {'id':value,'text':text_value},
+                                      success: function(data) {
+                                        alert('request data：'+data);
+                                      }
+                                    });
+                                }
+                                
+                                </script>
+                                
+                               <div id="SellTaskState3Refuse" class="white_content">
+                               <text type="text" ID="state5Text">拒绝申请</text><br>
+                               拒绝理由：<input type="text" ID="SellTaskState3RefuseText"><br>
+                               <a value="" id="SellTaskState3RefuseButton" onclick="SellTaskState3Refuse(this.value)">提交</a>
+                               <a onclick = "document.getElementById('SellTaskState3Refuse').style.display='none'">关闭</a>
+                               </div> 
+
+                               <div id="SellTaskState6Refuse" class="white_content">
+                               <text type="text" ID="state5Text">拒绝申请</text><br>
+                               拒绝理由：<input type="text" ID="SellTaskState6RefuseText"><br>
+                               <a value="" id="SellTaskState6RefuseButton" onclick="SellTaskState6Refuse(this.value)">提交</a>
+                               <a onclick = "document.getElementById('SellTaskState6Refuse').style.display='none'">关闭</a>
+                               </div> 
+
+
+                               <div id="SellerCloseTask" class="white_content">
+                               <text type="text" ID="state5Text">关闭订单</text><br>
+                               关闭原因：<input type="text" ID="SellerCloseTaskText"><br>
+                               <a id='SellerCloseTaskButton' value=""  onclick="SellerCloseTask(this.value)">提交</a>
+                               <a onclick = "document.getElementById('SellerCloseTask').style.display='none'">关闭</a>
+                               </div> 
+
+                               <a class="btnRepublish stdColorButton" href="javascript:;" value=`+data[x].BuyTaskId+` onclick ="SellTaskState3Verify(this.value)">确认发货</a>
+                               <a class="btnRepublish stdColorButton" href="javascript:;" value=`+data[x].BuyTaskId+` onclick="document.getElementById('SellTaskState3Refuse').style.display='block';document.getElementById('SellTaskState3RefuseButton').value=this.value">拒绝申请</a>
+                               <a class="btnRepublish stdColorButton" href="javascript:;" value=`+data[x].BuyTaskId+` onclick="document.getElementById('SellerCloseTask').style.display='block';document.getElementById('SellerCloseTask').value=this.value">关闭试用</a>
                                `
             }else if(data[x].BuyTaskState===4){
-                button_body = `<a class="btnRepublish stdColorButton" href="/publish/app/sdPlanTask?taskId=511679594" target="_blank">确认发货</a>
-                               <a class="btnRepublish stdColorButton cancel " href="javascript:;" data-taskid="511679594" target="_blank">关闭试用</a>
-                               `
+                button_body = `<a class="btnRepublish stdColorButton" href="javascript:;" value=`+data[x].BuyTaskId+` onclick ="SellTaskState3Verify(this.value)">确认发货</a>
+                               <a class="btnRepublish stdColorButton" href="javascript:;" value=`+data[x].BuyTaskId+` onclick="document.getElementById('SellerCloseTask').style.display='block';document.getElementById('SellerCloseTask').value=this.value">关闭试用</a>`
             }else if(data[x].BuyTaskState===5){
-                button_body = `<Text>等待收货</Text>`
+                button_body = `<Text>等待收货</Text><br><a class="btnRepublish stdColorButton" href="javascript:;" value=`+data[x].BuyTaskId+` onclick="document.getElementById('SellerCloseTask').style.display='block';document.getElementById('SellerCloseTask').value=this.value">关闭试用</a>`
             }else if(data[x].BuyTaskState===6){
-                button_body = `<a class="btnRepublish stdColorButton cancel " href="javascript:;" data-taskid="511679594" target="_blank">审核通过</a>
-                                  <a class="btnRepublish stdColorButton cancel " href="javascript:;" data-taskid="511679594" target="_blank">关闭试用</a>`
+                button_body = `<a class="btnRepublish stdColorButton" href="javascript:;" value=`+data[x].BuyTaskId+` onclick ="SellTaskState6Verify(this.value)">审核通过</a>
+                               <a class="btnRepublish stdColorButton" href="javascript:;" value=`+data[x].BuyTaskId+` onclick="document.getElementById('SellTaskState6Refuse').style.display='block';document.getElementById('SellTaskState6RefuseButton').value=this.value">驳回修改</a>
+                               <a class="btnRepublish stdColorButton" href="javascript:;" value=`+data[x].BuyTaskId+` onclick="document.getElementById('SellerCloseTask').style.display='block';document.getElementById('SellerCloseTask').value=this.value">关闭试用</a>`
             }else if(data[x].BuyTaskState===7){
-                button_body = `<a class="btnRepublish stdColorButton cancel " href="javascript:;" data-taskid="511679594" target="_blank">审核通过</a>
-                                  <a class="btnRepublish stdColorButton cancel " href="javascript:;" data-taskid="511679594" target="_blank">关闭试用</a>`
+                button_body = `<a class="btnRepublish stdColorButton" href="javascript:;" value=`+data[x].BuyTaskId+` onclick ="SellTaskState6Verify(this.value)">审核通过</a>
+                               <a class="btnRepublish stdColorButton" href="javascript:;" value=`+data[x].BuyTaskId+` onclick="document.getElementById('SellerCloseTask').style.display='block';document.getElementById('SellerCloseTask').value=this.value">关闭试用</a>`
             }
 
             let end_body = `</td>
