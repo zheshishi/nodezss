@@ -1,9 +1,35 @@
+async function AddRedis(app,taskId){
+    let message_obj = {
+        message: taskId,
+        func_name: 'taskstate2',
+        timeout: 2100
+    }
+    let key = JSON.stringify(message_obj);
+    let content = "";
+    console.log('raids key')
+    console.log(key)
+    app.redis.multi()
+        .set(key, content)
+        .expire(key, 2100)
+        .exec((error) => {
+            if (error) {
+                console.log("任务添加失败");
+            } else {
+                console.log("任务添加成功")
+            }
+        });
+
+}
+
 async function CloseTaskId(app,taskId,UserNameId,CloseReason){
     //1. search taskId
     //2. closeid
     //3. add orderid
     var GetTaskId
     var GetTaskIdsql
+    await app.config.resql(UserNameId)
+    await app.config.resql(taskId)
+    await app.config.resql(CloseReason)
     GetTaskIdsql = 'select * FROM BuyTask WHERE BuyTaskId='+taskId+' AND BuyUserNameId= '+UserNameId
     GetTaskId = await app.mysql.query(GetTaskIdsql)
     if(GetTaskId.length==0){
@@ -19,6 +45,8 @@ async function CloseTaskId(app,taskId,UserNameId,CloseReason){
         return ChangeOrder
     }
 }
+
+
 function twoDigits(d) {
     if(0 <= d && d < 10) return "0" + d.toString();
     if(-10 < d && d < 0) return "-0" + (-1*d).toString();
@@ -35,6 +63,10 @@ module.exports = app => {
       //通过任务id和账号id关闭订单 access taskid and usernameid close task
 
         async TaskState(){
+            /*state0:需登录
+              state1:错误提醒
+              state2:成功
+             */
             //Regular 
             var rePayMoney = /^([1-5]\d{0,9}|0)([.]?|(\.\d{1,2})?)$/
             var reOrderId = /^([1-9]\d{1,30})/
@@ -45,7 +77,9 @@ module.exports = app => {
             }
             var tokenVerify = this.app.jwt.verify(this.ctx.request.body.headers.Authorization, this.app.config.jwt.secret);
             var username = await this.app.mysql.get('UserName',{UserName:tokenVerify.username})//用户信息           
-            var taskId = await this.app.mysql.get('BuyTask',{BuyTaskId:this.ctx.request.body.headers.TaskId})
+            var taskIdSql = 'SELECT * FROM BuyTask JOIN SellOrder ON SellOrder.SellOrderId = BuyTask.SellOrderId WHERE BuyTaskId='+this.ctx.request.body.headers.TaskId
+            var taskId = await this.app.mysql.query(taskIdSql)
+            taskId = taskId[0]
             if(taskId===null || taskId.BuyUserNameId!==username.UserNameId || taskId.BuyTaskState!==this.ctx.request.body.headers.TaskState){
                 return this.ctx.body = {status:1,message:'未知错误'}
             }
@@ -57,7 +91,7 @@ module.exports = app => {
                 if(reOrderId.test(PlatFormOrderId) ===false||rePayMoney.test(PayMoney) ===false ||reAddMoney.test(AddMoney) ===false){
                     return this.ctx.body = {status:1,message:'金额格式、订单编号不对'}
                 }
-                if((PayMoney - taskId.PayMoney)>50||AddMoney>20){
+                if((PayMoney - (taskId.buyNum * taskId.buyPrice))>50||AddMoney>20||PayMoney<1||AddMoney<0){
                     return this.ctx.body = {status:1,message:'订单修改金额不能>50，附加任务不能>20'}
                 }
                 //如果状态2就到3吗？
@@ -213,23 +247,22 @@ module.exports = app => {
             //version:系统版本
             //sort:分类
             //思考如果是新用户是否免费送
-            if(this.ctx.header.version ==='1.0'){
-                if(this.ctx.header.sort==='0'){
-                    //const token = this.app.jwt.sign({ username: this.ctx.request.body.username, password: this.ctx.request.body.password }, this.app.config.jwt.secret);
-                    var tokenVerify = this.app.jwt.verify(this.ctx.header.authorization, this.app.config.jwt.secret);
-                    var username = await this.app.mysql.get('UserName',{UserName:tokenVerify.username})
-                    var taskId = this.ctx.header.taskid
-                    //console.log('task_taskId: '+taskId)
-                    //拿到买家40天内买过的店铺名
-                    var productGetDetailsSql = 'SELECT * FROM BuyTask JOIN UserAccount ON BuyTask.UserAccountId = UserAccount.UserAccountId JOIN SellOrder ON BuyTask.SellOrderId = SellOrder.SellOrderId JOIN SellProduct ON SellOrder.SellProductId = SellProduct.SellProductId JOIN SellShop ON SellProduct.SellShopId = SellShop.SellShopId WHERE BuyTaskId ='+taskId+';'
-                    var productGetDetails = await this.app.mysql.query(productGetDetailsSql) //获取订单，按订单时间排序获取
-                    //console.log(productGetDetails[0])
-                    if(username.UserNameId!==productGetDetails[0].UserNameId || productGetDetails.length===0){
-                        return this.ctx.body = {username:'username'}
-                    }
-                    return this.ctx.body = productGetDetails[0]
-                }
+
+            //const token = this.app.jwt.sign({ username: this.ctx.request.body.username, password: this.ctx.request.body.password }, this.app.config.jwt.secret);
+            var tokenVerify = this.app.jwt.verify(this.ctx.header.authorization, this.app.config.jwt.secret);
+            var username = await this.app.mysql.get('UserName',{UserName:tokenVerify.username})
+            var taskId = this.ctx.header.taskid
+            //console.log('task_taskId: '+taskId)
+            await this.app.config.resql(taskId)
+            //拿到买家40天内买过的店铺名
+            var productGetDetailsSql =  'SELECT * FROM BuyTask JOIN UserAccount ON BuyTask.UserAccountId = UserAccount.UserAccountId JOIN SellOrder ON BuyTask.SellOrderId = SellOrder.SellOrderId JOIN SellProduct ON SellOrder.SellProductId = SellProduct.SellProductId JOIN SellShop ON SellProduct.SellShopId = SellShop.SellShopId WHERE BuyTaskId ='+taskId+';'
+            var productGetDetails = await this.app.mysql.query(productGetDetailsSql) //获取订单，按订单时间排序获取
+            //console.log(productGetDetails[0])
+            if(username.UserNameId!==productGetDetails[0].UserNameId || productGetDetails.length===0){
+                return this.ctx.body = {username:'username'}
             }
+            return this.ctx.body = productGetDetails[0]
+
         }
 
         async closetask() {
@@ -242,10 +275,11 @@ module.exports = app => {
             var username = await this.app.mysql.get('UserName',{UserName:tokenVerify.username});
             var taskId = this.ctx.header.taskid
             let getTask = await CloseTaskId(this.app,taskId,username.UserNameId,null)
-            return this.ctx.body = productGetDetails
+            return this.ctx.body = {state:1,message:'done'}
         }
 
         async genratetask(){
+
             //state 0：not login
             //state 1：没有账号
 			//状态2: 不能下单
@@ -261,7 +295,8 @@ module.exports = app => {
                 return this.ctx.body = {status: 0, message: '没有token'}
             }
 	      var orderid = this.ctx.request.body.headers.orderid //订单id
-			//判断是否绑定账号
+          await this.app.config.resql(orderid)
+            //判断是否绑定账号
           var productGetDetailsSql = 'SELECT * FROM SellOrder JOIN SellProduct ON SellProduct.SellProductId = SellOrder.SellProductId WHERE SellOrderId = '+orderid+';'
           var productGetDetails = await this.app.mysql.query(productGetDetailsSql)
           var judgePlatformUser
@@ -332,6 +367,7 @@ module.exports = app => {
                     let OrderReduceSqlx = await this.app.mysql.query(OrderReduceSql) //减少任务
                     if(BuyTask.affectedRows===1){
                     	//redis 设置倒计时
+                        //await AddRedis(this.app,BuyTask.insertId)
                         let message_obj = {
                                 message: BuyTask.insertId,
                                 func_name: 'taskstate2',

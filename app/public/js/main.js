@@ -154,7 +154,7 @@ function ajaxGetTaskListView(data){
         $("#taskContainer").empty()
         for(var x=0;data.length-1>x;x++){
             Details = JSON.parse(data[x].Details)
-            var AjaxSsll = `<div class="taskCell"><div class="title clearfix"><span class="shop floatLeft mr-20 ml10">店铺：<span>`+data[x].ShopSort+` - `+ data[x].ShopUserName +`</span></span><span class="taskNo floatLeft mr-4">编号：<span>`+ data[x].BuyTaskId +`</span>
+            let front_body = `<div class="taskCell"><div class="title clearfix"><span class="shop floatLeft mr-20 ml10">店铺：<span>`+data[x].ShopSort+` - `+ data[x].ShopUserName +`</span></span><span class="taskNo floatLeft mr-4">编号：<span>`+ data[x].BuyTaskId +`</span>
             </span><span class="floatRight mr-8">状态：
                         <span class="FINISHED">`+data[x].BuyTaskState+`</span>
                         </span>
@@ -193,9 +193,11 @@ function ajaxGetTaskListView(data){
                                         <td style="text-align:left;">
                                             <em class="cap">账号：<span class="doing">`+data[x].PlatFormUserName+`</span></em>
                                         </td>
-                                        <td class="doing">
-                                            <a class="btnRepublish stdColorButton" href="/publish/app/sdPlanTask?taskId=511679594" target="_blank">一键发布</a>
-                                            <a class="btnRepublish stdColorButton cancel " href="javascript:;" data-taskid="511679594" target="_blank">撤销任务</a>
+                                        <td class="doing">`
+
+            let button_body = `<a class="btnRepublish stdColorButton" href="/publish/app/sdPlanTask?taskId=511679594" target="_blank">确认发货</a>
+                               <a class="btnRepublish stdColorButton cancel " href="javascript:;" data-taskid="511679594" target="_blank">信息不对</a>
+                               <a class="btnRepublish stdColorButton cancel " href="javascript:;" data-taskid="511679594" target="_blank">关闭试用</a>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -203,7 +205,10 @@ function ajaxGetTaskListView(data){
                         </div>
                     </div>
                 </div>`
-            $("#taskContainer").append(AjaxSsll)
+            let AllBody= front_body+button_body
+
+
+            $("#taskContainer").append(AllBody)
     }
 }
 
