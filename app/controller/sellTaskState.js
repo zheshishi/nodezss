@@ -24,7 +24,7 @@ class sellTaskState extends Controller {
         let CookieUserName = this.ctx.cookies.get('username', {encrypt: true})
         let UserName = await this.app.mysql.get('UserName', {UserName: CookieUserName})
         let State6VerifySqlString = 'UPDATE BuyTask JOIN SellOrder ON BuyTask.SellOrderId=SellOrder.SellOrderId SET BuyTask.BuyTaskState=1 WHERE  BuyTask.BuyTaskState in (6,7) AND SellOrder.UserNameId='+ UserName.UserNameId +' AND BuyTask.BuyTaskId='+this.ctx.query.id+';'
-        let State6VerifySql = await this.app.mysql.query(State3VerifySqlString)
+        let State6VerifySql = await this.app.mysql.query(State6VerifySqlString)
         console.log(State6VerifySql)
         return this.ctx.body=1
     }
