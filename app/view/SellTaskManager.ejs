@@ -55,6 +55,81 @@
             let Selectshop = document.getElementById('Selectshop').value
             ajaxGetTaskList(taskSort,Selectshop,SubSelectproduct,page,10,TimeStart,TimeEnd)
         }
+
+    function SellTaskState3Verify(value){
+        console.log('SellTaskState3Verify:'+value)
+        $.ajax({
+            url: '/sell/selltaskstate3verify',
+            type: 'get',
+            data: {'id':value},
+            success: function(data) {
+                console.log('request data：'+data);
+                window.location.reload()
+            }
+        });
+    }
+    function SellTaskState6Verify(value){
+        console.log('selltaskstate6verify:'+value)
+        $.ajax({
+            url: '/sell/selltaskstate6verify',
+            type: 'get',
+            data: {'id':value},
+            success: function(data) {
+                console.log('request data：'+data);
+                window.location.reload()
+            }
+        });
+    }
+
+    function SellTaskState3Refuse(){
+        let value = document.getElementById('SellTaskState3RefuseButton').value
+        let text_value = document.getElementById('SellTaskState3RefuseText').value
+        console.log('selltaskstate3refuse:'+value)
+        console.log('selltaskstate3refuse:'+text_value)
+        $.ajax({
+            url: '/sell/selltaskstate3refuse',
+            type: 'get',
+            data: {'id':value,'text':text_value},
+            success: function(data) {
+                console.log('request data：'+data);
+                window.location.reload()
+            }
+        });
+    }
+
+    function SellTaskState6Refuse(){
+        let value = document.getElementById('SellTaskState6RefuseButton').value
+        let text_value = document.getElementById('SellTaskState6RefuseText').value
+        console.log('selltaskstate6refuse:'+value)
+        console.log('selltaskstate6refuse:'+text_value)
+        $.ajax({
+            url: '/sell/selltaskstate6refuse',
+            type: 'get',
+            data: {'id':value,'text':text_value},
+            success: function(data) {
+                window.location.reload()
+                console.log('request data：'+data);
+            }
+        });
+    }
+
+
+    function SellerCloseTask(){
+        let value = document.getElementById('SellerCloseTaskButton').value
+        let text_value = document.getElementById('SellerCloseTaskText').value
+        $.ajax({
+            url: '/sell/sellerclosetask',
+            type: 'get',
+            data: {'id':value,'text':text_value},
+            success: function(data) {
+                window.location.reload()
+                console.log('request data：'+data);
+            }
+        });
+    }
+
+
+
     </script>
         <style>
             .UrlTitle {
@@ -69,7 +144,20 @@
             .geturlclass{
                 display:inline;
             }
-        </style>
+            .white_content {
+                display: none;
+                position: absolute;
+                top: 25%;
+                left: 25%;
+                width: 50%;
+                height: 25%;
+                padding: 20px;
+                border: 2px solid orange;
+                background-color: white;
+                z-index:1002;
+                overflow: auto;
+            }
+    </style>
 </head>
 
 <body class="hold-transition skin-blue sidebar-mini">
@@ -108,7 +196,30 @@
 
         </span>
         </div>
+        <div id="SellTaskState3Refuse" class="white_content">
+            <input id="SellTaskState3RefuseButton" value="x" type="hidden">
+            <text value= '' type="text" ID="SellTaskState3RefuseButtonx">拒绝申请</text><br>
+            拒绝理由：<input type="text" ID="SellTaskState3RefuseText"><br>
+            <a value="" id="SellTaskState3RefuseButton" onclick="SellTaskState3Refuse(this.value)">提交</a>
+            <a onclick = "document.getElementById('SellTaskState3Refuse').style.display='none'">关闭</a>
+        </div>
 
+        <div id="SellTaskState6Refuse" class="white_content">
+            <input id="SellTaskState6RefuseButton" value="x" type="hidden">
+            <text value= '' type="text" id="SellTaskState6RefuseButton">拒绝申请</text><br>
+            拒绝理由：<input type="text" ID="SellTaskState6RefuseText"><br>
+            <a value="" id="SellTaskState6RefuseButton1" onclick="SellTaskState6Refuse(this.value)">提交</a>
+            <a onclick = "document.getElementById('SellTaskState6Refuse').style.display='none'">关闭</a>
+        </div>
+
+
+        <div id="SellerCloseTask" class="white_content">
+            <input id="SellerCloseTaskButton" value="x" type="hidden">
+            <text type="text" ID="state5Text">关闭订单</text><br>
+            关闭原因：<input type="text" ID="SellerCloseTaskText"><br>
+            <a id='SellerCloseTaskButton' value=""  onclick="SellerCloseTask(this.value)">提交</a>
+            <a onclick = "document.getElementById('SellerCloseTask').style.display='none'">关闭</a>
+        </div>
 <div id="taskContainer">  
 
 </div>
