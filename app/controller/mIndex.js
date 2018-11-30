@@ -263,20 +263,6 @@ module.exports = app => {
             return this.ctx.body = productGetDetails[0]
 
         }
-
-        async closetask() {
-            //console.log('closetask: this.ctx.header:'+this.ctx.header)
-            if(this.ctx.header.authorization ==='' || this.ctx.header.authorization ===null ){
-                //console.log('noToken')
-                return this.ctx.body = {username:'username'}
-            }
-            var tokenVerify = this.app.jwt.verify(this.ctx.header.authorization, this.app.config.jwt.secret);
-            var username = await this.app.mysql.get('UserName',{UserName:tokenVerify.username});
-            var taskId = this.ctx.header.taskid
-            let getTask = await CloseTaskId(this.app,taskId,username.UserNameId,null)
-            return this.ctx.body = {state:1,message:'done'}
-        }
-
         async genratetask(){
 
             //state 0：not login
