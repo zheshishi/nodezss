@@ -26,7 +26,8 @@ module.exports = app => {
     router.get("/m/qntoken", "mIndex.qntoken"); //七牛token
     //web size sell admin网页端商家管理页面
     router.get("/m/closetask", "sellTaskState.closetask");
-    router.post("/m/taskstate", "sellTaskState.TaskState");
+    router.post("/m/taskstate", "sellTaskState.MobileTaskState3");
+    router.post("/m/TaskState6", "sellTaskState.MobileTaskState6");
 
     router.get('/sell/selltaskstate3verify','sellTaskState.SellTaskState3Verify');
     router.get('/sell/selltaskstate6verify','sellTaskState.SellTaskState6Verify');
