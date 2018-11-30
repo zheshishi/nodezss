@@ -115,6 +115,7 @@ class sellTaskState extends Controller {
         var username = await this.app.mysql.get('UserName',{UserName:tokenVerify.username})//用户信息
         var taskIdSql = 'SELECT * FROM BuyTask JOIN SellOrder ON SellOrder.SellOrderId = BuyTask.SellOrderId WHERE BuyTaskId='+this.ctx.request.body.headers.TaskId
         var taskId = await this.app.mysql.query(taskIdSql)
+        var filesurl = JSON.stringify(this.ctx.request.body.headers.filesurl)
         taskId = taskId[0]
         if(taskId===null || taskId.BuyUserNameId!==username.UserNameId || taskId.BuyTaskState!==this.ctx.request.body.headers.TaskState){
             return this.ctx.body = {status:1,message:'未知错误'}
@@ -122,7 +123,7 @@ class sellTaskState extends Controller {
         if(taskId.BuyTaskState==5||taskId.BuyTaskState==6||taskId.BuyTaskState==7){
             //如果状态2就到3吗？
             console.log(filesurl)
-            var TaskStateSql = 'update BuyTask SET BuyTaskState=6 where BuyUserNameId='+ username.UserNameId +' and BuyTaskId='+ this.ctx.request.body.headers.TaskId +';'
+            var TaskStateSql = 'update BuyTask SET BuyTaskState=6,TaskScreen2='+ filesurl +' where BuyUserNameId='+ username.UserNameId +' and BuyTaskId='+ this.ctx.request.body.headers.TaskId +';'
             var TaskState = await this.app.mysql.query(TaskStateSql); //获取订单，按订单时间排序获取
             if(TaskState){
                 return this.ctx.body = {status:2,message:'提交成功'}

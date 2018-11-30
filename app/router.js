@@ -27,7 +27,7 @@ module.exports = app => {
     //web size sell admin网页端商家管理页面
     router.get("/m/closetask", "sellTaskState.closetask");
     router.post("/m/taskstate", "sellTaskState.MobileTaskState3");
-    router.post("/m/TaskState6", "sellTaskState.MobileTaskState6");
+    router.post("/m/taskstatetwo", "sellTaskState.MobileTaskState6");
 
     router.get('/sell/selltaskstate3verify','sellTaskState.SellTaskState3Verify');
     router.get('/sell/selltaskstate6verify','sellTaskState.SellTaskState6Verify');
