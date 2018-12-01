@@ -275,6 +275,7 @@ class sellTaskState extends Controller {
     }
 
     async SellTaskState6Verify(){
+        //1.附加任务资金+刷单费用算法+支付金额+任务类型+附加费用，保存到buytask任务中，卖家减财富+买家财富
         console.log('SellTaskState6Verify：'+this.ctx.query.id)
         if (!this.ctx.cookies.get('username', {encrypt: true})) {
             return this.ctx.redirect('/selllogin')
