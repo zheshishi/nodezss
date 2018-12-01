@@ -33,6 +33,7 @@ async function CloseTaskId(app,taskId,UserNameId,CloseReason){
             var ChangeCommentSql = 'update BuyTaskComment SET TaskCommentId=2 where BuyTaskComment = '+GetTaskId[0].TaskCommentId
             var ChangeComment =  await app.mysql.query(ChangeOrderSql); //获取订单，按订单时间排序获取
         }
+        let redisReturn =await app.redis.del(taskId)
         return ChangeOrder
     }
 }
@@ -49,7 +50,6 @@ Date.prototype.toMysqlFormat = function() {
 
 
 class sellTaskState extends Controller {
-    //Buyer TaskState 2\3\4->3
     async closetask() {
         //console.log('closetask: this.ctx.header:'+this.ctx.header)
         if(this.ctx.header.authorization ==='' || this.ctx.header.authorization ===null ){
@@ -234,9 +234,12 @@ class sellTaskState extends Controller {
         if(taskId.BuyTaskState==5||taskId.BuyTaskState==6||taskId.BuyTaskState==7){
             //如果状态2就到3吗？
             console.log(filesurl)
-            var TaskStateSql = 'update BuyTask SET BuyTaskState=6,TaskScreen2='+ filesurl +' where BuyUserNameId='+ username.UserNameId +' and BuyTaskId='+ this.ctx.request.body.headers.TaskId +';'
+            let MyDate = new Date();
+            MyDate = '"'+MyDate.toMysqlFormat()+ '"INTERVAL 3 DAY'
+            var TaskStateSql = 'update BuyTask SET AutoChangeState=1,AutoChangeTime='+MyDate+', BuyTaskState=6,TaskScreen2='+ filesurl +' where BuyUserNameId='+ username.UserNameId +' and BuyTaskId='+ this.ctx.request.body.headers.TaskId +';'
             var TaskState = await this.app.mysql.query(TaskStateSql); //获取订单，按订单时间排序获取
             if(TaskState){
+                let redisReturn =await AddRedis(this.app,BuyTask.insertId,60*60*12*3)
                 return this.ctx.body = {status:2,message:'提交成功'}
             }
         }
@@ -255,15 +258,19 @@ class sellTaskState extends Controller {
         let get_comment_sql = 'select * from BuyTaskComment WHERE TaskCommentState = 2 AND BuyTask.BuyTaskId='+BuyTask.SellProductId
         let get_comment = await this.app.mysql.query(get_comment_sql)
         let State3VerifySqlString;
+        let MyDate = new Date();
+        MyDate = '"'+MyDate.toMysqlFormat()+ '"INTERVAL 6 DAY'
         if(get_comment.length>0){
-            State3VerifySqlString = 'UPDATE BuyTask JOIN SellOrder ON BuyTask.SellOrderId=SellOrder.SellOrderId JOIN SellProduct ON SellProduct.SellProductId=SellOrder.SellProductId  SET BuyTask.BuyTaskState=5,BuyTask.TaskCommentId='+get_comment[0].TaskCommentId +' WHERE BuyTask.BuyTaskState in (3,4) AND SellOrder.UserNameId='+ UserName.UserNameId +' AND BuyTask.BuyTaskId='+this.ctx.query.id+';'
+            State3VerifySqlString = 'UPDATE BuyTask JOIN SellOrder ON BuyTask.SellOrderId=SellOrder.SellOrderId JOIN SellProduct ON SellProduct.SellProductId=SellOrder.SellProductId  SET AutoChangeState=6,AutoChangeTime='+MyDate+',BuyTask.BuyTaskState=5,BuyTask.TaskCommentId='+get_comment[0].TaskCommentId +' WHERE BuyTask.BuyTaskState in (3,4) AND SellOrder.UserNameId='+ UserName.UserNameId +' AND BuyTask.BuyTaskId='+this.ctx.query.id+';'
             let get_comment_state_3 = 'UPDATE BuyTaskComment SET TaskCommentState=3 WHERE BuyTask.TaskCommentId='+get_comment[0].TaskCommentId
             let get_comment = await this.app.mysql.query(get_comment_state_3)
         }else{
-            State3VerifySqlString = 'UPDATE BuyTask JOIN SellOrder ON BuyTask.SellOrderId=SellOrder.SellOrderId SET BuyTask.BuyTaskState=5 WHERE BuyTask.BuyTaskState in (3,4) AND SellOrder.UserNameId='+ UserName.UserNameId +' AND BuyTask.BuyTaskId='+this.ctx.query.id+';'
+            State3VerifySqlString = 'UPDATE BuyTask JOIN SellOrder ON BuyTask.SellOrderId=SellOrder.SellOrderId SET AutoChangeState=6,AutoChangeTime='+MyDate+', BuyTask.BuyTaskState=5 WHERE BuyTask.BuyTaskState in (3,4) AND SellOrder.UserNameId='+ UserName.UserNameId +' AND BuyTask.BuyTaskId='+this.ctx.query.id+';'
         }
         let State3VerifySql = await this.app.mysql.query(State3VerifySqlString)
-        console.log(State3VerifySql)
+        if(State3VerifySql){
+            let redisReturn =await AddRedis(this.ctx.query.id,60*60*12*6)
+        }
         return this.ctx.body=1
     }
 
@@ -274,9 +281,11 @@ class sellTaskState extends Controller {
         }
         let CookieUserName = this.ctx.cookies.get('username', {encrypt: true})
         let UserName = await this.app.mysql.get('UserName', {UserName: CookieUserName})
-        let State6VerifySqlString = 'UPDATE BuyTask JOIN SellOrder ON BuyTask.SellOrderId=SellOrder.SellOrderId SET BuyTask.BuyTaskState=1 WHERE  BuyTask.BuyTaskState in (6,7) AND SellOrder.UserNameId='+ UserName.UserNameId +' AND BuyTask.BuyTaskId='+this.ctx.query.id+';'
+        let State6VerifySqlString = 'UPDATE BuyTask JOIN SellOrder ON BuyTask.SellOrderId=SellOrder.SellOrderId SET AutoChangeState=null, AutoChangeTime=null, BuyTask.BuyTaskState=1 WHERE  BuyTask.BuyTaskState in (6,7) AND SellOrder.UserNameId='+ UserName.UserNameId +' AND BuyTask.BuyTaskId='+this.ctx.query.id+';'
         let State6VerifySql = await this.app.mysql.query(State6VerifySqlString)
-        console.log(State6VerifySql)
+        if(State6VerifySql){
+            let redisReturn =await this.app.redis.del(this.ctx.query.id)
+        }
         return this.ctx.body=1
     }
     async SellTaskState3Refuse(){
@@ -302,9 +311,13 @@ class sellTaskState extends Controller {
         }
         let CookieUserName = this.ctx.cookies.get('username', {encrypt: true})
         let UserName = await this.app.mysql.get('UserName', {UserName: CookieUserName})
-        let State3VerifySqlString = 'UPDATE BuyTask JOIN SellOrder ON BuyTask.SellOrderId=SellOrder.SellOrderId SET BuyTask.BuyTaskState=7 WHERE  BuyTask.BuyTaskState in (6,7) AND SellOrder.UserNameId='+ UserName.UserNameId +' AND BuyTask.BuyTaskId='+this.ctx.query.id+';'
+        let MyDate = new Date();
+        MyDate = '"'+MyDate.toMysqlFormat()+ '"INTERVAL 3 DAY'
+        let State3VerifySqlString = 'UPDATE BuyTask JOIN SellOrder ON BuyTask.SellOrderId=SellOrder.SellOrderId SET AutoChangeState=0,AutoChangeTime='+MyDate+', BuyTask.BuyTaskState=7 WHERE  BuyTask.BuyTaskState in (6,7) AND SellOrder.UserNameId='+ UserName.UserNameId +' AND BuyTask.BuyTaskId='+this.ctx.query.id+';'
         let State3VerifySql = await this.app.mysql.query(State3VerifySqlString)
-        console.log(State3VerifySql)
+        if(State3VerifySql){
+            let redisReturn =await AddRedis(this.app,BuyTask.insertId,60*60*12*3)
+        }
         return this.ctx.body=1
     }
     async SellerCloseTask(){
