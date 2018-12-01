@@ -7,6 +7,7 @@ const fs = require('fs')
 const puppeteer = require('puppeteer')
 
 
+
 class sellController extends Controller {
     async CreateTaskGet() {
         if (!this.ctx.cookies.get('username', {encrypt: true})) {
@@ -197,6 +198,7 @@ class sellController extends Controller {
             await app.config.resql(orderSortx)
             await app.config.resql(PriceMinx)
             await app.config.resql(PriceMaxx)
+
             var eventinsert = await app.mysql.insert('SellOrder', {
                 SellProductId: productinfoID,
                 SellShopId: MysqlProduct.SellShopId,
@@ -230,6 +232,7 @@ class sellController extends Controller {
                 orderSort: orderSortx,
                 PriceMin: PriceMinx,
                 PriceMax: PriceMaxx,
+
             });
             if(eventinsert.affectedRows === 1){
                 var updateMoneySql ='UPDATE FinancialBalance SET Balance=Balance-'+orderNumberx*eventMoney + ',PerformMoney=PerformMoney+'+orderNumberx*eventMoney + ' WHERE UserNameId="' + UserName.UserNameId + '";'

@@ -14,6 +14,7 @@
     "egg-static": "^2.1.1",
     "egg-view-ejs": "^2.0.0",
     "ihuyi106": "^1.0.1",
+    "mysql": "^2.16.0",
     "puppeteer": "^1.10.0"
   },
   "devDependencies": {
