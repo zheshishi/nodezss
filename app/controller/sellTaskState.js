@@ -17,25 +17,41 @@ async function CloseTaskId(app,taskId,UserNameId,CloseReason){
     await app.config.resql(UserNameId)
     await app.config.resql(taskId)
     await app.config.resql(CloseReason)
-    GetTaskIdsql = 'select * FROM BuyTask WHERE BuyTaskId='+taskId+' AND BuyUserNameId= '+UserNameId
+    GetTaskIdsql = 'select * FROM BuyTask JOIN SellOrder ON SellOrder.SellOrderId = BuyTask.SellOrderId WHERE BuyTaskId='+taskId
     GetTaskId = await app.mysql.query(GetTaskIdsql)
-    if(GetTaskId.length==0){
-        GetTaskIdsql = 'select * FROM BuyTask JOIN SellOrder ON SellOrder.SellOrderId = BuyTask.SellOrderId WHERE BuyTaskId='+taskId+' AND SellOrder.UserNameId= '+UserNameId
-        GetTaskId = await app.mysql.query(GetTaskIdsql)
-        }
-    if(GetTaskId.length>0){
-        var productGetDetailsSql = 'update BuyTask SET BuyTaskState=0, AutoChangeState=NULL,AutoChangeTime=NULL,CloseUserNameId='+UserNameId+',CloseReason='+CloseReason+' where BuyTaskId='+ taskId +';'
+    GetTaskId = GetTaskId[0]
+    if(GetTaskId.BuyUserNameId == UserNameId || GetTaskId.UserNameId== UserNameId || UserNameId==null){
+        var productGetDetailsSql = 'update BuyTask SET BuyTaskState=0, AutoChangeState=NULL,AutoChangeTime=NULL,CloseUserNameId='+UserNameId+',CloseReason="'+CloseReason+'" where BuyTaskId='+ taskId +';'
         var productGetDetails =  await app.mysql.query(productGetDetailsSql); //获取订单，按订单时间排序获取
-        var ChangeOrderSql = 'update SellOrder SET orderNumber=orderNumber+1 where SellOrderId = '+GetTaskId[0].SellOrderId
+        var ChangeOrderSql = 'update SellOrder SET orderNumber=orderNumber+1 where SellOrderId = '+GetTaskId.SellOrderId
         var ChangeOrder =  await app.mysql.query(ChangeOrderSql); //获取订单，按订单时间排序获取
         //comment
-        if(GetTaskId[0].TaskCommentId!==null){
-            var ChangeCommentSql = 'update BuyTaskComment SET TaskCommentId=2 where BuyTaskComment = '+GetTaskId[0].TaskCommentId
+        if(GetTaskId.TaskCommentId){
+            var ChangeCommentSql = 'update BuyTaskComment SET TaskCommentState=2,BuyTaskId=null where TaskCommentId = '+GetTaskId.TaskCommentId
             var ChangeComment =  await app.mysql.query(ChangeOrderSql); //获取订单，按订单时间排序获取
         }
         let redisReturn =await app.redis.del(taskId)
         return ChangeOrder
     }
+    // GetTaskIdsql = 'select * FROM BuyTask WHERE BuyTaskId='+taskId+' AND BuyUserNameId= '+UserNameId
+    // GetTaskId = await app.mysql.query(GetTaskIdsql)
+    // if(GetTaskId.length==0){
+    //     GetTaskIdsql = 'select * FROM BuyTask JOIN SellOrder ON SellOrder.SellOrderId = BuyTask.SellOrderId WHERE BuyTaskId='+taskId+' AND SellOrder.UserNameId= '+UserNameId
+    //     GetTaskId = await app.mysql.query(GetTaskIdsql)
+    //     }
+    // if(GetTaskId.length>0){
+    //     var productGetDetailsSql = 'update BuyTask SET BuyTaskState=0, AutoChangeState=NULL,AutoChangeTime=NULL,CloseUserNameId='+UserNameId+',CloseReason='+CloseReason+' where BuyTaskId='+ taskId +';'
+    //     var productGetDetails =  await app.mysql.query(productGetDetailsSql); //获取订单，按订单时间排序获取
+    //     var ChangeOrderSql = 'update SellOrder SET orderNumber=orderNumber+1 where SellOrderId = '+GetTaskId[0].SellOrderId
+    //     var ChangeOrder =  await app.mysql.query(ChangeOrderSql); //获取订单，按订单时间排序获取
+    //     //comment
+    //     if(GetTaskId[0].TaskCommentId!==null){
+    //         var ChangeCommentSql = 'update BuyTaskComment SET TaskCommentId=2 where BuyTaskComment = '+GetTaskId[0].TaskCommentId
+    //         var ChangeComment =  await app.mysql.query(ChangeOrderSql); //获取订单，按订单时间排序获取
+    //     }
+    //     let redisReturn =await app.redis.del(taskId)
+    //     return ChangeOrder
+    // }
 }
 
 function twoDigits(d) {
@@ -62,7 +78,27 @@ class sellTaskState extends Controller {
         let getTask = await CloseTaskId(this.app,taskId,username.UserNameId,null)
         return this.ctx.body = {state:1,message:'done'}
     }
-
+    async SellerCloseTask(){
+        console.log('SellerCloseTask：'+this.ctx.query.id+'text:'+this.ctx.query.text)
+        if (!this.ctx.cookies.get('username', {encrypt: true})) {
+            return this.ctx.redirect('/selllogin')
+        }
+        let CookieUserName = this.ctx.cookies.get('username', {encrypt: true})
+        let UserName = await this.app.mysql.get('UserName', {UserName: CookieUserName})
+        let BuyTask = await this.app.mysql.get('BuyTask', {BuyTaskId: this.ctx.query.id})
+        let CloseTaskId = await CloseTaskId(this.app,this.ctx.query.id,UserName,'')
+        //let State3VerifySqlString = 'UPDATE BuyTask JOIN SellOrder ON BuyTask.SellOrderId=SellOrder.SellOrderId SET BuyTask.BuyTaskState=0 WHERE BuyTask.BuyTaskState in (3,4,5,6,7) AND SellOrder.UserNameId='+ UserName.UserNameId +' AND BuyTask.BuyTaskId='+this.ctx.query.id+';'
+        //let State3VerifySql = await this.app.mysql.query(State3VerifySqlString)
+        console.log(CloseTaskId)
+        return this.ctx.body=1
+    }
+    async AutoCloseTask(){
+        console.log('AutoCloseTask_Taskid:'+this.ctx.header.id)
+        if(this.ctx.header.id){
+            await CloseTaskId(this.app,this.ctx.header.id,null,'Auto')
+            return this.ctx.body=1
+        }
+    }
 
     async genratetask(){
 
@@ -262,7 +298,7 @@ class sellTaskState extends Controller {
         MyDate = '"'+MyDate.toMysqlFormat()+ '"INTERVAL 6 DAY'
         if(get_comment.length>0){
             State3VerifySqlString = 'UPDATE BuyTask JOIN SellOrder ON BuyTask.SellOrderId=SellOrder.SellOrderId JOIN SellProduct ON SellProduct.SellProductId=SellOrder.SellProductId  SET AutoChangeState=6,AutoChangeTime='+MyDate+',BuyTask.BuyTaskState=5,BuyTask.TaskCommentId='+get_comment[0].TaskCommentId +' WHERE BuyTask.BuyTaskState in (3,4) AND SellOrder.UserNameId='+ UserName.UserNameId +' AND BuyTask.BuyTaskId='+this.ctx.query.id+';'
-            let get_comment_state_3 = 'UPDATE BuyTaskComment SET TaskCommentState=3 WHERE BuyTask.TaskCommentId='+get_comment[0].TaskCommentId
+            let get_comment_state_3 = 'UPDATE BuyTaskComment SET TaskCommentState=3,BuyTaskId='+this.ctx.query.id+' WHERE BuyTask.TaskCommentId='+get_comment[0].TaskCommentId
             let get_comment = await this.app.mysql.query(get_comment_state_3)
         }else{
             State3VerifySqlString = 'UPDATE BuyTask JOIN SellOrder ON BuyTask.SellOrderId=SellOrder.SellOrderId SET AutoChangeState=6,AutoChangeTime='+MyDate+', BuyTask.BuyTaskState=5 WHERE BuyTask.BuyTaskState in (3,4) AND SellOrder.UserNameId='+ UserName.UserNameId +' AND BuyTask.BuyTaskId='+this.ctx.query.id+';'
@@ -321,20 +357,7 @@ class sellTaskState extends Controller {
         }
         return this.ctx.body=1
     }
-    async SellerCloseTask(){
-        console.log('SellerCloseTask：'+this.ctx.query.id+'text:'+this.ctx.query.text)
-        if (!this.ctx.cookies.get('username', {encrypt: true})) {
-            return this.ctx.redirect('/selllogin')
-        }
-        let CookieUserName = this.ctx.cookies.get('username', {encrypt: true})
-        let UserName = await this.app.mysql.get('UserName', {UserName: CookieUserName})
-        let BuyTask = await this.app.mysql.get('BuyTask', {BuyTaskId: this.ctx.query.id})
-        let CloseTaskId = await CloseTaskId(this.app,this.ctx.query.id,UserName,'')
-        //let State3VerifySqlString = 'UPDATE BuyTask JOIN SellOrder ON BuyTask.SellOrderId=SellOrder.SellOrderId SET BuyTask.BuyTaskState=0 WHERE BuyTask.BuyTaskState in (3,4,5,6,7) AND SellOrder.UserNameId='+ UserName.UserNameId +' AND BuyTask.BuyTaskId='+this.ctx.query.id+';'
-        //let State3VerifySql = await this.app.mysql.query(State3VerifySqlString)
-        console.log(CloseTaskId)
-        return this.ctx.body=1
-    }
+
 }
 
 module.exports = sellTaskState;

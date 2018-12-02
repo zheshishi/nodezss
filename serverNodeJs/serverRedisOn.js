@@ -16,11 +16,13 @@
 // });
 
 
-
+const webUrl = 'xvcongcong.vicp.net'
+const status0Url = 'http://127.0.0.1:7001/sell/autoclosetask'
 const redis = require('redis');
 const mysql = require('mysql');
+const req = require('request')
 const redis_config = {
-    host: "xvcongcong.vicp.net",
+    host: webUrl,
     port: 6379,
     password: '1121redis',
     db: 1
@@ -29,7 +31,7 @@ function MysqlBD() {
     var connection = mysql.createConnection({
         user: 'root',
         password: '1121Mysql',
-        host: 'xvcongcong.vicp.net',
+        host: webUrl,
         port: 3306,
         database: 'CrySystem'
     });
@@ -81,7 +83,7 @@ function ChangerState(AutoChangeState,key){
 }
 
 
-function GetMessage(channel, key,){
+function GetMessage(channel, key){
     console.log("接收到了推送")
 
     sql='select * from BuyTask where BuyTaskId='+key
@@ -91,8 +93,15 @@ function GetMessage(channel, key,){
             mysqlValue= mysqlValue[0]
             if(mysqlValue.BuyTaskState==0||mysqlValue.BuyTaskState==1){
                 console.log('BuyTaskState=1')
+            }else if(mysqlValue.AutoChangeState==0){
+                console.log('0')
+                req.get(status0Url,
+                    {headers:{'id':mysqlValue.BuyTaskId}}
+                    );
             }else if(mysqlValue.AutoChangeState==1){
-                console.log('AutoChangeState=1')
+                console.log('1')
+            }else if(mysqlValue.AutoChangeState==5){
+                console.log('5')
             }else{
                 let ChangeStateValue = ChangerState(mysqlValue.AutoChangeState,key)
             }
@@ -101,6 +110,7 @@ function GetMessage(channel, key,){
         }
     })
 }
+//GetMessage(1,415)
 
 //redis_cli.on("message", SampleOnExpired);
 redis_cli.on("message", GetMessage);
