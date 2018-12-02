@@ -5,7 +5,14 @@ const Controller = require('egg').Controller;
 async function AddRedis(app,key,min){
     // var now = new Date();
     // now =now.addMinutes(60*40);
-    app.redis.set(key,key,'EX',min)
+    let redisReturn
+    try {
+        redisReturn = await app.redis.set(key, key, 'EX', min)
+    }catch(error){
+        redisReturn = await app.redis.del(key)
+        redisReturn = await app.redis.set(key,key,'EX',min)
+    }
+    return redisReturn
 }
 
 async function CloseTaskId(app,taskId,UserNameId,CloseReason){
@@ -28,7 +35,7 @@ async function CloseTaskId(app,taskId,UserNameId,CloseReason){
         //comment
         if(GetTaskId.TaskCommentId){
             var ChangeCommentSql = 'update BuyTaskComment SET TaskCommentState=2,BuyTaskId=null where TaskCommentId = '+GetTaskId.TaskCommentId
-            var ChangeComment =  await app.mysql.query(ChangeOrderSql); //获取订单，按订单时间排序获取
+            var ChangeComment =  await app.mysql.query(ChangeCommentSql); //获取订单，按订单时间排序获取
         }
         let redisReturn =await app.redis.del(taskId)
         return ChangeOrder
@@ -86,10 +93,10 @@ class sellTaskState extends Controller {
         let CookieUserName = this.ctx.cookies.get('username', {encrypt: true})
         let UserName = await this.app.mysql.get('UserName', {UserName: CookieUserName})
         let BuyTask = await this.app.mysql.get('BuyTask', {BuyTaskId: this.ctx.query.id})
-        let CloseTaskId = await CloseTaskId(this.app,this.ctx.query.id,UserName,'')
+        let CloseTaskIdRetrun = await CloseTaskId(this.app, this.ctx.query.id, UserName.UserNameId, this.ctx.query.text)
         //let State3VerifySqlString = 'UPDATE BuyTask JOIN SellOrder ON BuyTask.SellOrderId=SellOrder.SellOrderId SET BuyTask.BuyTaskState=0 WHERE BuyTask.BuyTaskState in (3,4,5,6,7) AND SellOrder.UserNameId='+ UserName.UserNameId +' AND BuyTask.BuyTaskId='+this.ctx.query.id+';'
         //let State3VerifySql = await this.app.mysql.query(State3VerifySqlString)
-        console.log(CloseTaskId)
+        console.log(CloseTaskIdRetrun)
         return this.ctx.body=1
     }
     async AutoCloseTask(){
@@ -180,9 +187,11 @@ class sellTaskState extends Controller {
                 //TaskAddMoney = 附加任务集合
                 //idmoney = 账号数
                 //imageNumber = 图片张数
-                let MyDate = new Date();
-
-                let CreateTaskSql = 'INSERT into BuyTask(buyUserNameId,SellOrderId,BuyTaskState,UserAccountId,PayMoney,AddMoney,AutoChangeState,AutoChangeTime)values('+username.UserNameId+','+orderid+',2,'+judgePlatformUser.UserAccountId+','+task_total_money+','+TaskAddMoney+',0,"'+MyDate.toMysqlFormat()+'"+ INTERVAL 40 Minute'+');'
+                let Min = 40;
+                let MyDate = new Date(Date.now() + Min * 60*1000);
+                console.log(MyDate)
+                MyDate ='"'+MyDate.toMysqlFormat() +'"'
+                let CreateTaskSql = 'INSERT into BuyTask(buyUserNameId,SellOrderId,BuyTaskState,UserAccountId,PayMoney,AddMoney,AutoChangeState,AutoChangeTime)values('+username.UserNameId+','+orderid+',2,'+judgePlatformUser.UserAccountId+','+task_total_money+','+TaskAddMoney+',0,'+MyDate+');'
                 let BuyTask = await this.app.mysql.query(CreateTaskSql) //插入任务
                 let OrderReduceSql = 'update SellOrder SET orderNumber=orderNumber-1 where SellOrderId = '+orderid
                 let OrderReduceSqlx = await this.app.mysql.query(OrderReduceSql) //减少任务
@@ -233,12 +242,14 @@ class sellTaskState extends Controller {
             }
             //如果状态2就到3吗？
             console.log(filesurl)
-            let MyDate = new Date();
-            MyDate = '"'+MyDate.toMysqlFormat()+ '"INTERVAL 3 DAY'
+            let days = 3;
+            let MyDate = new Date(Date.now() + days * 24*60*60*1000);
+            console.log(MyDate)
+            MyDate ='"'+MyDate.toMysqlFormat() +'"'
             var TaskStateSql = 'update BuyTask SET AutoChangeState=5,AutoChangeTime='+MyDate+', BuyTaskState=3,AddMoney='+ AddMoney +',PayMoney='+ PayMoney +',TaskScreen1='+ filesurl +',PlatFormOrderId='+ PlatFormOrderId + ' where BuyUserNameId='+ username.UserNameId +' and BuyTaskId='+ this.ctx.request.body.headers.TaskId +';'
             var TaskState = await this.app.mysql.query(TaskStateSql); //获取订单，按订单时间排序获取
             if(TaskState){
-                let redisReturn =await AddRedis(this.app,BuyTask.insertId,60*60*12*3)
+                let redisReturn =await AddRedis(this.app,this.ctx.request.body.headers.TaskId,60*60*12*3)
                 return this.ctx.body = {status:2,message:'提交成功'}
             }
         }
@@ -270,12 +281,14 @@ class sellTaskState extends Controller {
         if(taskId.BuyTaskState==5||taskId.BuyTaskState==6||taskId.BuyTaskState==7){
             //如果状态2就到3吗？
             console.log(filesurl)
-            let MyDate = new Date();
-            MyDate = '"'+MyDate.toMysqlFormat()+ '"INTERVAL 3 DAY'
+            let days = 6;
+            let MyDate = new Date(Date.now() + days * 24*60*60*1000);
+            console.log(MyDate)
+            MyDate ='"'+MyDate.toMysqlFormat() +'"'
             var TaskStateSql = 'update BuyTask SET AutoChangeState=1,AutoChangeTime='+MyDate+', BuyTaskState=6,TaskScreen2='+ filesurl +' where BuyUserNameId='+ username.UserNameId +' and BuyTaskId='+ this.ctx.request.body.headers.TaskId +';'
             var TaskState = await this.app.mysql.query(TaskStateSql); //获取订单，按订单时间排序获取
             if(TaskState){
-                let redisReturn =await AddRedis(this.app,BuyTask.insertId,60*60*12*3)
+                let redisReturn =await AddRedis(this.app,taskId.BuyTaskId,60*60*12*6)
                 return this.ctx.body = {status:2,message:'提交成功'}
             }
         }
@@ -284,28 +297,32 @@ class sellTaskState extends Controller {
     //判断是否有评价，如果有则升级评价
     async SellTaskState3Verify() {
         console.log('SellTaskState3Verify：'+this.ctx.query.id)
-        if (!this.ctx.cookies.get('username', {encrypt: true})) {
-            return this.ctx.redirect('/selllogin')
+        if(!this.ctx.query.auth){
+            if (!this.ctx.cookies.get('username', {encrypt: true})) {
+                return this.ctx.redirect('/selllogin')
+            }
+        }else if(this.ctx.query.auth!=='redis'){
+            return this.ctx.body = {username:'TaskState'}
         }
-        let CookieUserName = this.ctx.cookies.get('username', {encrypt: true})
-        let UserName = await this.app.mysql.get('UserName', {UserName: CookieUserName})
         let BuyTask = await this.app.mysql.query('select * from BuyTask JOIN SellOrder ON BuyTask.SellOrderId=SellOrder.SellOrderId JOIN SellProduct ON SellProduct.SellProductId=SellOrder.SellProductId where BuyTaskId='+this.ctx.query.id)
         BuyTask = BuyTask[0]
-        let get_comment_sql = 'select * from BuyTaskComment WHERE TaskCommentState = 2 AND BuyTask.BuyTaskId='+BuyTask.SellProductId
+        let get_comment_sql = 'select * from BuyTaskComment WHERE TaskCommentState = 2 AND BuyTaskComment.SellProductId='+BuyTask.SellProductId
         let get_comment = await this.app.mysql.query(get_comment_sql)
         let State3VerifySqlString;
-        let MyDate = new Date();
-        MyDate = '"'+MyDate.toMysqlFormat()+ '"INTERVAL 6 DAY'
+        let days = 8;
+        let MyDate = new Date(Date.now() + days * 24*60*60*1000);
+        console.log(MyDate)
+        MyDate ='"'+MyDate.toMysqlFormat() +'"'
         if(get_comment.length>0){
-            State3VerifySqlString = 'UPDATE BuyTask JOIN SellOrder ON BuyTask.SellOrderId=SellOrder.SellOrderId JOIN SellProduct ON SellProduct.SellProductId=SellOrder.SellProductId  SET AutoChangeState=6,AutoChangeTime='+MyDate+',BuyTask.BuyTaskState=5,BuyTask.TaskCommentId='+get_comment[0].TaskCommentId +' WHERE BuyTask.BuyTaskState in (3,4) AND SellOrder.UserNameId='+ UserName.UserNameId +' AND BuyTask.BuyTaskId='+this.ctx.query.id+';'
-            let get_comment_state_3 = 'UPDATE BuyTaskComment SET TaskCommentState=3,BuyTaskId='+this.ctx.query.id+' WHERE BuyTask.TaskCommentId='+get_comment[0].TaskCommentId
-            let get_comment = await this.app.mysql.query(get_comment_state_3)
+            State3VerifySqlString = 'UPDATE BuyTask JOIN SellOrder ON BuyTask.SellOrderId=SellOrder.SellOrderId SET AutoChangeState=0,AutoChangeTime='+MyDate+',BuyTask.BuyTaskState=5,BuyTask.TaskCommentId='+get_comment[0].TaskCommentId +' WHERE BuyTask.BuyTaskState in (3,4) AND BuyTask.BuyTaskId='+this.ctx.query.id+';'
+            let get_comment_state_3 = 'UPDATE BuyTaskComment SET TaskCommentState=3,BuyTaskId='+this.ctx.query.id+' WHERE BuyTaskComment.TaskCommentId='+get_comment[0].TaskCommentId
+            let get_comment_sql_run = await this.app.mysql.query(get_comment_state_3)
         }else{
-            State3VerifySqlString = 'UPDATE BuyTask JOIN SellOrder ON BuyTask.SellOrderId=SellOrder.SellOrderId SET AutoChangeState=6,AutoChangeTime='+MyDate+', BuyTask.BuyTaskState=5 WHERE BuyTask.BuyTaskState in (3,4) AND SellOrder.UserNameId='+ UserName.UserNameId +' AND BuyTask.BuyTaskId='+this.ctx.query.id+';'
+            State3VerifySqlString = 'UPDATE BuyTask JOIN SellOrder ON BuyTask.SellOrderId=SellOrder.SellOrderId SET AutoChangeState=0,AutoChangeTime='+MyDate+', BuyTask.BuyTaskState=5 WHERE BuyTask.BuyTaskState in (3,4) AND BuyTask.BuyTaskId='+this.ctx.query.id+';'
         }
         let State3VerifySql = await this.app.mysql.query(State3VerifySqlString)
         if(State3VerifySql){
-            let redisReturn =await AddRedis(this.ctx.query.id,60*60*12*6)
+            let redisReturn =await AddRedis(this.app,this.ctx.query.id,60*60*12*days)
         }
         return this.ctx.body=1
     }
@@ -313,6 +330,9 @@ class sellTaskState extends Controller {
     async SellTaskState6Verify(){
         //1.附加任务资金+刷单费用算法+支付金额+任务类型+附加费用，保存到buytask任务中，卖家减财富+买家财富
         console.log('SellTaskState6Verify：'+this.ctx.query.id)
+        if(this.ctx.query.auth!=='redis'){
+            return this.ctx.body = {username:'TaskState'}
+        }
         if (!this.ctx.cookies.get('username', {encrypt: true})) {
             return this.ctx.redirect('/selllogin')
         }
@@ -332,12 +352,14 @@ class sellTaskState extends Controller {
         }
         let CookieUserName = this.ctx.cookies.get('username', {encrypt: true})
         let UserName = await this.app.mysql.get('UserName', {UserName: CookieUserName})
-        let MyDate = new Date();
-        MyDate = '"'+MyDate.toMysqlFormat()+ '"INTERVAL 3 DAY'
+        let days = 3;
+        let MyDate = new Date(Date.now() + days * 24*60*60*1000);
+        console.log(MyDate)
+        MyDate ='"'+MyDate.toMysqlFormat() +'"'
         let State3VerifySqlString = 'UPDATE BuyTask JOIN SellOrder ON BuyTask.SellOrderId=SellOrder.SellOrderId SET AutoChangeState=0,AutoChangeTime='+MyDate+',BuyTask.BuyTaskState=4 WHERE  BuyTask.BuyTaskState in (3,4) AND SellOrder.UserNameId='+ UserName.UserNameId +' AND BuyTask.BuyTaskId='+this.ctx.query.id+';'
         let State3VerifySql = await this.app.mysql.query(State3VerifySqlString)
         if(State3VerifySql){
-            let redisReturn =await AddRedis(this.ctx.query.id,60*60*12*3)
+            let redisReturn =await AddRedis(this.app,this.ctx.query.id,60*60*12*3)
         }
         return this.ctx.body=1
     }
@@ -348,12 +370,14 @@ class sellTaskState extends Controller {
         }
         let CookieUserName = this.ctx.cookies.get('username', {encrypt: true})
         let UserName = await this.app.mysql.get('UserName', {UserName: CookieUserName})
-        let MyDate = new Date();
-        MyDate = '"'+MyDate.toMysqlFormat()+ '"INTERVAL 3 DAY'
+        let days = 4;
+        let MyDate = new Date(Date.now() + days * 24*60*60*1000);
+        console.log(MyDate)
+        MyDate ='"'+MyDate.toMysqlFormat() +'"'
         let State3VerifySqlString = 'UPDATE BuyTask JOIN SellOrder ON BuyTask.SellOrderId=SellOrder.SellOrderId SET AutoChangeState=0,AutoChangeTime='+MyDate+', BuyTask.BuyTaskState=7 WHERE  BuyTask.BuyTaskState in (6,7) AND SellOrder.UserNameId='+ UserName.UserNameId +' AND BuyTask.BuyTaskId='+this.ctx.query.id+';'
         let State3VerifySql = await this.app.mysql.query(State3VerifySqlString)
         if(State3VerifySql){
-            let redisReturn =await AddRedis(this.app,BuyTask.insertId,60*60*12*3)
+            let redisReturn =await AddRedis(this.app,this.ctx.query.id,60*60*12*days)
         }
         return this.ctx.body=1
     }

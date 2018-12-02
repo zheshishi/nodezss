@@ -18,6 +18,8 @@
 
 const webUrl = 'xvcongcong.vicp.net'
 const status0Url = 'http://127.0.0.1:7001/sell/autoclosetask'
+const status1Url = 'http://127.0.0.1:7001/sell/autoclosetask'
+const status5Url = 'http://127.0.0.1:7001/sell/selltaskstate3verify'
 const redis = require('redis');
 const mysql = require('mysql');
 const req = require('request')
@@ -100,8 +102,17 @@ function GetMessage(channel, key){
                     );
             }else if(mysqlValue.AutoChangeState==1){
                 console.log('1')
+                req.get(status1Url,
+                    {headers:{'id':mysqlValue.BuyTaskId}}
+                    );
+
+
             }else if(mysqlValue.AutoChangeState==5){
                 console.log('5')
+                req.get(status5Url,
+                    {qs:{'id':mysqlValue.BuyTaskId,'auth':'redis'}}
+                    );
+
             }else{
                 let ChangeStateValue = ChangerState(mysqlValue.AutoChangeState,key)
             }
@@ -110,7 +121,7 @@ function GetMessage(channel, key){
         }
     })
 }
-//GetMessage(1,415)
+GetMessage(1,426)
 
 //redis_cli.on("message", SampleOnExpired);
 redis_cli.on("message", GetMessage);
