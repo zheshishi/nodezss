@@ -383,7 +383,8 @@ class sellTaskState extends Controller {
         //2. 资金减少
         //3. 订单标为完成，并清除自动化状态与时间
         //4. redis删除
-        let State6VerifySqlString = 'UPDATE BuyTask JOIN SellOrder ON BuyTask.SellOrderId=SellOrder.SellOrderId SET MoneySeller='+MoneySeller+',MoneyBuyer='+MoneyBuyer+' AutoChangeState=null, AutoChangeTime=null, BuyTask.BuyTaskState=1 WHERE BuyTask.BuyTaskState in (6,7) AND BuyTask.BuyTaskId='+this.ctx.query.id+';'
+        let State6VerifySqlString = 'UPDATE BuyTask SET MoneySeller='+MoneySeller+',MoneyBuyer='+MoneyBuyer+', AutoChangeState=null, AutoChangeTime=null, BuyTaskState=1 WHERE BuyTaskState in (6,7) AND BuyTaskId='+this.ctx.query.id+';'
+        //let State6VerifySqlString = 'UPDATE BuyTask SET MoneySeller='+MoneySeller+',MoneyBuyer='+MoneyBuyer+' AutoChangeState=null, AutoChangeTime=null, BuyTaskState=1 WHERE BuyTaskState in (6,7) AND BuyTaskId='+this.ctx.query.id+';'
         let State6VerifySql = await this.app.mysql.query(State6VerifySqlString)
         if(State6VerifySql){
             let Money1Sql = 'UPDATE FinancialBalance SET PerformMoney=PerformMoney-'+MoneySeller+' WHERE UserNameId='+getTask.UserNameId
