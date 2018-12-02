@@ -28,7 +28,7 @@ async function CloseTaskId(app,taskId,UserNameId,CloseReason){
     GetTaskId = await app.mysql.query(GetTaskIdsql)
     GetTaskId = GetTaskId[0]
     if(GetTaskId.BuyUserNameId == UserNameId || GetTaskId.UserNameId== UserNameId || UserNameId==null){
-        var productGetDetailsSql = 'update BuyTask SET BuyTaskState=0, AutoChangeState=NULL,AutoChangeTime=NULL,CloseUserNameId='+UserNameId+',CloseReason="'+CloseReason+'" where BuyTaskId='+ taskId +';'
+        var productGetDetailsSql = 'update BuyTask SET BuyTaskState=0, AutoChangeState=NULL,AutoChangeTime=NULL, TaskCommentId=NULL, CloseUserNameId='+UserNameId+',CloseReason="'+CloseReason+'" where BuyTaskId='+ taskId +';'
         var productGetDetails =  await app.mysql.query(productGetDetailsSql); //获取订单，按订单时间排序获取
         var ChangeOrderSql = 'update SellOrder SET orderNumber=orderNumber+1 where SellOrderId = '+GetTaskId.SellOrderId
         var ChangeOrder =  await app.mysql.query(ChangeOrderSql); //获取订单，按订单时间排序获取
@@ -328,17 +328,56 @@ class sellTaskState extends Controller {
     }
 
     async SellTaskState6Verify(){
-        //1.附加任务资金+刷单费用算法+支付金额+任务类型+附加费用，保存到buytask任务中，卖家减财富+买家财富
         console.log('SellTaskState6Verify：'+this.ctx.query.id)
-        if(this.ctx.query.auth!=='redis'){
-            return this.ctx.body = {username:'TaskState'}
+        let taskId = this.ctx.query.id
+        let getTasksql = 'select * from BuyTask JOIN SellOrder ON BuyTask.SellOrderId=SellOrder.SellOrderId where BuyTask.BuyTaskId='+taskId
+        let getTask = await this.app.mysql.query(getTasksql)
+        getTask = getTask[0]
+        let VerifyJudge = 0
+        if(this.ctx.query.auth==='redis'){
+            VerifyJudge = 1
         }
-        if (!this.ctx.cookies.get('username', {encrypt: true})) {
-            return this.ctx.redirect('/selllogin')
+        if(VerifyJudge==0){
+            let CookieUserName = this.ctx.cookies.get('username', {encrypt: true})
+            let UserName = await this.app.mysql.get('UserName', {UserName: CookieUserName})
+            if(UserName.UserNameId==getTask.UserNameId){
+                VerifyJudge = 1
+            }
         }
-        let CookieUserName = this.ctx.cookies.get('username', {encrypt: true})
-        let UserName = await this.app.mysql.get('UserName', {UserName: CookieUserName})
-        let State6VerifySqlString = 'UPDATE BuyTask JOIN SellOrder ON BuyTask.SellOrderId=SellOrder.SellOrderId SET AutoChangeState=null, AutoChangeTime=null, BuyTask.BuyTaskState=1 WHERE  BuyTask.BuyTaskState in (6,7) AND SellOrder.UserNameId='+ UserName.UserNameId +' AND BuyTask.BuyTaskId='+this.ctx.query.id+';'
+        if(VerifyJudge==0){
+            return this.ctx.body='1'
+        }
+
+
+        //1.附加任务资金+刷单费用算法+支付金额+任务类型+附加费用，保存到buytask任务中，卖家减财富+买家财富
+
+
+        console.log(getTask)
+        let totalMoney
+        let add_money
+        let id_money
+        let comment_money_seller=0
+        let comment_money_buyer=0
+        let ComplaintMoney = getTask.ComplaintMoney
+        add_money=getTask.AddMoney
+        id_money=getTask.huabeiId*2
+        if(getTask.event==1){
+            totalMoney=getTask.PayMoney
+        }else if(getTask.event==2){
+            totalMoney=getTask.ReturnBuyPrice
+        }
+        let all_money = await this.config.MoneyAlgorithm(getTask.event,totalMoney,add_money,id_money)
+        let all_money_seller = all_money[0]
+        let all_money_buyer = all_money[1]
+        console.log(all_money)
+        if(getTask.TaskCommentId!==null){
+            let SqlComment = 'select * from BuyTaskComment where TaskCommentId='+getTask.TaskCommentId
+            let GetSqlComment = await this.app.mysql.query(SqlComment)
+            GetSqlComment = GetSqlComment[0]
+            comment_money_seller = GetSqlComment.SellMoney
+            comment_money_buyer = GetSqlComment.BuyMoney
+        }
+        let State6VerifySqlString = 'UPDATE BuyTask JOIN SellOrder ON BuyTask.SellOrderId=SellOrder.SellOrderId SET AutoChangeState=null, AutoChangeTime=null, BuyTask.BuyTaskState=1 WHERE BuyTask.BuyTaskState in (6,7) AND BuyTask.BuyTaskId='+this.ctx.query.id+';'
         let State6VerifySql = await this.app.mysql.query(State6VerifySqlString)
         if(State6VerifySql){
             let redisReturn =await this.app.redis.del(this.ctx.query.id)
@@ -358,6 +397,10 @@ class sellTaskState extends Controller {
         MyDate ='"'+MyDate.toMysqlFormat() +'"'
         let State3VerifySqlString = 'UPDATE BuyTask JOIN SellOrder ON BuyTask.SellOrderId=SellOrder.SellOrderId SET AutoChangeState=0,AutoChangeTime='+MyDate+',BuyTask.BuyTaskState=4 WHERE  BuyTask.BuyTaskState in (3,4) AND SellOrder.UserNameId='+ UserName.UserNameId +' AND BuyTask.BuyTaskId='+this.ctx.query.id+';'
         let State3VerifySql = await this.app.mysql.query(State3VerifySqlString)
+        //1. 资金减少
+        //2. 评价状态改为1
+        //3. 订单标为完成，并清除自动化状态与时间
+        //4. redis删除
         if(State3VerifySql){
             let redisReturn =await AddRedis(this.app,this.ctx.query.id,60*60*12*3)
         }

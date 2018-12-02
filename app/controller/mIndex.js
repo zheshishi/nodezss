@@ -119,48 +119,43 @@ module.exports = app => {
 	            return this.ctx.body = {username:'username'}
             	}
 
-            	//sort:分类 version:系统版本
-            if(this.ctx.header.version ==='1.0'){
-	            if(this.ctx.header.sort==='0'){
-	            	console.log('verify Version and sort')
-		            //const token = this.app.jwt.sign({ username: this.ctx.request.body.username, password: this.ctx.request.body.password }, this.app.config.jwt.secret);
-		            const tokenVerify = this.app.jwt.verify(this.ctx.header.authorization, this.app.config.jwt.secret);
-		            var username = await this.app.mysql.get('UserName',{UserName:tokenVerify.username})//用户信息
-		            //拿到买家45天内买过的店铺名
-                    var sqlsyn = 'SELECT * FROM SellOrder JOIN SellProduct ON SellOrder.SellProductId = SellProduct.SellProductId JOIN SellShop ON SellProduct.SellShopId = SellShop.SellShopId WHERE orderNumber>0 AND SellShop.SellShopId NOT IN (SELECT SellOrder.sellShopId FROM BuyTask JOIN SellOrder ON SellOrder.SellOrderId = BuyTask.SellOrderId WHERE buyUserNameId='+username.UserNameId+' AND BuyTaskState <> 0 AND  NOW() - INTERVAL 40 DAY < BuyTaskCreateTime);'
-                    var sqluservalue = 'SELECT * FROM BuyTask JOIN SellOrder ON SellOrder.SellOrderId = BuyTask.SellOrderId WHERE buyUserNameId='+ username.UserNameId +' AND BuyTaskState <> 0'
-                    //console.log(sqlsyn)
-		            var BuyOrder = await this.app.mysql.query(sqlsyn)
-                    var BuyTask = await this.app.mysql.query(sqluservalue)
-					//get 最近的任务
-					// 订单赛选
-					// 是否复购代码
-					var AfterPurchase = 0
-					var returnOrder = []
-					for (var sx =0; sx<BuyOrder.length; sx++){
-                        for (var sxx =0; sxx<BuyTask.length; sxx++){
-                            //console.log('sxx:'+sxx)
-                            //console.log('BuyOrder[sx].SellProductId:'+BuyOrder[sx].SellProductId)
-                            //console.log('BuyTask[sxx].SellProductId:'+BuyTask[sxx].SellProductId)
-                            if(BuyOrder[sx].SellProductId ==  BuyTask[sxx].SellProductId){
-                            	if(BuyOrder[sx].ProductBuy1> 5){
-									if(BuyOrder[sx].ProductBuy2/BuyOrder[sx].ProductBuy1>0.3){//如果产品复购率>30%不展示
-										AfterPurchase = 1}
-                                	}
-                                }
+            console.log('verify Version and sort')
+            //const token = this.app.jwt.sign({ username: this.ctx.request.body.username, password: this.ctx.request.body.password }, this.app.config.jwt.secret);
+            const tokenVerify = this.app.jwt.verify(this.ctx.header.authorization, this.app.config.jwt.secret);
+            var username = await this.app.mysql.get('UserName',{UserName:tokenVerify.username})//用户信息
+            //拿到买家45天内买过的店铺名
+            var sqlsyn = 'SELECT * FROM SellOrder JOIN SellProduct ON SellOrder.SellProductId = SellProduct.SellProductId JOIN SellShop ON SellProduct.SellShopId = SellShop.SellShopId WHERE orderNumber>0 AND SellShop.SellShopId NOT IN (SELECT SellOrder.sellShopId FROM BuyTask JOIN SellOrder ON SellOrder.SellOrderId = BuyTask.SellOrderId WHERE buyUserNameId='+username.UserNameId+' AND BuyTaskState <> 0 AND  NOW() - INTERVAL 40 DAY < BuyTaskCreateTime);'
+            var sqluservalue = 'SELECT * FROM BuyTask JOIN SellOrder ON SellOrder.SellOrderId = BuyTask.SellOrderId WHERE buyUserNameId='+ username.UserNameId +' AND BuyTaskState <> 0'
+            //console.log(sqlsyn)
+            var BuyOrder = await this.app.mysql.query(sqlsyn)
+            var BuyTask = await this.app.mysql.query(sqluservalue)
+            //get 最近的任务
+            // 订单赛选
+            // 是否复购代码
+            var AfterPurchase = 0
+            var returnOrder = []
+            for (var sx =0; sx<BuyOrder.length; sx++){
+                for (var sxx =0; sxx<BuyTask.length; sxx++){
+                    //console.log('sxx:'+sxx)
+                    //console.log('BuyOrder[sx].SellProductId:'+BuyOrder[sx].SellProductId)
+                    //console.log('BuyTask[sxx].SellProductId:'+BuyTask[sxx].SellProductId)
+                    if(BuyOrder[sx].SellProductId ==  BuyTask[sxx].SellProductId){
+                        if(BuyOrder[sx].ProductBuy1> 5){
+                            if(BuyOrder[sx].ProductBuy2/BuyOrder[sx].ProductBuy1>0.3){//如果产品复购率>30%不展示
+                                AfterPurchase = 1}
                             }
-                        if(AfterPurchase===1){
-                            AfterPurchase=0
-                        }else{returnOrder.push(BuyOrder[sx])}
                         }
-					}
-					//去掉
+                    }
+                if(AfterPurchase===1){
+                    AfterPurchase=0
+                }else{returnOrder.push(BuyOrder[sx])}
+                }
+            //去掉
 
                     // 是否复购代码
                     // 订单赛选
 		            return this.ctx.body = returnOrder//返回：订单编号+产品主图
 		            //this.ctx.body = {username:username}//返回：订单编号+产品主图
-	            }
         	}
 
         async product() {
