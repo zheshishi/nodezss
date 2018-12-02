@@ -377,9 +377,23 @@ class sellTaskState extends Controller {
             comment_money_seller = GetSqlComment.SellMoney
             comment_money_buyer = GetSqlComment.BuyMoney
         }
-        let State6VerifySqlString = 'UPDATE BuyTask JOIN SellOrder ON BuyTask.SellOrderId=SellOrder.SellOrderId SET AutoChangeState=null, AutoChangeTime=null, BuyTask.BuyTaskState=1 WHERE BuyTask.BuyTaskState in (6,7) AND BuyTask.BuyTaskId='+this.ctx.query.id+';'
+        let MoneySeller = all_money_seller + comment_money_seller + ComplaintMoney
+        let MoneyBuyer = all_money_buyer + comment_money_buyer - ComplaintMoney
+        //1. 评价状态改为1 MoneyBuyer MoneySeller
+        //2. 资金减少
+        //3. 订单标为完成，并清除自动化状态与时间
+        //4. redis删除
+        let State6VerifySqlString = 'UPDATE BuyTask JOIN SellOrder ON BuyTask.SellOrderId=SellOrder.SellOrderId SET MoneySeller='+MoneySeller+',MoneyBuyer='+MoneyBuyer+' AutoChangeState=null, AutoChangeTime=null, BuyTask.BuyTaskState=1 WHERE BuyTask.BuyTaskState in (6,7) AND BuyTask.BuyTaskId='+this.ctx.query.id+';'
         let State6VerifySql = await this.app.mysql.query(State6VerifySqlString)
         if(State6VerifySql){
+            let Money1Sql = 'UPDATE FinancialBalance SET PerformMoney=PerformMoney-'+MoneySeller+' WHERE UserNameId='+getTask.UserNameId
+            let Money2Sql = 'UPDATE FinancialBalance SET PerformMoney=PerformMoney+'+MoneyBuyer+' WHERE UserNameId='+getTask.BuyUserNameId
+            let Money1Sql1 =await this.app.mysql.query(Money1Sql)
+            let Money2Sql2 =await this.app.mysql.query(Money2Sql)
+            if(getTask.TaskCommentId!==null){
+                let SqlComment = 'UPDATE BuyTaskComment SET TaskCommentState=1 where TaskCommentId='+getTask.TaskCommentId
+                let GetSqlComment = await this.app.mysql.query(SqlComment)
+            }
             let redisReturn =await this.app.redis.del(this.ctx.query.id)
         }
         return this.ctx.body=1
@@ -397,10 +411,6 @@ class sellTaskState extends Controller {
         MyDate ='"'+MyDate.toMysqlFormat() +'"'
         let State3VerifySqlString = 'UPDATE BuyTask JOIN SellOrder ON BuyTask.SellOrderId=SellOrder.SellOrderId SET AutoChangeState=0,AutoChangeTime='+MyDate+',BuyTask.BuyTaskState=4 WHERE  BuyTask.BuyTaskState in (3,4) AND SellOrder.UserNameId='+ UserName.UserNameId +' AND BuyTask.BuyTaskId='+this.ctx.query.id+';'
         let State3VerifySql = await this.app.mysql.query(State3VerifySqlString)
-        //1. 资金减少
-        //2. 评价状态改为1
-        //3. 订单标为完成，并清除自动化状态与时间
-        //4. redis删除
         if(State3VerifySql){
             let redisReturn =await AddRedis(this.app,this.ctx.query.id,60*60*12*3)
         }
