@@ -1,5 +1,8 @@
 ("use strict");
-
+async function BlackUserName(app,username_id){
+    let BlackStateSql = 'update UserName SET Status=1 WHERE UserNameId='+username_id
+    await app.mysql.query(BlackStateSql)
+}
 module.exports = app => {
     class LoginController extends app.Controller {
           async Login() {
@@ -11,7 +14,7 @@ module.exports = app => {
             let DeviceId = this.ctx.request.body.DeviceId  // e.g. iPhone7,2 / or the board on Android e.g. goldfish
             let SystemName = this.ctx.request.body.SystemName // e.g. iPhone OS
             let SystemVersion = this.ctx.request.body.SystemVersion  // e.g. 9.0
-            let BundleID = this.ctx.request.body.BundleID // e.g. com.learnium.mobile
+            let BundleId = this.ctx.request.body.BundleID // e.g. com.learnium.mobile
             let BuildNumber = this.ctx.request.body.BuildNumber  // e.g. 89
             let AppVersion = this.ctx.request.body.AppVersion  // e.g. 1.1.0
             let DeviceName = this.ctx.request.body.DeviceName  // e.g. Becca's iPhone 6
@@ -21,32 +24,61 @@ module.exports = app => {
             let Timezone = this.ctx.request.body.Timezone // e.g America/Mexico_City
             let emulator = this.ctx.request.body.emulator // if app is running in emulator return true
             const LoginedMysql = await this.app.mysql.get('UserName', { UserName: this.ctx.request.body.username, PassWord: this.ctx.request.body.password });
-            if (LoginedMysql === null){
-                this.ctx.body = {state:1,message:'no'};
-                console.log('LoginedMysql_null')
+            if (LoginedMysql == null){
+                return this.ctx.body = {state:1,message:'no'};
             }
             //check blackList
             if (LoginedMysql.Status==1){
                 return this.ctx.body = {state:0,message:'blacklist'};
               }
             //check emulator
-            if(emulator==true){
-                //setting username status = 1
-                //save emlatorList +usernameId
+            if(emulator==false){
+                let UserEmulatorSql = 'INSERT INTO UserEmulator (UserNameId,ip) values('+LoginedMysql.UserNameId+',"'+ip+'")'
+                let UserEmulatorSqlRun = await this.app.mysql.query(UserEmulatorSql)
+                let row = await BlackUserName(this.app, LoginedMysql.UserNameId)
                 return this.ctx.body = {state:0,message:'blacklist'};
             }
-            let getMachineSql = await this.mysql.get('UserMachine', {UniqueID:UniqueID})
+            let getMachineSql = await this.app.mysql.get('UserMachine', {UniqueID:UniqueID})
           if (getMachineSql){
               //如果账号不是设备原来用户
-              if(getMachineSql.UserNameId !=LoginedMysql.UserNameId){
+              if(getMachineSql.UserNameId !==LoginedMysql.UserNameId){
+                  let row = await BlackUserName(this.app, getMachineSql.UserNameId)
+                  let row1 = await BlackUserName(this.app, LoginedMysql.UserNameId)
+                  let rowX = {
+                      UserNameId: LoginedMysql.UserNameId,
+                      UserMachineId:getMachineSql.UserMachineId,
+                      ip: ip
+                  }
+                  let createUser = await this.app.mysql.insert('UserLoginOtherMachine',rowX)
                   return this.ctx.body = {state:0,message:'blacklist'};
-                  let row = {Status: 1}
-                  let result = await this.app.mysql.update('UserMachine', row);
-                  if (result.affectedRows === 1) {
-                      return this.ctx.body = {state:0,message:'blacklist'};
-                        }
-                    }
+                }
           }else{
+              let systemSort;
+              if(SystemName==='IOS'||SystemName==='iOS'||SystemName==='ios'||SystemName==='IOS'||SystemName==='Ios'){
+                  systemSort=1
+              }else if(SystemName==='android'||SystemName==='Android'||SystemName==='ANDROID'){
+                  systemSort=0
+              }
+
+                  let rowX = {
+                      UserNameId: LoginedMysql.UserNameId,
+                      System: systemSort,
+                      UniqueID:UniqueID,
+                      Manufacturer:Manufacturer,
+                      getModel:Model,
+                      getDeviceId:DeviceId,
+                      SystemName:SystemName,
+                      SystemVersion:SystemVersion,
+                      BundleId:BundleId,
+                      BuildNumber:BuildNumber,
+                      AppVersion:AppVersion,
+                      DeviceName:DeviceName,
+                      DeviceLocale:DeviceLocale,
+                      DeviceCountry:DeviceCountry,
+                      Timezone:Timezone,
+                      ip:ip,
+              }
+              let createUser = await this.app.mysql.insert('UserMachine',rowX)
               //如果不存在，保存并记录
           }
             //搜索机器码是否存在，
