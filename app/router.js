@@ -9,7 +9,7 @@ module.exports = app => {
     router.get('/', controller.home.index);
     //jwt
     router.get("/jwt", app.jwt, "render.index"); // use old api app.jwt
-    router.post("/login", "login.index");
+    router.post("/login", "login.Login");
     router.post("/mobilelogin", "login.MobileLogin");
     router.post('/sms', controller.sms.index);
     //router.post("/MobileLogin", "MobileLogin.index");
