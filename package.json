@@ -6,7 +6,7 @@
   "dependencies": {
     "cnpm": "^6.0.0",
     "egg": "^2.2.1",
-    "egg-jwt": "^3.1.2",
+    "egg-jwt": "^3.1.4",
     "egg-mysql": "^3.0.0",
     "egg-qiniu-upload": "^1.1.4",
     "egg-redis": "^2.0.0",

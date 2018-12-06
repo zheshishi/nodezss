@@ -124,9 +124,9 @@ module.exports = app => {
             const tokenVerify = this.app.jwt.verify(this.ctx.header.authorization, this.app.config.jwt.secret);
             var username = await this.app.mysql.get('UserName',{UserName:tokenVerify.username})//用户信息
             //拿到买家45天内买过的店铺名
-            var sqlsyn = 'SELECT * FROM SellOrder JOIN SellProduct ON SellOrder.SellProductId = SellProduct.SellProductId JOIN SellShop ON SellProduct.SellShopId = SellShop.SellShopId WHERE orderNumber>0 AND SellShop.SellShopId NOT IN (SELECT SellOrder.sellShopId FROM BuyTask JOIN SellOrder ON SellOrder.SellOrderId = BuyTask.SellOrderId WHERE buyUserNameId='+username.UserNameId+' AND BuyTaskState <> 0 AND  NOW() - INTERVAL 40 DAY < BuyTaskCreateTime);'
+            var sqlsyn = 'SELECT * FROM SellOrder JOIN SellProduct ON SellOrder.SellProductId = SellProduct.SellProductId JOIN SellShop ON SellProduct.SellShopId = SellShop.SellShopId WHERE orderNumber>0 AND SellShop.SellShopId NOT IN (SELECT SellOrder.sellShopId FROM BuyTask JOIN SellOrder ON SellOrder.SellOrderId = BuyTask.SellOrderId WHERE buyUserNameId='+username.UserNameId+' AND event ='+ this.ctx.header.event+' AND BuyTaskState <> 0 AND  NOW() - INTERVAL 40 DAY < BuyTaskCreateTime);'
             var sqluservalue = 'SELECT * FROM BuyTask JOIN SellOrder ON SellOrder.SellOrderId = BuyTask.SellOrderId WHERE buyUserNameId='+ username.UserNameId +' AND BuyTaskState <> 0'
-            //console.log(sqlsyn)
+            console.log(sqlsyn)
             var BuyOrder = await this.app.mysql.query(sqlsyn)
             var BuyTask = await this.app.mysql.query(sqluservalue)
             //get 最近的任务
@@ -167,20 +167,18 @@ module.exports = app => {
             	//version:系统版本
             	//sort:分类
             	//思考如果是新用户是否免费送
-            if(this.ctx.header.version ==='1.0'){
-	            if(this.ctx.header.sort==='0'){
-		            //const token = this.app.jwt.sign({ username: this.ctx.request.body.username, password: this.ctx.request.body.password }, this.app.config.jwt.secret);
-		            var tokenVerify = this.app.jwt.verify(this.ctx.header.authorization, this.app.config.jwt.secret);
-		            var username = await this.app.mysql.get('UserName',{UserName:tokenVerify.username})//用户信息
-		            var taskId = this.ctx.header.taskid //用户信息
-		            //拿到买家40天内买过的店铺名
-		            var productGetDetailsSql = 'SELECT * FROM SellOrder JOIN SellProduct ON SellOrder.SellProductId = SellProduct.SellProductId JOIN SellShop ON SellProduct.SellShopId = SellShop.SellShopId WHERE SellOrderId ='+taskId+';'
-		            var productGetDetails = await this.app.mysql.query(productGetDetailsSql) //获取订单，按订单时间排序获取
-		            //console.log(productGetDetails [0])
-		            return this.ctx.body = productGetDetails[0]//返回：订单编号+产品主图
-		            //this.ctx.body = {username:username}//返回：订单编号+产品主图
-	            }
-        	}
+
+                //const token = this.app.jwt.sign({ username: this.ctx.request.body.username, password: this.ctx.request.body.password }, this.app.config.jwt.secret);
+                var tokenVerify = this.app.jwt.verify(this.ctx.header.authorization, this.app.config.jwt.secret);
+                var username = await this.app.mysql.get('UserName',{UserName:tokenVerify.username})//用户信息
+                var taskId = this.ctx.header.taskid //用户信息
+                //拿到买家40天内买过的店铺名
+                var productGetDetailsSql = 'SELECT * FROM SellOrder JOIN SellProduct ON SellOrder.SellProductId = SellProduct.SellProductId JOIN SellShop ON SellProduct.SellShopId = SellShop.SellShopId WHERE SellOrderId ='+taskId+';'
+                var productGetDetails = await this.app.mysql.query(productGetDetailsSql) //获取订单，按订单时间排序获取
+                //console.log(productGetDetails [0])
+                return this.ctx.body = productGetDetails[0]//返回：订单编号+产品主图
+                //this.ctx.body = {username:username}//返回：订单编号+产品主图
+
     }
 
         async task() {
