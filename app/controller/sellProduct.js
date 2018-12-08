@@ -314,7 +314,7 @@ class sellController extends Controller {
                 return await this.ctx.render('sellTaskComment.ejs', {message: '请填写有效信息'})
             }
             var imgjson = imgjson
-            var commentsql = "insert into BuyTaskComment(UserNameId, event, Text,img,SellProductId)value("+UserName.UserNameId+","+event+",'"+Text+"','"+imgjson+"',"+productId+")"
+            var commentsql = "insert into BuyTaskComment(UserNameId, BuyTaskCommentEvent, BuyTaskCommentText,BuyTaskCommentImg,SellProductId)value("+UserName.UserNameId+","+event+",'"+Text+"','"+imgjson+"',"+productId+")"
             console.log(commentsql)
             var commentsqlreturn =  await this.app.mysql.query(commentsql)
             return await this.ctx.render('sellTaskComment.ejs', {message: '保存成功'})

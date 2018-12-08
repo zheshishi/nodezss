@@ -28,13 +28,13 @@ async function CloseTaskId(app,taskId,UserNameId,CloseReason){
     GetTaskId = await app.mysql.query(GetTaskIdsql)
     GetTaskId = GetTaskId[0]
     if(GetTaskId.BuyUserNameId == UserNameId || GetTaskId.UserNameId== UserNameId || UserNameId==null){
-        var productGetDetailsSql = 'update BuyTask SET BuyTaskState=0, AutoChangeState=NULL,AutoChangeTime=NULL, TaskCommentId=NULL, CloseUserNameId='+UserNameId+',CloseReason="'+CloseReason+'" where BuyTaskId='+ taskId +';'
+        var productGetDetailsSql = 'update BuyTask SET BuyTaskState=0, AutoChangeState=NULL,AutoChangeTime=NULL, BuyTaskCommentId=NULL, CloseUserNameId='+UserNameId+',CloseReason="'+CloseReason+'" where BuyTaskId='+ taskId +';'
         var productGetDetails =  await app.mysql.query(productGetDetailsSql); //获取订单，按订单时间排序获取
         var ChangeOrderSql = 'update SellOrder SET orderNumber=orderNumber+1 where SellOrderId = '+GetTaskId.SellOrderId
         var ChangeOrder =  await app.mysql.query(ChangeOrderSql); //获取订单，按订单时间排序获取
         //comment
-        if(GetTaskId.TaskCommentId){
-            var ChangeCommentSql = 'update BuyTaskComment SET TaskCommentState=2,BuyTaskId=null where TaskCommentId = '+GetTaskId.TaskCommentId
+        if(GetTaskId.BuyTaskCommentId){
+            var ChangeCommentSql = 'update BuyTaskComment SET TaskCommentState=2,BuyTaskId=null where BuyTaskCommentId = '+GetTaskId.BuyTaskCommentId
             var ChangeComment =  await app.mysql.query(ChangeCommentSql); //获取订单，按订单时间排序获取
         }
         let redisReturn =await app.redis.del(taskId)
@@ -314,8 +314,8 @@ class sellTaskState extends Controller {
         console.log(MyDate)
         MyDate ='"'+MyDate.toMysqlFormat() +'"'
         if(get_comment.length>0){
-            State3VerifySqlString = 'UPDATE BuyTask JOIN SellOrder ON BuyTask.SellOrderId=SellOrder.SellOrderId SET AutoChangeState=0,AutoChangeTime='+MyDate+',BuyTask.BuyTaskState=5,BuyTask.TaskCommentId='+get_comment[0].TaskCommentId +' WHERE BuyTask.BuyTaskState in (3,4) AND BuyTask.BuyTaskId='+this.ctx.query.id+';'
-            let get_comment_state_3 = 'UPDATE BuyTaskComment SET TaskCommentState=3,BuyTaskId='+this.ctx.query.id+' WHERE BuyTaskComment.TaskCommentId='+get_comment[0].TaskCommentId
+            State3VerifySqlString = 'UPDATE BuyTask JOIN SellOrder ON BuyTask.SellOrderId=SellOrder.SellOrderId SET AutoChangeState=0,AutoChangeTime='+MyDate+',BuyTask.BuyTaskState=5,BuyTask.BuyTaskCommentId='+get_comment[0].TaskCommentId +' WHERE BuyTask.BuyTaskState in (3,4) AND BuyTask.BuyTaskId='+this.ctx.query.id+';'
+            let get_comment_state_3 = 'UPDATE BuyTaskComment SET TaskCommentState=3 WHERE BuyTaskComment.TaskCommentId='+get_comment[0].TaskCommentId
             let get_comment_sql_run = await this.app.mysql.query(get_comment_state_3)
         }else{
             State3VerifySqlString = 'UPDATE BuyTask JOIN SellOrder ON BuyTask.SellOrderId=SellOrder.SellOrderId SET AutoChangeState=0,AutoChangeTime='+MyDate+', BuyTask.BuyTaskState=5 WHERE BuyTask.BuyTaskState in (3,4) AND BuyTask.BuyTaskId='+this.ctx.query.id+';'
