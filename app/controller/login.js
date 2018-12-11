@@ -228,8 +228,8 @@ module.exports = app => {
             let gettoken = this.app.jwt.verify(this.ctx.request.body.authorization, this.app.config.jwt.secret);
             var username = await this.app.mysql.get('UserName',{UserName:gettoken.username})//用户信息
             //获取卡号信息
-            if(username.identitynumber){
-                identityNumber = username.identitynumber
+            if(username.identity_number!=null && username.identity_number!=''){
+                identityNumber = username.identity_number
                 name =  username.Name
             }else{
                 identityNumber = this.ctx.request.body.identitynumber
@@ -273,7 +273,12 @@ module.exports = app => {
             if(GetId.length>0){
                 return this.ctx.body={state:1,message:'未知错误'}//验证码是否正确
             }
+            // 验证银行卡是否在别人卡上
 
+            var getcardsql = await this.app.mysql.get('UserBankCard',{UserBankCard:card})//用户信息
+            if(getcardsql){
+                return this.ctx.body={state:1,message:'未知错误'}//验证码是否正确
+            }
             //提交银行卡
             var CryptoJS = require("crypto-js");
             var axios = require('axios');
