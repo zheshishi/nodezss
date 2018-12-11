@@ -215,25 +215,25 @@ module.exports = app => {
           }
         async verifycard() {
             //token 验证
-            if(this.ctx.header.authorization ==='' || this.ctx.header.authorization ===null ){
+            if(this.ctx.request.body.authorization ==='' || this.ctx.request.body.authorization ===null ){
                 console.log('noToken')
                 return this.ctx.body = {username:'username'}
             }
-            let gettoken = this.app.jwt.verify(this.ctx.header.authorization, this.app.config.jwt.secret);
-            var username = await this.app.mysql.get('UserName',{UserName:gettoken.username})//用户信息
-
-            //获取卡号信息
             let identityNumber;
             let name;
-            let card = this.ctx.header.card
-            let mobile = this.ctx.header.mobile
-            let verifycode = this.ctx.header.verifycode
+            let card = this.ctx.request.body.card
+            let mobile = this.ctx.request.body.mobile
+            let verifycode = this.ctx.request.body.VerifyCode
+            let testvaluesxxx = this.ctx.request.body.name
+            let gettoken = this.app.jwt.verify(this.ctx.request.body.authorization, this.app.config.jwt.secret);
+            var username = await this.app.mysql.get('UserName',{UserName:gettoken.username})//用户信息
+            //获取卡号信息
             if(username.identitynumber){
                 identityNumber = username.identitynumber
                 name =  username.Name
             }else{
-                identityNumber = this.ctx.header.identitynumber
-                name =  this.ctx.header.name
+                identityNumber = this.ctx.request.body.identitynumber
+                name =  this.ctx.request.body.name
             }
             let testvalues;
             //银行卡是否正确？
@@ -258,7 +258,7 @@ module.exports = app => {
            if(/(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/.test(identityNumber)==false){
                return this.ctx.body={state:1,message:'请输入正确证件号'}
            }
-           if(/^([a-zA-Z0-9\u4e00-\u9fa5\·]{1,10})$/.test(name)==false){
+           if(/^([a-zA-Z0-9\u4e00-\u9fa5\·]{2,10})$/.test(name)==false){
                return this.ctx.body={state:1,message:'请输入正确姓名'}
            }
             //短信验证码是否存在？
@@ -281,7 +281,7 @@ module.exports = app => {
             var dateTime = nowDate.toGMTString();
             var host = "service-3ak2jjkf-1253495967.ap-beijing.apigateway.myqcloud.com";
             var path = "/creditop/BankCardQuery/BankCardVerification";
-            var query = "accountNo="+identityNumber+"&idCardCode="+card+"&name="+name
+            var query = "accountNo="+identityNumber+"&bankPreMobile="+mobile+"&idCardCode="+card+"&name="+name
             var url = "https://service-3ak2jjkf-1253495967.ap-beijing.apigateway.myqcloud.com/release";
             url = url + path + "?" + query;
             var source = "source";

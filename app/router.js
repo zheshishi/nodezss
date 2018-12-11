@@ -11,7 +11,7 @@ module.exports = app => {
     router.get("/jwt", app.jwt, "render.index"); // use old api app.jwt
     router.post("/login", "login.Login");
     router.post("/mobilelogin", "login.MobileLogin");
-    router.get("/verifycard", "login.verifycard");
+    router.post("/verifycard", "login.verifycard");
     router.post('/sms', controller.sms.index);
     router.get("/success", "success.index");
     //jwt
