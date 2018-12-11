@@ -69,42 +69,56 @@ module.exports = app => {
                 //拿到买家45天内买过的店铺名
                 var BuyTaskSql = 'SELECT * FROM BuyTask JOIN SellOrder ON SellOrder.SellOrderId = BuyTask.SellOrderId WHERE buyUserNameId='+ username.UserNameId +' AND BuyTaskState <> 0'
                 var sqlsyn = 'SELECT * FROM SellOrder JOIN SellProduct ON SellOrder.SellProductId = SellProduct.SellProductId JOIN SellShop ON SellProduct.SellShopId = SellShop.SellShopId WHERE orderNumber>0 AND SellShop.SellShopId NOT IN (SELECT SellOrder.sellShopId FROM BuyTask JOIN SellOrder ON SellOrder.SellOrderId = BuyTask.SellOrderId WHERE buyUserNameId='+username.UserNameId+' AND BuyTaskState <> 0 AND  NOW() - INTERVAL 40 DAY < BuyTaskCreateTime);'
-                var sqluservalue = 'SELECT * FROM BuyTask JOIN SellOrder ON SellOrder.SellOrderId = BuyTask.SellOrderId WHERE buyUserNameId='+ username.UserNameId +' AND BuyTaskState <> 0'
+                var sqluservalue = 'SELECT * FROM BuyTask JOIN SellOrder ON SellOrder.SellOrderId = BuyTask.SellOrderId WHERE buyUserNameId='+ username.UserNameId +' AND BuyTaskState NOT IN(0,1)'
                 //console.log(sqlsyn)
                 var BuyOrder = await this.app.mysql.query(sqlsyn)
                 var BuyTask = await this.app.mysql.query(sqluservalue)
-                //get 最近的任务
-                // 订单赛选
                 // 是否复购代码
-                // var AfterPurchase = 0
-                // var returnOrder = []
-                // for (var sx =0; sx<BuyOrder.length; sx++){
-                //     for (var sxx =0; sxx<BuyTask.length; sxx++){
-                //         //console.log('sxx:'+sxx)
-                //         //console.log('BuyOrder[sx].SellProductId:'+BuyOrder[sx].SellProductId)
-                //         //console.log('BuyTask[sxx].SellProductId:'+BuyTask[sxx].SellProductId)
-                //         if(BuyOrder[sx].SellProductId ==  BuyTask[sxx].SellProductId){
-                //             if(BuyOrder[sx].ProductBuy1> 5){
-                //                 if(BuyOrder[sx].ProductBuy2/BuyOrder[sx].ProductBuy1>0.3){//如果产品复购率>30%不展示
-                //                     AfterPurchase = 1}
-                //                 }
-                //             }
-                //         }
-                //     if(AfterPurchase===1){
-                //         AfterPurchase=0
-                //     }else{returnOrder.push(BuyOrder[sx])}
-                //     }
-                // }
-                //去掉
-
-                // 是否复购代码
-                // 订单赛选
                 console.log('GetBuyTaskEnd')
                 return this.ctx.body = BuyTask//返回：订单编号+产品主图
-                //this.ctx.body = {username:username}//返回：订单编号+产品主图
         }
+        async GetBuyTaskDone() {
+            console.log('GetBuyTask')
+            if(this.ctx.header.authorization ==='' || this.ctx.header.authorization ===null ){
+                console.log('noToken')
+                return this.ctx.body = {username:'username'}
+            }
 
+            //const token = this.app.jwt.sign({ username: this.ctx.request.body.username, password: this.ctx.request.body.password }, this.app.config.jwt.secret);
+            const tokenVerify = this.app.jwt.verify(this.ctx.header.authorization, this.app.config.jwt.secret);
+            var username = await this.app.mysql.get('UserName',{UserName:tokenVerify.username})//用户信息
+            //拿到买家45天内买过的店铺名
+            var BuyTaskSql = 'SELECT * FROM BuyTask JOIN SellOrder ON SellOrder.SellOrderId = BuyTask.SellOrderId WHERE buyUserNameId='+ username.UserNameId +' AND BuyTaskState <> 0'
+            var sqlsyn = 'SELECT * FROM SellOrder JOIN SellProduct ON SellOrder.SellProductId = SellProduct.SellProductId JOIN SellShop ON SellProduct.SellShopId = SellShop.SellShopId WHERE orderNumber>0 AND SellShop.SellShopId NOT IN (SELECT SellOrder.sellShopId FROM BuyTask JOIN SellOrder ON SellOrder.SellOrderId = BuyTask.SellOrderId WHERE buyUserNameId='+username.UserNameId+' AND BuyTaskState <> 0 AND  NOW() - INTERVAL 40 DAY < BuyTaskCreateTime);'
+            var sqluservalue = 'SELECT * FROM BuyTask JOIN SellOrder ON SellOrder.SellOrderId = BuyTask.SellOrderId WHERE buyUserNameId='+ username.UserNameId +' AND BuyTaskState =1'
+            //console.log(sqlsyn)
+            var BuyOrder = await this.app.mysql.query(sqlsyn)
+            var BuyTask = await this.app.mysql.query(sqluservalue)
+            // 是否复购代码
+            console.log('GetBuyTaskEnd')
+            return this.ctx.body = BuyTask//返回：订单编号+产品主图
+        }
+        async GetBuyTaskClose() {
+            console.log('GetBuyTaskClose')
+            if(this.ctx.header.authorization ==='' || this.ctx.header.authorization ===null ){
+                console.log('noToken')
+                return this.ctx.body = {username:'username'}
+            }
 
+            //const token = this.app.jwt.sign({ username: this.ctx.request.body.username, password: this.ctx.request.body.password }, this.app.config.jwt.secret);
+            const tokenVerify = this.app.jwt.verify(this.ctx.header.authorization, this.app.config.jwt.secret);
+            var username = await this.app.mysql.get('UserName',{UserName:tokenVerify.username})//用户信息
+            //拿到买家45天内买过的店铺名
+            var BuyTaskSql = 'SELECT * FROM BuyTask JOIN SellOrder ON SellOrder.SellOrderId = BuyTask.SellOrderId WHERE buyUserNameId='+ username.UserNameId +' AND BuyTaskState <> 0'
+            var sqlsyn = 'SELECT * FROM SellOrder JOIN SellProduct ON SellOrder.SellProductId = SellProduct.SellProductId JOIN SellShop ON SellProduct.SellShopId = SellShop.SellShopId WHERE orderNumber>0 AND SellShop.SellShopId NOT IN (SELECT SellOrder.sellShopId FROM BuyTask JOIN SellOrder ON SellOrder.SellOrderId = BuyTask.SellOrderId WHERE buyUserNameId='+username.UserNameId+' AND BuyTaskState <> 0 AND  NOW() - INTERVAL 40 DAY < BuyTaskCreateTime);'
+            var sqluservalue = 'SELECT * FROM BuyTask JOIN SellOrder ON SellOrder.SellOrderId = BuyTask.SellOrderId WHERE buyUserNameId='+ username.UserNameId +' AND BuyTaskState =0'
+            //console.log(sqlsyn)
+            var BuyOrder = await this.app.mysql.query(sqlsyn)
+            var BuyTask = await this.app.mysql.query(sqluservalue)
+            // 是否复购代码
+            console.log('GetBuyTaskEnd')
+            return this.ctx.body = BuyTask//返回：订单编号+产品主图
+        }
 
 
       async index() {
@@ -209,6 +223,20 @@ module.exports = app => {
 
         }
 
+
+        async username() {
+            console.log('MIndexUsername')
+            if(this.ctx.header.authorization ==='' || this.ctx.header.authorization ===null ){
+                console.log('noToken')
+                return this.ctx.body = {username:'username'}
+            }
+            let tokenVerify = this.app.jwt.verify(this.ctx.header.authorization, this.app.config.jwt.secret);
+            let username = await this.app.mysql.get('UserName',{UserName:tokenVerify.username})//用户信息
+            //拿到买家45天内买过的店铺名
+            var sqlsyn = 'SELECT * FROM SellOrder JOIN SellProduct ON SellOrder.SellProductId = SellProduct.SellProductId JOIN SellShop ON SellProduct.SellShopId = SellShop.SellShopId WHERE orderNumber>0 AND event ='+ this.ctx.header.event+' AND SellShop.SellShopId  NOT IN (SELECT SellOrder.sellShopId FROM BuyTask JOIN SellOrder ON SellOrder.SellOrderId = BuyTask.SellOrderId WHERE buyUserNameId='+username.UserNameId+' AND BuyTaskState <> 0 AND  NOW() - INTERVAL 40 DAY < BuyTaskCreateTime);'
+            //var BuyTask = await this.app.mysql.query(sqluservalue)
+            return this.ctx.body = username//返回：订单编号+产品主图
+        }
 
         async qntoken(){
             // if(this.ctx.request.body.headers.Authorization ==='' || this.ctx.request.body.headers.Authorization ===null ){

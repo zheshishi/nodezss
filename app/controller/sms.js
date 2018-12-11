@@ -24,12 +24,10 @@ module.exports = app => {
         //    }})
         //   this.ctx.body = {message:'yes'};
         // --- send sms --- //
-        console.log('sendSms：'+contentRandom)
-        console.log(this.ctx.request.body.username)
-        await this.app.mysql.insert('sms',{Verify: contentRandom, MobileNumber: parseInt(this.ctx.request.body.username) } );
+        console.log('sendSms：'+contentRandom+'Math：'+Math.random().toString())
+        await this.app.mysql.insert('sms',{Verify: contentRandom, MobileNumber: parseInt(this.ctx.request.body.mobile) } );
+        return this.ctx.body = {message:'yes'}
         console.log('sendSms')
-
-
       }
     }
     return Home1Controller;

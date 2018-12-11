@@ -370,7 +370,7 @@ class sellTaskState extends Controller {
         let all_money_seller = all_money[0]
         let all_money_buyer = all_money[1]
         console.log(all_money)
-        if(getTask.TaskCommentId!==null){
+        if(getTask.TaskCommentId!=null){
             let SqlComment = 'select * from BuyTaskComment where TaskCommentId='+getTask.TaskCommentId
             let GetSqlComment = await this.app.mysql.query(SqlComment)
             GetSqlComment = GetSqlComment[0]

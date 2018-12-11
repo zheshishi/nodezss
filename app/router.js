@@ -11,18 +11,21 @@ module.exports = app => {
     router.get("/jwt", app.jwt, "render.index"); // use old api app.jwt
     router.post("/login", "login.Login");
     router.post("/mobilelogin", "login.MobileLogin");
+    router.get("/verifycard", "login.verifycard");
     router.post('/sms', controller.sms.index);
-    //router.post("/MobileLogin", "MobileLogin.index");
-    //router.post("/login", "login.index");
     router.get("/success", "success.index");
     //jwt
     router.get("/m/index", "mIndex.index"); //
     router.get("/m/product", "mIndex.product");
     router.post("/m/addaccount", "mIndex.addTbAccount");
     router.get("/m/task", "mIndex.task");
-    router.get("/m/getbuytask", "mIndex.GetBuyTask"); //获取任务
     router.post("/m/qntoken", "mIndex.qntoken"); //七牛token
     router.get("/m/qntoken", "mIndex.qntoken"); //七牛token
+    router.get("/m/getbuytask", "mIndex.GetBuyTask"); //获取任务
+    router.get("/m/getbuytaskclose", "mIndex.GetBuyTaskClose"); //获取任务
+    router.get("/m/getbuytaskdone", "mIndex.GetBuyTaskDone"); //获取任务
+    router.get("/m/username", "mIndex.username"); //获取任务
+
     //web size sell admin网页端商家管理页面
 
     router.get("/m/closetask", "sellTaskState.closetask");

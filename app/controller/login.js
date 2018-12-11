@@ -1,4 +1,6 @@
 ("use strict");
+let BIN = require('bankcardinfo');
+
 async function BlackUserName(app,username_id){
     let BlackStateSql = 'update UserName SET Status=1 WHERE UserNameId='+username_id
     await app.mysql.query(BlackStateSql)
@@ -59,25 +61,23 @@ module.exports = app => {
                       return this.ctx.body = {state:0,message:'blacklist'};
                   }
           }else{
-
-
-                  let rowX = {
-                      UserNameId: LoginedMysql.UserNameId,
-                      System: systemSort,
-                      UniqueID:UniqueID,
-                      Manufacturer:Manufacturer,
-                      getModel:Model,
-                      getDeviceId:DeviceId,
-                      SystemName:SystemName,
-                      SystemVersion:SystemVersion,
-                      BundleId:BundleId,
-                      BuildNumber:BuildNumber,
-                      AppVersion:AppVersion,
-                      DeviceName:DeviceName,
-                      DeviceLocale:DeviceLocale,
-                      DeviceCountry:DeviceCountry,
-                      Timezone:Timezone,
-                      ip:ip,
+              let rowX = {
+                  UserNameId: LoginedMysql.UserNameId,
+                  System: systemSort,
+                  UniqueID:UniqueID,
+                  Manufacturer:Manufacturer,
+                  getModel:Model,
+                  getDeviceId:DeviceId,
+                  SystemName:SystemName,
+                  SystemVersion:SystemVersion,
+                  BundleId:BundleId,
+                  BuildNumber:BuildNumber,
+                  AppVersion:AppVersion,
+                  DeviceName:DeviceName,
+                  DeviceLocale:DeviceLocale,
+                  DeviceCountry:DeviceCountry,
+                  Timezone:Timezone,
+                  ip:ip,
               }
               let createUser = await this.app.mysql.insert('UserMachine',rowX)
               //如果不存在，保存并记录
@@ -217,6 +217,101 @@ module.exports = app => {
             // this.ctx.cookies.set('username', LoginedMysql[LoginedMysql.length -1].MobileNumber, { encrypt: true });
             // this.ctx.redirect('/sell')
           }
+        async verifycard() {
+            //token 验证
+            if(this.ctx.header.authorization ==='' || this.ctx.header.authorization ===null ){
+                console.log('noToken')
+                return this.ctx.body = {username:'username'}
+            }
+            let gettoken = this.app.jwt.verify(this.ctx.header.authorization, this.app.config.jwt.secret);
+            var username = await this.app.mysql.get('UserName',{UserName:gettoken.username})//用户信息
+
+            //获取卡号信息
+            let identityNumber;
+            let name;
+            let card = this.ctx.header.card
+            let mobile = this.ctx.header.mobile
+            let verifycode = this.ctx.header.verifycode
+            if(username.identitynumber){
+                identityNumber = username.identitynumber
+                name =  username.Name
+            }else{
+                identityNumber = this.ctx.header.identitynumber
+                name =  this.ctx.header.name
+            }
+            let testvalues;
+            //银行卡是否正确？
+            let https = require('https');
+            let httpsUrl = "https://ccdcapi.alipay.com/validateAndCacheCardInfo.json?_input_charset=utf-8&cardNo=" + card + "&cardBinCheck=true"
+            let verityCardReturn = false;
+            await BIN.getBankBin(card)
+                .then(function (data) {
+                    testvalues = data
+                })
+                .catch(function (err) {
+                    testvalues = err
+                    verityCardReturn=true
+                })
+            if(verityCardReturn==true){
+                return this.ctx.body={state:1,message:'请输入正确证件号'}
+            }
+            //正则验证卡号
+            if (/^1\d{10}$/.test(mobile) === false) {
+                return this.ctx.body={state:1,message:'请输入正确的手机号'}
+            }
+           if(/(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/.test(identityNumber)==false){
+               return this.ctx.body={state:1,message:'请输入正确证件号'}
+           }
+           if(/^([a-zA-Z0-9\u4e00-\u9fa5\·]{1,10})$/.test(name)==false){
+               return this.ctx.body={state:1,message:'请输入正确姓名'}
+           }
+            //短信验证码是否存在？
+            let LoginedMysql = await this.app.mysql.select('sms', { where:{MobileNumber: mobile }});//是否存在验证码
+            if (LoginedMysql.length === 0){
+                return this.ctx.body={state:1,message:'请发验证码'}
+            }
+
+            //验证码是否正确？
+            if (LoginedMysql[LoginedMysql.length -1].Verify !== parseInt(verifycode)) {
+                return this.ctx.body={state:1,message:'验证码错误'}//验证码是否正确
+            } else if(LoginedMysql[LoginedMysql.length -1].MobileNumber !=mobile){
+                return this.ctx.body={state:1,message:'手机号不一致'}//验证码是否正确
+            }
+
+            // 验证银行卡是否在别人卡上
+            let GetId = await this.app.mysql.get('UserName',{identity_number: identityNumber})
+            if(GetId){
+                return this.ctx.body={state:1,message:'未知错误'}//验证码是否正确
+            }
+
+            let row = {
+                UserName: LoginedMysql[LoginedMysql.length -1].MobileNumber,
+                PassWord: this.ctx.request.body.password
+            }
+            let createUser = await this.app.mysql.insert('UserName',row)
+            LoginedMysql = await this.app.mysql.get('UserName',{UserName: LoginedMysql[LoginedMysql.length -1].MobileNumber})
+            let rowx = {
+                UserNameId: LoginedMysql.UserNameId,
+                Balance: 0
+            }
+            const createUserB = await this.app.mysql.insert('FinancialBalance',rowx)
+
+            const result = await this.app.mysql.update('UserName', row); // 更新 posts 表中的记录
+
+            LoginedMysql = await this.app.mysql.get('UserName', { UserName: this.ctx.request.body.username, PassWord: this.ctx.request.body.password });
+            if (LoginedMysql == null){
+                return this.ctx.body = {state:1,message:'no'};
+            }
+            this.app.jwt.verify(token, this.app.config.jwt.secret, function(err, decoded) {
+                console.log(err)
+            });
+            let returnlog = 'token:' + token + 'tokenVerify :'+ JSON.stringify(tokenVerify)
+            console.log(returnlog)
+            return this.ctx.body={state:2,token:token};
+
+            // this.ctx.cookies.set('username', LoginedMysql[LoginedMysql.length -1].MobileNumber, { encrypt: true });
+            // this.ctx.redirect('/sell')
+        }
         }
     return LoginController;
 };
