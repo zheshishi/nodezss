@@ -317,6 +317,15 @@ module.exports = app => {
                     getcardid = error
                     console.log(error);
                 });
+            //if(getcardid)保存了，那么保存数据
+            if(username.identity_number==null||username.identity_number==''){
+                //UPDATE  identitynumber
+                let identitynumber_sql = 'update UserName set identity_number='+identityNumber+', Name="'+name+'" where UserNameId='+username.UserNameId
+                await this.app.mysql.query(identitynumber_sql)
+            }
+            //UPDATE  identitynumberINSERT INTO UserEmulator (UserNameId,ip) values('+LoginedMysql.UserNameId+',"'+ip+'")
+            let identitynumber_sql = 'insert INTO UserBankCard (UserNameId,UserBankCard) values('+username.UserNameId+','+card+')'
+            await this.app.mysql.query(identitynumber_sql)
             console.log(getcardid)
             return this.ctx.body={state:2,token:token};
 
