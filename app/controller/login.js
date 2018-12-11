@@ -119,14 +119,10 @@ module.exports = app => {
             }else if(SystemName==='android'||SystemName==='Android'||SystemName==='ANDROID'){
               systemSort=0
             }
-            let LoginedMysql = await this.app.mysql.select('sms', { where:{MobileNumber: this.ctx.request.body.username }});//是否存在验证码
+            let LoginedMysqlstring = 'SELECT * FROM sms WHERE DateTime> CURRENT_TIMESTAMP - INTERVAL 4 MINUTE AND MobileNumber='+mobile+' AND Verify='+verifycode
+            let LoginedMysql = await this.app.mysql.query(LoginedMysqlstring);//是否存在验证码
             if (LoginedMysql.length === 0){
-              return await this.ctx.render('sellMobileLogin.ejs',{state:1,message:'请发验证码'})
-            }
-            if (LoginedMysql[LoginedMysql.length -1].Verify !== parseInt(this.ctx.request.body.VerifyCode)) {
-                return await this.ctx.render('sellMobileLogin.ejs',{state:1,message:'验证码错误'})//验证码是否正确
-            } else if(LoginedMysql[LoginedMysql.length -1].MobileNumber !==this.ctx.request.body.username){
-                return await this.ctx.render('sellMobileLogin.ejs',{state:1,message:'手机号不一致'})//验证码是否正确
+                return this.ctx.body={state:1,message:'请发验证码'}
             }
             // save mobile and password 保存密码
             let GetId = await this.app.mysql.get('UserName',{UserName: LoginedMysql[LoginedMysql.length -1].MobileNumber})
@@ -253,7 +249,7 @@ module.exports = app => {
                     verityCardReturn=true
                 })
             if(verityCardReturn==true){
-                return this.ctx.body={state:1,message:'请输入正确证件号'}
+                return this.ctx.body={state:1,message:'请输入正确银行卡号'}
             }
             //正则验证卡号
             if (/^1\d{10}$/.test(mobile) === false) {
@@ -266,47 +262,62 @@ module.exports = app => {
                return this.ctx.body={state:1,message:'请输入正确姓名'}
            }
             //短信验证码是否存在？
-            let LoginedMysql = await this.app.mysql.select('sms', { where:{MobileNumber: mobile }});//是否存在验证码
+            let LoginedMysqlstring = 'SELECT * FROM sms WHERE DateTime> CURRENT_TIMESTAMP - INTERVAL 4 MINUTE AND MobileNumber='+mobile+' AND Verify='+verifycode
+            let LoginedMysql = await this.app.mysql.query(LoginedMysqlstring);//是否存在验证码
             if (LoginedMysql.length === 0){
-                return this.ctx.body={state:1,message:'请发验证码'}
+                return this.ctx.body={state:1,message:'填写正确的验证码或从新发送'}
             }
-
-            //验证码是否正确？
-            if (LoginedMysql[LoginedMysql.length -1].Verify !== parseInt(verifycode)) {
-                return this.ctx.body={state:1,message:'验证码错误'}//验证码是否正确
-            } else if(LoginedMysql[LoginedMysql.length -1].MobileNumber !=mobile){
-                return this.ctx.body={state:1,message:'手机号不一致'}//验证码是否正确
-            }
-
             // 验证银行卡是否在别人卡上
-            let GetId = await this.app.mysql.get('UserName',{identity_number: identityNumber})
-            if(GetId){
+            let test_cardid_string = 'SELECT * FROM UserName WHERE UserName<>'+mobile +' AND identity_number='+identityNumber
+            let GetId = await this.app.mysql.query(test_cardid_string)
+            if(GetId.length>0){
                 return this.ctx.body={state:1,message:'未知错误'}//验证码是否正确
             }
 
-            let row = {
-                UserName: LoginedMysql[LoginedMysql.length -1].MobileNumber,
-                PassWord: this.ctx.request.body.password
-            }
-            let createUser = await this.app.mysql.insert('UserName',row)
-            LoginedMysql = await this.app.mysql.get('UserName',{UserName: LoginedMysql[LoginedMysql.length -1].MobileNumber})
-            let rowx = {
-                UserNameId: LoginedMysql.UserNameId,
-                Balance: 0
-            }
-            const createUserB = await this.app.mysql.insert('FinancialBalance',rowx)
+            //提交银行卡
+            var CryptoJS = require("crypto-js");
+            var axios = require('axios');
+            var nowDate = new Date();
+            var dateTime = nowDate.toGMTString();
+            var host = "service-3ak2jjkf-1253495967.ap-beijing.apigateway.myqcloud.com";
+            var path = "/creditop/BankCardQuery/BankCardVerification";
+            var query = "accountNo="+identityNumber+"&idCardCode="+card+"&name="+name
+            var url = "https://service-3ak2jjkf-1253495967.ap-beijing.apigateway.myqcloud.com/release";
+            url = url + path + "?" + query;
+            var source = "source";
+            //云市场分配的密钥Id
+            var secretId = "AKIDg704nh4aDAn6hPd3iSgo93d9Ry5nqavgryC8";
+            //云市场分配的密钥Key
+            var secretKey = "kHWQb246er1af8A6vxi4k7qu18Y8xn6Tgx18g87O";
+            var auth = "hmac id=\"" + secretId + "\", algorithm=\"hmac-sha1\", headers=\"x-date source\", signature=\"";
+            var signStr = "x-date: " + dateTime + "\n" + "source: " + source;
+            var sign = CryptoJS.HmacSHA1(signStr, secretKey)
+            console.log(sign.toString())
+            sign = CryptoJS.enc.Base64.stringify(sign)
+            sign = auth + sign + "\""
+            console.log(sign)
 
-            const result = await this.app.mysql.update('UserName', row); // 更新 posts 表中的记录
-
-            LoginedMysql = await this.app.mysql.get('UserName', { UserName: this.ctx.request.body.username, PassWord: this.ctx.request.body.password });
-            if (LoginedMysql == null){
-                return this.ctx.body = {state:1,message:'no'};
-            }
-            this.app.jwt.verify(token, this.app.config.jwt.secret, function(err, decoded) {
-                console.log(err)
+            var instance = axios.create({
+                baseURL: url,
+                timeout: 5000,
+                headers: {
+                    "Source": source,
+                    "X-date": dateTime,
+                    "Authorization": sign
+                },
+                withCredentials: true
             });
-            let returnlog = 'token:' + token + 'tokenVerify :'+ JSON.stringify(tokenVerify)
-            console.log(returnlog)
+
+            let getcardid;
+            instance.get()
+                .then(function (response) {
+                    getcardid = response
+                })
+                .catch(function (error) {
+                    getcardid = error
+                    console.log(error);
+                });
+            console.log(getcardid)
             return this.ctx.body={state:2,token:token};
 
             // this.ctx.cookies.set('username', LoginedMysql[LoginedMysql.length -1].MobileNumber, { encrypt: true });
