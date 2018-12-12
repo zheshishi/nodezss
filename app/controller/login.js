@@ -280,48 +280,60 @@ module.exports = app => {
                 return this.ctx.body={state:1,message:'银行卡已被绑定无法捆绑'}//验证码是否正确
             }
             //提交银行卡
-            var CryptoJS = require("crypto-js");
-            var axios = require('axios');
-            var nowDate = new Date();
-            var dateTime = nowDate.toGMTString();
-            var host = "service-3ak2jjkf-1253495967.ap-beijing.apigateway.myqcloud.com";
-            var path = "/creditop/BankCardQuery/BankCardVerification";
-            var query = "accountNo="+identityNumber+"&bankPreMobile="+mobile+"&idCardCode="+card+"&name="+name
-            var url = "https://service-3ak2jjkf-1253495967.ap-beijing.apigateway.myqcloud.com/release";
-            url = url + path + "?" + query;
-            var source = "source";
-            //云市场分配的密钥Id
-            var secretId = "AKIDg704nh4aDAn6hPd3iSgo93d9Ry5nqavgryC8";
-            //云市场分配的密钥Key
-            var secretKey = "kHWQb246er1af8A6vxi4k7qu18Y8xn6Tgx18g87O";
-            var auth = "hmac id=\"" + secretId + "\", algorithm=\"hmac-sha1\", headers=\"x-date source\", signature=\"";
-            var signStr = "x-date: " + dateTime + "\n" + "source: " + source;
-            var sign = CryptoJS.HmacSHA1(signStr, secretKey)
-            console.log(sign.toString())
-            sign = CryptoJS.enc.Base64.stringify(sign)
-            sign = auth + sign + "\""
-            console.log(sign)
+            let axios = require('axios');
+            let bank_verify_url = 'http://yunyidata.market.alicloudapi.com/bankAuthenticate4'
+            let appcode = 'APPCODE f66213ab974641f795883f86519ef452';
+            //let appcode = 'f66213ab974641f795883f86519ef452';
+            let cardNo = 6222021001017772838;
+            let idNo = 330304198601077818
+            //let name = '许从从';
+            let phoneNo=18606622210
+            var FormData = require('form-data');
+            var bodyFormData = new FormData();
+            bodyFormData.append('ReturnBankInfo', 'YES');
+            bodyFormData.append('cardNo', cardNo);
+            bodyFormData.append('idNo', idNo);
+            bodyFormData.append('phoneNo', phoneNo);
+            bodyFormData.append('name', name);
 
-            var instance = axios.create({
-                baseURL: url,
-                timeout: 5000,
+            let postData = {
+                ReturnBankInfo:'YES',
+                cardNo:cardNo,
+                idNo:idNo,
+                phoneNo:phoneNo,
+                name:name
+            };
+            let axiosConfig = {
                 headers: {
-                    "Source": source,
-                    "X-date": dateTime,
-                    "Authorization": sign
-                },
-                withCredentials: true
-            });
-
-            let getcardid;
-            instance.get()
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    "Authorization": appcode,
+                }
+            };
+            await axios({
+                method: 'post',
+                url: bank_verify_url,
+                data: bodyFormData,
+                config: { headers: {'Content-Type': 'multipart/form-data',"Authorization": appcode}}
+            })
                 .then(function (response) {
-                    getcardid = response
+                    //handle success
+                    console.log(response);
                 })
-                .catch(function (error) {
-                    console.log(error);
-                    getcardid = error
+                .catch(function (response) {
+                    //handle error
+                    console.log(response);
                 });
+
+
+
+            await axios.post(bank_verify_url, postData, axiosConfig)
+                .then((res) => {
+                    console.log("RESPONSE RECEIVED: ", res);
+                })
+                .catch((err) => {
+                    console.log("AXIOS ERROR: ", err);
+                })
+
             //if(getcardid)保存了，那么保存数据
             if(username.identity_number==null||username.identity_number==''){
                 //UPDATE  identitynumber
