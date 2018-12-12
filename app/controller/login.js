@@ -268,7 +268,7 @@ module.exports = app => {
                 return this.ctx.body={state:1,message:'填写正确的验证码或从新发送'}
             }
             // 验证银行卡是否在别人卡上
-            let test_cardid_string = 'SELECT * FROM UserName WHERE UserName<>'+mobile +' AND identity_number='+identityNumber
+            let test_cardid_string = 'SELECT * FROM UserName WHERE UserName<>'+gettoken.username +' AND identity_number='+identityNumber
             let GetId = await this.app.mysql.query(test_cardid_string)
             if(GetId.length>0){
                 return this.ctx.body={state:1,message:'未知错误'}//验证码是否正确
@@ -277,7 +277,7 @@ module.exports = app => {
 
             var getcardsql = await this.app.mysql.get('UserBankCard',{UserBankCard:card})//用户信息
             if(getcardsql){
-                return this.ctx.body={state:1,message:'未知错误'}//验证码是否正确
+                return this.ctx.body={state:1,message:'银行卡已被绑定无法捆绑'}//验证码是否正确
             }
             //提交银行卡
             var CryptoJS = require("crypto-js");
@@ -319,8 +319,8 @@ module.exports = app => {
                     getcardid = response
                 })
                 .catch(function (error) {
-                    getcardid = error
                     console.log(error);
+                    getcardid = error
                 });
             //if(getcardid)保存了，那么保存数据
             if(username.identity_number==null||username.identity_number==''){
