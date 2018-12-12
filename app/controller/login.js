@@ -279,75 +279,42 @@ module.exports = app => {
             if(getcardsql){
                 return this.ctx.body={state:1,message:'银行卡已被绑定无法捆绑'}//验证码是否正确
             }
-            //提交银行卡
-            let axios = require('axios');
-            let bank_verify_url = 'http://yunyidata.market.alicloudapi.com/bankAuthenticate4'
-            let appcode = 'APPCODE f66213ab974641f795883f86519ef452';
-            //let appcode = 'f66213ab974641f795883f86519ef452';
-            let cardNo = 6222021001017772838;
-            let idNo = 330304198601077818
-            //let name = '许从从';
-            let phoneNo=18606622210
-            var FormData = require('form-data');
-            var bodyFormData = new FormData();
-            bodyFormData.append('ReturnBankInfo', 'YES');
-            bodyFormData.append('cardNo', cardNo);
-            bodyFormData.append('idNo', idNo);
-            bodyFormData.append('phoneNo', phoneNo);
-            bodyFormData.append('name', name);
-
-            let postData = {
-                ReturnBankInfo:'YES',
-                cardNo:cardNo,
-                idNo:idNo,
-                phoneNo:phoneNo,
-                name:name
-            };
-            let axiosConfig = {
+            //提交银行卡验证
+            let appcode = 'f66213ab974641f795883f86519ef452';
+            var http = require('http');
+            var options = {
+                host: 'api11.aliyun.venuscn.com',
+                path: '/cert/bank-card/4?bank='+card+'&name='+encodeURI(name)+'&mobile='+encodeURI(mobile)+'&number='+identityNumber,
+                method: 'GET',
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    "Authorization": appcode,
+                    'Authorization': 'APPCODE ' + appcode
                 }
             };
-            await axios({
-                method: 'post',
-                url: bank_verify_url,
-                data: bodyFormData,
-                config: { headers: {'Content-Type': 'multipart/form-data',"Authorization": appcode}}
-            })
-                .then(function (response) {
-                    //handle success
-                    console.log(response);
-                })
-                .catch(function (response) {
-                    //handle error
-                    console.log(response);
+            let judgeHttpGet;
+            await http.get(options, function(res) {
+                    var resData = '';
+                    res.on("data", function(data) {
+                        resData += data;
+                    });
+                    res.on("end", function() {
+                        judgeHttpGet=JSON.parse(resData)
+                    });
                 });
-
-
-
-            await axios.post(bank_verify_url, postData, axiosConfig)
-                .then((res) => {
-                    console.log("RESPONSE RECEIVED: ", res);
-                })
-                .catch((err) => {
-                    console.log("AXIOS ERROR: ", err);
-                })
-
-            //if(getcardid)保存了，那么保存数据
-            if(username.identity_number==null||username.identity_number==''){
-                //UPDATE  identitynumber
-                let identitynumber_sql = 'update UserName set identity_number='+identityNumber+', Name="'+name+'" where UserNameId='+username.UserNameId
+            // 验证银行卡是否在别人卡上
+            if(judgeHttpGet['data']['code']==0){
+                if(username.identity_number==null||username.identity_number==''){
+                    //UPDATE  identitynumber
+                    let identitynumber_sql = 'update UserName set identity_number='+identityNumber+', Name="'+name+'" where UserNameId='+username.UserNameId
+                    await this.app.mysql.query(identitynumber_sql)
+                }
+                //UPDATE  identitynumberINSERT INTO UserEmulator (UserNameId,ip) values('+LoginedMysql.UserNameId+',"'+ip+'")
+                let identitynumber_sql = 'insert INTO UserBankCard (UserNameId,UserBankCard) values('+username.UserNameId+','+card+')'
                 await this.app.mysql.query(identitynumber_sql)
+                console.log(getcardid)
+                return this.ctx.body={state:2,message:'验证成功'};
+            }else{
+                return this.ctx.body={state:1,message:judgeHttpGet['data']['desc']};
             }
-            //UPDATE  identitynumberINSERT INTO UserEmulator (UserNameId,ip) values('+LoginedMysql.UserNameId+',"'+ip+'")
-            let identitynumber_sql = 'insert INTO UserBankCard (UserNameId,UserBankCard) values('+username.UserNameId+','+card+')'
-            await this.app.mysql.query(identitynumber_sql)
-            console.log(getcardid)
-            return this.ctx.body={state:2,token:token};
-
-            // this.ctx.cookies.set('username', LoginedMysql[LoginedMysql.length -1].MobileNumber, { encrypt: true });
-            // this.ctx.redirect('/sell')
         }
         }
     return LoginController;
