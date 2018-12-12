@@ -19,7 +19,9 @@
     "form-data": "^2.3.3",
     "ihuyi106": "^1.0.1",
     "mysql": "^2.16.0",
-    "puppeteer": "^1.10.0"
+    "puppeteer": "^1.10.0",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.2"
   },
   "devDependencies": {
     "autod": "^3.0.1",

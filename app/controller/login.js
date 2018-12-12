@@ -1,5 +1,20 @@
 ("use strict");
 let BIN = require('bankcardinfo');
+const rp  = require('request-promise');
+
+async function VerifyCardFunction(options){
+    let  rpbody
+        await rp(options)
+            .then(function (repos) {
+                console.log('repos:'+repos);
+                rpbody =repos
+            })
+            .catch(function (err) {
+                console.log('err:'+err)
+                rpbody =err
+            });
+    return rpbody
+}
 
 async function BlackUserName(app,username_id){
     let BlackStateSql = 'update UserName SET Status=1 WHERE UserNameId='+username_id
@@ -281,39 +296,47 @@ module.exports = app => {
             }
             //提交银行卡验证
             let appcode = 'f66213ab974641f795883f86519ef452';
-            var http = require('http');
             var options = {
-                host: 'api11.aliyun.venuscn.com',
-                path: '/cert/bank-card/4?bank='+card+'&name='+encodeURI(name)+'&mobile='+encodeURI(mobile)+'&number='+identityNumber,
-                method: 'GET',
+                uri: 'http://api11.aliyun.venuscn.com/cert/bank-card/4',
+                qs: {
+                    bank:card,
+                    name:encodeURI(name),
+                    mobile:encodeURI(mobile),
+                    number:identityNumber
+                },
                 headers: {
+                    'User-Agent': 'Request-Promise',
                     'Authorization': 'APPCODE ' + appcode
-                }
+                },
+                json: true // Automatically parses the JSON string in the response
             };
-            let judgeHttpGet;
-            await http.get(options, function(res) {
-                    var resData = '';
-                    res.on("data", function(data) {
-                        resData += data;
-                    });
-                    res.on("end", function() {
-                        judgeHttpGet=JSON.parse(resData)
-                    });
-                });
+            let judgeHttpGet = await VerifyCardFunction(options)
+            // rp(options)
+            //     .then(function (repos) {
+            //         console.log('repos:'+repos);
+            //     })
+            //     .catch(function (err) {
+            //         console.log('err:'+err)
+            //     });
             // 验证银行卡是否在别人卡上
-            if(judgeHttpGet['data']['code']==0){
-                if(username.identity_number==null||username.identity_number==''){
-                    //UPDATE  identitynumber
-                    let identitynumber_sql = 'update UserName set identity_number='+identityNumber+', Name="'+name+'" where UserNameId='+username.UserNameId
+            console.log('testvaluex:'+judgeHttpGet)
+            try{
+                if(judgeHttpGet['data']['code']==0){
+                    if(username.identity_number==null||username.identity_number==''){
+                        //UPDATE  identitynumber
+                        let identitynumber_sql = 'update UserName set identity_number='+identityNumber+', Name="'+name+'" where UserNameId='+username.UserNameId
+                        await this.app.mysql.query(identitynumber_sql)
+                    }
+                    //UPDATE  identitynumberINSERT INTO UserEmulator (UserNameId,ip) values('+LoginedMysql.UserNameId+',"'+ip+'")
+                    let identitynumber_sql = 'insert INTO UserBankCard (UserNameId,UserBankCard) values('+username.UserNameId+','+card+')'
                     await this.app.mysql.query(identitynumber_sql)
+                    console.log(getcardid)
+                    return this.ctx.body={state:2,message:'验证成功'};
+                }else{
+                    return this.ctx.body={state:1,message:judgeHttpGet['data']['desc']};
                 }
-                //UPDATE  identitynumberINSERT INTO UserEmulator (UserNameId,ip) values('+LoginedMysql.UserNameId+',"'+ip+'")
-                let identitynumber_sql = 'insert INTO UserBankCard (UserNameId,UserBankCard) values('+username.UserNameId+','+card+')'
-                await this.app.mysql.query(identitynumber_sql)
-                console.log(getcardid)
-                return this.ctx.body={state:2,message:'验证成功'};
-            }else{
-                return this.ctx.body={state:1,message:judgeHttpGet['data']['desc']};
+            }catch(err){
+                return this.ctx.body={state:1,message:'请填写正确的信息'};
             }
         }
         }
