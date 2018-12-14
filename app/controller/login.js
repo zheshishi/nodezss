@@ -228,6 +228,58 @@ module.exports = app => {
             // this.ctx.cookies.set('username', LoginedMysql[LoginedMysql.length -1].MobileNumber, { encrypt: true });
             // this.ctx.redirect('/sell')
           }
+        //获取银行余额
+        async getmoney() {
+            //获取绑定的银行卡
+            //token 验证
+            console.log('MIndexUsername')
+            if(this.ctx.header.authorization ==='' || this.ctx.header.authorization ===null ){
+                console.log('noToken')
+                return this.ctx.body = {username:'username'}
+            }
+            let tokenVerify = this.app.jwt.verify(this.ctx.header.authorization, this.app.config.jwt.secret);
+            let username = await this.app.mysql.get('UserName',{UserName:tokenVerify.username})//用户信息
+            let get_money = await this.app.mysql.get('FinancialBalance',{UserNameId:username.UserNameId})//用户信息
+            console.log(get_money)
+            return this.ctx.body = get_money
+        }
+
+        async withdraw(){
+            if(this.ctx.request.body.authorization =='' || this.ctx.request.body.authorization ==null ){
+                console.log('noToken')
+                return this.ctx.body = {username:'username'}
+            }
+            let rePayMoney = /^([1-5]\d{0,9}|0)([.]?|(\.\d{1,2})?)$/
+            if(rePayMoney.test(this.ctx.request.body.Money)==false) {
+                return this.ctx.body={state:1,message:'金额不对'}//验证码是否正确
+            }
+            let gettoken = this.app.jwt.verify(this.ctx.request.body.authorization, this.app.config.jwt.secret);
+            let username = await this.app.mysql.get('UserName',{UserName:gettoken.username})//用户信息
+            let get_money = await this.app.mysql.get('FinancialBalance',{UserNameId:username.UserNameId})//用户信息
+            if(get_money.Balance<this.ctx.request.body.Money){
+                return this.ctx.body={state:1,message:'金额不对'}//验证码是否正确
+            }
+            let money_sql = 'update FinancialBalance set Balance=Balance-'+this.ctx.request.body.Money+',PerformMoney=PerformMoney+'+this.ctx.request.body.Money +' where UserNameId='+username.UserNameId
+            let money_sql_run = await this.app.mysql.query(money_sql)
+            let insert_money_sql = 'insert into FinancialWithdraw  (UserNameId,UserBankCardId,Amount) values('+username.UserNameId+','+this.ctx.request.body.UserBankCardId+','+this.ctx.request.body.Money+')'
+            let insert_money_sql_run = await this.app.mysql.query(insert_money_sql)
+            return this.ctx.body={state:2,message:'银行卡已被绑定无法捆绑'}//验证码是否正确
+        }
+        async card() {
+            //获取绑定的银行卡
+            //token 验证
+            console.log('MIndexUsername')
+            if(this.ctx.header.authorization ==='' || this.ctx.header.authorization ===null ){
+                console.log('noToken')
+                return this.ctx.body = {username:'username'}
+            }
+            let tokenVerify = this.app.jwt.verify(this.ctx.header.authorization, this.app.config.jwt.secret);
+            let username = await this.app.mysql.get('UserName',{UserName:tokenVerify.username})//用户信息
+            let getcardSql = 'select * from UserBankCard where UserNameId='+username.UserNameId//用户信息
+            let getcard = await this.app.mysql.query(getcardSql)//用户信息
+            console.log(getcard)
+            return this.ctx.body = getcard
+            }
         async verifycard() {
             //token 验证
             if(this.ctx.request.body.authorization ==='' || this.ctx.request.body.authorization ===null ){

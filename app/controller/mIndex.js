@@ -251,10 +251,11 @@ module.exports = app => {
             return this.ctx.body = tokenx
         }
 
-
+        async tcode(){
+            return await this.ctx.render('tcode.ejs',{message:''})
+            }
 
     	async addTbAccount(){
-		    console.log('addTbAccount')
 			console.log(this.ctx.request.body.headers.Authorization)
 		    if(this.ctx.request.body.headers.Authorization ==='' || this.ctx.request.body.headers.Authorization ===null ){
 		    	console.log('noToken')
@@ -264,22 +265,18 @@ module.exports = app => {
 	        var username = await this.app.mysql.get('UserName',{UserName:tokenVerify.username})//用户信息
 	        var platform = this.ctx.request.body.headers.platform //用户信息
 	        var account = this.ctx.request.body.headers.account //用户信息
-	        var accountSql = await this.app.mysql.get('UserAccount',{PlatFormUserName:account,PlatForm:'tb'})//用户信息
+	        var accountSql = await this.app.mysql.get('UserAccount',{PlatFormUserName:account,PlatForm:platform})//用户信息
 	        if(accountSql==null){
 		        return this.ctx.body = {status:0,message:'账户还没保存，请重新刷新'}
             }else if(accountSql.UserNameId===null){
                 var rowsql = 'UPDATE UserAccount SET UserNameId="' + username.UserNameId + '" WHERE UserAccountId="' + accountSql.UserAccountId + '";'
                 var result = await this.app.mysql.query(rowsql);
-                return this.ctx.body = {status:1,message:'淘宝账户，绑定成功。'}
+                return this.ctx.body = {status:2,message:'账户，绑定成功。'}
 	        }else if(accountSql.UserNameId!==username.UserNameId){
 		        return this.ctx.body = {status:0,message:'在其他账户绑定，请重试。'}
 	        }else if(accountSql.UserNameId===username.UserNameId) {
                 return this.ctx.body = {status: 1, message: '淘宝账户已在绑定在你名下。'}
             }
-		    	//version:系统版本
-		    	//sort:分类
-		    	//思考如果是新用户是否免费送
-				//
             console.log(orderid)
             console.log(username)
             //做过的时间：老的读取订单的算法，如果35天内做过，不做

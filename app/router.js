@@ -11,13 +11,18 @@ module.exports = app => {
     router.get("/jwt", app.jwt, "render.index"); // use old api app.jwt
     router.post("/login", "login.Login");
     router.post("/mobilelogin", "login.MobileLogin");
-    router.post("/verifycard", "login.verifycard");
     router.post('/sms', controller.sms.index);
     router.get("/success", "success.index");
+    router.post("/verifycard", "login.verifycard");
+    router.get("/card", "login.card"); //获取银行卡号
+    router.get("/m/getmoney", "login.getmoney"); //手机获取余额
+    router.post("/m/withdraw", "login.withdraw"); //手机提现
+
     //jwt
     router.get("/m/index", "mIndex.index"); //
     router.get("/m/product", "mIndex.product");
     router.post("/m/addaccount", "mIndex.addTbAccount");
+    router.get("/t", "mIndex.tcode");//二维码
     router.get("/m/task", "mIndex.task");
     router.post("/m/qntoken", "mIndex.qntoken"); //七牛token
     router.get("/m/qntoken", "mIndex.qntoken"); //七牛token
