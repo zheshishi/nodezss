@@ -143,7 +143,8 @@ async function GetJbCookie() {
         page.setUserAgent(UAtb)
         await page.goto('https://passport.jd.com/new/login.aspx');
         //console.log('element and screenshot')
-        let element = await page.$('div[class=qrcode-img]');
+        //let element = await page.$('div[class=qrcode-img]');
+        let element = await page.$('div[class=qrcode-login]');
         await element.screenshot({path: 'jd.png'});
         //console.log('element and screenshot')
         cos.putObject({
@@ -411,7 +412,7 @@ function getRandomInt(max) {
 }
 
 
-//GetTbCookie()
+GetTbCookie()
 GetJbCookie()
 
 //打开浏览器

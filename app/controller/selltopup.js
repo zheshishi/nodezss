@@ -12,7 +12,7 @@ class topup extends Controller {
 	        let cookieget = this.ctx.cookies.get('username', { encrypt: true })
 	        console.log('sell')
 	        console.log(cookieget)
-	        await this.ctx.render('sell.ejs',{message:'账号或密码错误'})
+	        await this.ctx.render('selltopup.ejs',{message:'账号或密码错误'})
         }
     }
 	async topuppost() {
@@ -28,7 +28,7 @@ class topup extends Controller {
 	        });
 	        let returnlog = 'token:' + token + 'tokenVerify :'+ JSON.stringify(tokenVerify)
 	        console.log(returnlog)
-            await this.ctx.render('sellLogin.ejs',{message:'', token:token, clearToken:0});
+            await this.ctx.render('selltopup.ejs',{message:'', token:token, clearToken:0});
 	    }
 	}
 }

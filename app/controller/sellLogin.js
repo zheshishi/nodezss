@@ -51,16 +51,15 @@ class HomeController extends Controller {
                         PassWord: this.ctx.request.body.password
                     }
                     const createUser = await this.app.mysql.insert('UserName',row)
-                    const GetNewUserId = await this.app.mysql.get('UserName',{UserName: LoginedMysql[LoginedMysql.length -1].MobileNumber})
                     const rowx = {
-                        UserNameId: GetNewUserId.ID,
+                        UserNameId: createUser.insertId,
                         Balance: 0
                     }
                     const createUserB = await this.app.mysql.insert('FinancialBalance',rowx)
                     this.ctx.cookies.set('username', LoginedMysql[LoginedMysql.length -1].MobileNumber, { encrypt: true });
                     this.ctx.redirect('/sell')
 				} else {
-					var rowsql = "UPDATE UserName SET PassWord="+this.ctx.request.body.password+" WHERE ID="+GetId.ID+";"
+					var rowsql = "UPDATE UserName SET PassWord="+this.ctx.request.body.password+" WHERE UserNameId="+GetId.UserNameId+";"
 					var result = await this.app.mysql.query(rowsql);
 					if (result.affectedRows === 1) {
 						this.ctx.cookies.set('username', LoginedMysql[LoginedMysql.length -1].MobileNumber, { encrypt: true });

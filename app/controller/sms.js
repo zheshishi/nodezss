@@ -16,18 +16,18 @@ module.exports = app => {
     class Home1Controller extends app.Controller {
       async index() {
         // --- send sms --- //
-        // iHuyi.send(this.ctx.request.body.username, content, function(err, smsId) {
-        // if(err) {
-        //     console.log(err.message);
-        // } else {
-        //     console.log("SMS sent, and smsId is " + contentRandom);
-        //    }})
-        //   this.ctx.body = {message:'yes'};
+        let mobile_number;
+        console.log(this.ctx.request.body.username)
+        iHuyi.send(this.ctx.request.body.username, content, function(err, smsId) {
+        if(err) {
+            console.log(err.message);
+        } else {
+            console.log("SMS sent, and smsId is " + contentRandom);
+           }})
+          this.ctx.body = {message:'yes'};
         // --- send sms --- //
-        console.log('sendSms：'+contentRandom+'Math：'+Math.random().toString())
-        await this.app.mysql.insert('sms',{Verify: contentRandom, MobileNumber: parseInt(this.ctx.request.body.mobile) } );
+        await this.app.mysql.insert('sms',{Verify: contentRandom, MobileNumber: parseInt(this.ctx.request.body.username) } );
         return this.ctx.body = {message:'yes'}
-        console.log('sendSms')
       }
     }
     return Home1Controller;

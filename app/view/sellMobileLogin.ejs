@@ -85,22 +85,37 @@ function settime(obj) {
         textAter.textContent = '2个密码不一致' 
         return false;
      } else if(countdown == 60){
+      //   $.ajax({
+      //  　　type: "POST", //用POST方式传输
+      //  　　dataType: "dataType", //数据格式:JSON
+      //  　　url: '/sms', //目标地址
+      // 　　 data: {username:username,password:password},
+      // 　　 error: function (XMLHttpRequest, textStatus, errorThrown) { },
+      //  　　success: function (msg){ }
+      //   });
         $.ajax({
-       　　type: "POST", //用POST方式传输
-       　　dataType: "text", //数据格式:JSON
-       　　url: '/sms', //目标地址
-      　　 data: "username=" + username + "&password=" + password,
-      　　 error: function (XMLHttpRequest, textStatus, errorThrown) { },
-       　　success: function (msg){ }
-        });
+            url: "/sms",
+            type: "POST",
+            headers: {
+                "Content-Type": "application/json; charset=utf-8"
+            },
+            dataType: "json",
+            data: JSON.stringify({
+                username:username,
+                password:password
+            }),
+            success: function (data, status) {
+                console.log("post result: ", data, status)
+            }
+        })
+
         }
+      　　 //data: "username=" + username + "&password=" + password,
 
     if (countdown == 0) { 
         obj.removeAttribute("disabled");    
         obj.value="免费获取验证码"; 
-
         countdown = 60; 
-
         return;
     } else { 
         obj.setAttribute("disabled", true); 
