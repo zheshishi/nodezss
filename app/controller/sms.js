@@ -1,5 +1,22 @@
 ("use strict");
 
+var QcloudSms = require("qcloudsms_js");
+var appid = 1400172261;  // SDK AppID是1400开头
+var appkey = "16ad07643df4d5b614c5afac9ba0f566"
+var phoneNumbers;
+var qcloudsms = QcloudSms(appid, appkey);
+function callback(err, res, resData) {
+    if (err) {
+        console.log("err: ", err);
+    } else {
+        console.log("request data: ", res.req);
+        console.log("response data: ", resData);
+    }
+}
+
+var ssender = qcloudsms.SmsSingleSender();
+var params = ["5678"];//数组具体的元素个数和模板中变量个数必须一致，例如事例中templateId:5678对应一个变量，参数数组中元素个数也必须是一个
+//ssender.sendWithParam(86, phoneNumbers[0], templateId,params, SmsSign, "", "", callback);
 
 const Controller = require('egg').Controller;
 let IHuyi = require("ihuyi106");
