@@ -12,9 +12,8 @@ class sellController extends Controller {
 	        this.ctx.redirect('/selllogin')
         } else {
 	        let cookieget = this.ctx.cookies.get('username', { encrypt: true })
-	        console.log('sell')
-	        console.log(cookieget)
-	        await this.ctx.render('sell.ejs',{message:'账号或密码错误'})
+        	this.ctx.redirect('/sell/createtask')
+	        //await this.ctx.render('sell.ejs',{message:'账号或密码错误'})
         }
     }
 	async sellPost() {

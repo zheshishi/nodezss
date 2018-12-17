@@ -118,10 +118,13 @@ function ajaxGetTaskList(sort,shopId,productId,page,pageNum,TimeStart,TimeEnd){
 }
 
 
+
+
+//任务页面按钮
 function ajaxGetTaskListNumView(data,page,pageNum){
-    console.log('data:'+data+'page:'+page+'pageNum:'+pageNum)
+    //console.log('data:'+data+'page:'+page+'pageNum:'+pageNum)
     let totalPage = parseInt(data/pageNum)+1
-    console.log(totalPage)
+    //console.log(totalPage)
     $("#pagination").empty()
     let pageview = ''
     if((page-1)<=totalPage && (page-1)>0){
@@ -229,15 +232,14 @@ function ajaxGetTaskListView(data){
                     </div>
                 </div>`
             let AllBody= front_body+button_body+end_body
-
-
             $("#taskContainer").append(AllBody)
     }
 }
 
 
+//获取任务页面
 function ajaxGetCommentList(sort,shopId,productId,page,pageNum,TimeStart,TimeEnd){
-    console.log('sort:'+sort+'shopId:'+shopId+'productId:'+productId+'page:'+page+'pageNum:'+pageNum+'TimeStart:'+TimeStart+'TimeEnd:'+TimeEnd);
+    //console.log('sort:'+sort+'shopId:'+shopId+'productId:'+productId+'page:'+page+'pageNum:'+pageNum+'TimeStart:'+TimeStart+'TimeEnd:'+TimeEnd);
     //任务属性、店铺、产品、页数、时间1和2
     $.ajax({
         method: "get",

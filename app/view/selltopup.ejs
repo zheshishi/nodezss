@@ -28,7 +28,66 @@
     <link rel="stylesheet" href="/public/adminLTE/dist/css/AdminLTE.min.css">
     <link rel="stylesheet" href="/public/adminLTE/dist/css/skins/_all-skins.min.css">
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" type="text/javascript"></script>
+<script>
+    //获取店铺名
+window.onload = function(){
+        get_card_id()
+    }
+function insert_view_card_id(data){
+        var Details;
+        var Read_card;
+        //$("#topup_card").empty()
+        for(var x=0;data.length>x;x++){
+            //img = JSON.parse(data[x].img)
+            //Details = JSON.parse(data[x].Details)
+            Details = `<option value='`+data[x].ChannelId+`'>`+data[x].ChannelCardId+data[x].Channel+`</option>`
+            $("#topup_card").append(Details)
+            Read_card = `<br><Text>`+data[x].Channel+`  卡号：`+data[x].ChannelCardId+`  收款人：`+data[x].ChannelUserName+`</Text>`
+            $("#topup_card_select_read").append(Read_card)
 
+    }}
+function get_card_id(data) {
+    console.log(data)
+    if (data !== 0) {
+        $.ajax({
+            method: "get",
+            url: '/sell/getcardid',
+            success: function (data, status) {
+                insert_view_card_id(data)
+            }
+        })
+
+    }
+}
+function post_topup() {
+     let price = document.getElementById("price").value;
+     let cardid = document.getElementById("cardid").value;
+     let InsertTime = document.getElementById("InsertTime").value;
+     let topup_card = document.getElementById("topup_card").value;
+     $.ajax({
+        method: "post",
+        url: '/sell/topup',
+        data:{
+            price:price,
+            cardid:cardid,
+            InsertTime:InsertTime,
+            topup_card:topup_card,
+        },
+        success: function (data, status) {
+            let return_message
+            if(data.state==1){
+                return_message = `<Text style="color:red;">`+ data.message+`</Text>`
+                $("#alterdiv").empty()
+                $("#alterdiv").append(return_message)
+            }else if(data.state==2){
+                return_message = `<Text style="color:red;">`+ data.message+`</Text>`
+                $("#alterdiv").empty()
+                $("#alterdiv").append(return_message)
+            }
+        }
+    })
+    }
+</script>
 
     <style>
         .UrlTitle {
@@ -58,13 +117,42 @@
             <div class="box-header with-border">
                 <h3 class="box-title">充值</h3>
             </div>
-            <div>
-            <Text>充值</Text>
-            <input type="" name="money"></input>
-            <button type="submit">充值</button>
+            <div><br>
+            <span style="color:red;">金额：￥<%= message %>元</span><br><br>
+            <div id='alterdiv'>
+            </div><br><br>     
+            <span>充值金额：</span>
+            <input type="number" placeholder="0.00" id="price" min="0" step="0.01" title="Currency" pattern="^\d+(?:\.\d{1,2})?$">
+            <br><br>
+            <span>转账卡号：</span><input name="cardid" id='cardid'><br><br>
+            <span>转账时间：</span><input type="date" id='InsertTime' min="2017-09-16"/><br><br>
+            <div id="topup_card_select" name="topup_card_select">
+                <strong style="color:mediumvioletred">收款卡号：</strong>
+                <select id='topup_card' name='topup_card'>
+                    <option value=''>请选择收款卡号</option>
+                </select>
+            </div><br>
+            <button style="height: 30px; background-color:mediumvioletred; color: white" onclick='post_topup()'>充值</button>
+            <br><br>
+            <div id="topup_card_select_read" name="topup_card_select_read">
+                <strong style="color:blue">在备注、摘要中填写「手机号/账号」，系统会自动到账</strong>
+            </div>
             </div>
                 <!-- /.box-header -->
+<div id="taskContainer">
+</div>
 
+            <!--这里是分页区域-->
+
+<div class="row">
+    <div class="col-sm-7">
+        <div class="dataTables_paginate paging_simple_numbers" id="example2_paginate">
+            <ul class="pagination" id='pagination'>
+
+            </ul>
+        </div>
+    </div>
+</div>
         </div>
     </div>
     <%- include menu/footer %>

@@ -69,6 +69,8 @@ module.exports = app => {
     //商家充值页面
     router.get("/sell/topup", "selltopup.topupget"); // sell Login
     router.post("/sell/topup", "selltopup.topuppost"); // sell Login
+    router.get("/sell/finance", "selltopup.finance"); // sell Login
+    router.get("/sell/getcardid", "selltopup.getcardid"); // sell Login
 
     //网页crawler
     router.post("/crawler/", "crawler.index"); // sell Login
