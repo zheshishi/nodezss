@@ -266,7 +266,7 @@ function ajaxGetCommentListView(data){
         var Details;
         $("#taskContainer").empty()
         for(var x=0;data.length-1>x;x++){
-            img = JSON.parse(data[x].img)
+            img = JSON.parse(data[x].BuyTaskCommentImg)
             Details = JSON.parse(data[x].Details)
             var AjaxSsll = `<div class="taskCell"><div class="title clearfix"><span class="shop floatLeft mr-20 ml10">店铺：<span>`+data[x].ShopSort+` - `+ data[x].ShopUserName +`</span></span><span class="taskNo floatLeft mr-4">编号：<span>`+ data[x].TaskCommentId +`</span>
             </span><span class="floatRight mr-8">状态：
@@ -278,7 +278,7 @@ function ajaxGetCommentListView(data){
                         </span>
                         <span class="floatRight mr-8">
                         任务类型：
-                        <span>`+data[x].event+`</span>
+                        <span>`+data[x].BuyTaskCommentEvent+`</span>
                         </span>
                     </div>
                     <div class="body">
@@ -297,7 +297,7 @@ function ajaxGetCommentListView(data){
                                         <td style="text-align:left;">
                                             <div style="wight:100px;float:left;margin-right:10px;"><img height="100px" width="100px" src="`+ Details.mainImage[0]+`"></div>
                                             <div style="wight:100px;float:left;margin-right:10px;"><img height="100px" width="100px" src="`+ img[0]+`"></div>
-                                            <span style="height:100px">`+data[x].Text+`</span><br>
+                                            <span style="height:100px">`+data[x].BuyTaskCommentText+`</span><br>
                                             <span>订单编号：<text class="doing"></text></span><br>
                                             <span style="height:100px">单价：￥<text class="doing"></text> </span><span> 关键词：<text></text></span<br>
                                         </td>
@@ -309,8 +309,6 @@ function ajaxGetCommentListView(data){
                                             <em class="cap">账号：<span class="doing"></span></em>
                                         </td>
                                         <td class="doing">
-                                            <a class="btnRepublish stdColorButton" href="/publish/app/sdPlanTask?taskId=511679594" target="_blank">一键发布</a>
-                                            <a class="btnRepublish stdColorButton cancel " href="javascript:;" data-taskid="511679594" target="_blank">撤销任务</a>
                                         </td>
                                     </tr>
                                 </tbody>

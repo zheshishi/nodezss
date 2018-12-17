@@ -36,9 +36,12 @@ class sellController extends Controller {
             if(MinTime>=MaxTime){return await this.ctx.render('sellTaskPost.ejs', {message: '试用时间开始不能小于完成时间', shopname: ''})}
             var buyPrice = parseFloat(this.ctx.request.body.buyPrice).toFixed(2)
             buyPrice = parseFloat(buyPrice)
+            if(/^(([1-9]\d*)|\d)(\.\d{1,2})?$/.test(buyPrice)==false){return await this.ctx.render('sellTaskPost.ejs', {message: '请填写正确的数字', shopname: ''})}
             var buyNum = parseInt(this.ctx.request.body.buyNum)
+            if(/^(([1-9]\d*)|\d)?$/.test(buyNum)==false){return await this.ctx.render('sellTaskPost.ejs', {message: '请填写正确的数字', shopname: ''})}
             var buyRules = this.ctx.request.body.buyRules
             var showPrice = this.ctx.request.body.showPrice
+            if(/^(([1-9]\d*)|\d)(\.\d{1,2})?$/.test(showPrice)==false){return await this.ctx.render('sellTaskPost.ejs', {message: '请填写正确的数字', shopname: ''})}
             if (showPrice  ===NaN||showPrice  === ''||showPrice  ===0){showPrice = buyPrice}
             showPrice = parseFloat(showPrice).toFixed(2)
             showPrice = parseFloat(showPrice)
@@ -431,7 +434,7 @@ class sellController extends Controller {
         }else{
             sortSql = 'TaskCommentState = ' + sort
         }
-        let taskListSql = `SELECT TaskCommentId,Details,ShopUserName,event,Text,img,TaskCommentState,img,SellShop.ShopSort,CommentCreateTime FROM BuyTaskComment
+        let taskListSql = `SELECT BuyTaskCommentId,Details,ShopUserName,BuyTaskCommentEvent,BuyTaskCommentText,TaskCommentState,BuyTaskCommentImg,SellShop.ShopSort,CommentCreateTime FROM BuyTaskComment
                             JOIN SellProduct ON BuyTaskComment.SellProductId = SellProduct.SellProductId 
                             JOIN SellShop ON SellProduct.SellShopId = SellShop.SellShopId 
                             WHERE `+sortSql+` AND BuyTaskComment.UserNameId =`+UserName.UserNameId+TimeStart+TimeEnd+shopId+productId+` limit `+((page-1)*pageNum)+`,`+pageNum+`;`

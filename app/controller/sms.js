@@ -6,9 +6,8 @@ let IHuyi = require("ihuyi106");
 let account = "cf_vanxv";
 let password = "1q2w3e4r";
 let apiKey = "2a8f2e7f44351729a9ba6502e6750b76"; // international api key, if exist
-let iCountryCode = "1";
-let contentRandom = parseInt(Math.random().toString().slice(-6))
-let content = "您正在进行手机验证，验证码是【 "+contentRandom+" 】，【 2 】分钟内有效。";
+let contentRandom="";
+
 // apiKey is optional
 let iHuyi = new IHuyi(account, password, apiKey);
 
@@ -17,7 +16,13 @@ module.exports = app => {
       async index() {
         // --- send sms --- //
         let mobile_number;
+        let contentRandom="";
+        for(var i=0;i<6;i++){
+          contentRandom+=Math.floor(Math.random()*10)
+        }
+        let content = "您正在进行手机验证，验证码是【 "+contentRandom+" 】，【 2 】分钟内有效。";
         console.log(this.ctx.request.body.username)
+        console.log(contentRandom)
         iHuyi.send(this.ctx.request.body.username, content, function(err, smsId) {
         if(err) {
             console.log(err.message);
