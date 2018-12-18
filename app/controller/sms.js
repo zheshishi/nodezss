@@ -1,5 +1,5 @@
 ("use strict");
-
+const Controller = require('egg').Controller;
 var QcloudSms = require("qcloudsms_js");
 var appid = 1400172261;  // SDK AppID是1400开头
 var appkey = "16ad07643df4d5b614c5afac9ba0f566"
@@ -15,16 +15,15 @@ function callback(err, res, resData) {
 }
 
 var ssender = qcloudsms.SmsSingleSender();
-var params = ["5678"];//数组具体的元素个数和模板中变量个数必须一致，例如事例中templateId:5678对应一个变量，参数数组中元素个数也必须是一个
-//ssender.sendWithParam(86, phoneNumbers[0], templateId,params, SmsSign, "", "", callback);
-
-const Controller = require('egg').Controller;
+var params = ["5678"];
+var templateId = 249169;
+var SmsSign = "折试试";
 let IHuyi = require("ihuyi106");
 let account = "cf_vanxv";
 let password = "1q2w3e4r";
 let apiKey = "2a8f2e7f44351729a9ba6502e6750b76"; // international api key, if exist
 let contentRandom="";
-
+let contentRandom_array =[]
 // apiKey is optional
 let iHuyi = new IHuyi(account, password, apiKey);
 
@@ -34,12 +33,15 @@ module.exports = app => {
         // --- send sms --- //
         let mobile_number;
         let contentRandom="";
+        contentRandom_array =[];
         for(var i=0;i<6;i++){
           contentRandom+=Math.floor(Math.random()*10)
         }
+        contentRandom_array.push(contentRandom)
         let content = "您正在进行手机验证，验证码是【 "+contentRandom+" 】，【 2 】分钟内有效。";
         console.log(this.ctx.request.body.username)
         console.log(contentRandom)
+        ssender.sendWithParam(86, this.ctx.request.body.username, templateId, contentRandom_array, SmsSign, "", "", callback);
         iHuyi.send(this.ctx.request.body.username, content, function(err, smsId) {
         if(err) {
             console.log(err.message);

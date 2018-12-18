@@ -111,6 +111,8 @@ module.exports = app => {
             this.ctx.body = {state:2,token:token};
         }
         async MobileLogin() {
+            console.log('MobileLogin')
+            console.log(this.ctx.request.body.ip)
             let ip = this.ctx.request.body.ip
             let UniqueID = this.ctx.request.body.UniqueID
             let Manufacturer = this.ctx.request.body.Manufacturer  // e.g. Apple
