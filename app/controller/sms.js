@@ -42,13 +42,14 @@ module.exports = app => {
         console.log(this.ctx.request.body.username)
         console.log(contentRandom)
         ssender.sendWithParam(86, this.ctx.request.body.username, templateId, contentRandom_array, SmsSign, "", "", callback);
-        iHuyi.send(this.ctx.request.body.username, content, function(err, smsId) {
-        if(err) {
-            console.log(err.message);
-        } else {
-            console.log("SMS sent, and smsId is " + contentRandom);
-           }})
-          this.ctx.body = {message:'yes'};
+        //iHuyI SEND
+        // iHuyi.send(this.ctx.request.body.username, content, function(err, smsId) {
+        // if(err) {
+        //     console.log(err.message);
+        // } else {
+        //     console.log("SMS sent, and smsId is " + contentRandom);
+        //    }})
+        //   this.ctx.body = {message:'yes'};
         // --- send sms --- //
         await this.app.mysql.insert('sms',{Verify: contentRandom, MobileNumber: parseInt(this.ctx.request.body.username) } );
         return this.ctx.body = {message:'yes'}

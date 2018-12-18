@@ -130,6 +130,8 @@ module.exports = app => {
             let DeviceCountry = this.ctx.request.body.DeviceCountry // e.g US
             let Timezone = this.ctx.request.body.Timezone // e.g America/Mexico_City
             let emulator = this.ctx.request.body.emulator // if app is running in emulator return true
+            let mobile = this.ctx.request.body.username
+            let verifycode = this.ctx.request.body.VerifyCode
             let systemSort;
             if(SystemName==='IOS'||SystemName==='iOS'||SystemName==='ios'||SystemName==='IOS'||SystemName==='Ios'){
               systemSort=1
