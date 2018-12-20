@@ -8,7 +8,7 @@ module.exports = appInfo => {
 
   // use for cookie sign key, should change to your own and keep security
   config.keys = appInfo.name + '_1536142102057_2341';
-  config.webUrl = "http:"+weburl+":7001";
+  config.webUrl = weburl;
   config.MoneyAlgorithm = MoneyAlgorithm;
   config.resql = resql;
   config.security = {

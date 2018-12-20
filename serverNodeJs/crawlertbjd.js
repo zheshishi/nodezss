@@ -1,4 +1,4 @@
-//京东与淘宝的爬虫
+//adsl 服务器，京东与淘宝的爬虫，
 
 const puppeteer = require('puppeteer');
 var sleep = require('sleep');

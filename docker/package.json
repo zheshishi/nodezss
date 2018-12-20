@@ -4,16 +4,27 @@
   "description": "",
   "private": true,
   "dependencies": {
+    "axios": "^0.18.0",
+    "bankcardinfo": "^2.0.4",
+    "cnpm": "^6.0.0",
+    "cos-nodejs-sdk-v5": "^2.5.1",
+    "crypto-js": "^3.1.9-1",
     "egg": "^2.2.1",
-    "egg-jwt": "^3.1.2",
+    "egg-jwt": "^3.1.4",
     "egg-mysql": "^3.0.0",
     "egg-qiniu-upload": "^1.1.4",
     "egg-redis": "^2.0.0",
     "egg-scripts": "^2.5.0",
     "egg-static": "^2.1.1",
     "egg-view-ejs": "^2.0.0",
+    "form-data": "^2.3.3",
     "ihuyi106": "^1.0.1",
-    "puppeteer": "^1.10.0"
+    "mysql": "^2.16.0",
+    "puppeteer": "^1.10.0",
+    "qcloudsms_js": "^0.1.1",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.2",
+    "sleep": "^5.2.3"
   },
   "devDependencies": {
     "autod": "^3.0.1",
@@ -29,7 +40,7 @@
     "node": ">=8.9.0"
   },
   "scripts": {
-    "start": "egg-scripts start --title=egg-server-zss",
+    "start": "egg-scripts start",
     "stop": "egg-scripts stop --title=egg-server-zss",
     "dev": "egg-bin dev",
     "debug": "egg-bin debug",

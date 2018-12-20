@@ -1,19 +1,4 @@
-// var Redis = require("ioredis");
-// var sub = new Redis(/** 连接信息 */);
-// sub.once("connect", function() {
-//     // 假设我们需要选择 redis 的 db，因为实际上我们不会去污染默认的 db 0
-//     sub.select(1, function(err) {
-//         if(err) process.exit(4);
-//         sub.subscribe("foo", function() {
-//             //... 订阅频道成功
-//         });
-//     });
-// });
-
-// // 监听从 `foo` 来的消息
-// sub.on("message", function(channel, msg) {
-//     console.log(channel, msg);
-// });
+// redis接收端，如果获取到发送内容，那么自动运行
 
 
 const webUrl = 'xvcongcong.vicp.net'
@@ -155,9 +140,6 @@ function GetMysqlTask(){
 }
 
 
-function CreateRedisTask(){
-
-}
 GetMysqlTask()
 
 
