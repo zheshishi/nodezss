@@ -216,7 +216,7 @@ module.exports = app => {
             let productGetDetailsSql =  'SELECT * FROM BuyTask JOIN UserAccount ON BuyTask.UserAccountId = UserAccount.UserAccountId JOIN SellOrder ON BuyTask.SellOrderId = SellOrder.SellOrderId JOIN SellProduct ON SellOrder.SellProductId = SellProduct.SellProductId JOIN SellShop ON SellProduct.SellShopId = SellShop.SellShopId '+TaskCommentSql+' WHERE BuyTask.BuyTaskId ='+taskId+';'
             let productGetDetails = await this.app.mysql.query(productGetDetailsSql) //获取订单，按订单时间排序获取
             //console.log(productGetDetails[0])
-            if(username.UserNameId!==productGetDetails[0].UserNameId || productGetDetails.length===0){
+            if(username.UserNameId!==productGetDetails[0].BuyUserNameId || productGetDetails.length===0){
                 return this.ctx.body = {username:'username'}
             }
             return this.ctx.body = productGetDetails[0]

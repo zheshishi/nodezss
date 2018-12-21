@@ -4,9 +4,12 @@ const puppeteer = require('puppeteer');
 var sleep = require('sleep');
 var UA = require('./chrome.json');
 var request = require("request")
-var serverurl = 'http://127.0.0.1:7001/crawler'
+var serverurl = 'http://vanxv.vicp.net/crawler'
 //browser
-
+let browser_head = {
+    headless: false,//false
+    //executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+}
 // 引入模块
 var COS = require('cos-nodejs-sdk-v5');
 var fs = require('fs');
@@ -23,10 +26,7 @@ async function GetTbCookie(){
     var countDownDate = 1
     while(countDownDate == 1){
         console.log('new loop'+countDownDate)
-        var browser = await puppeteer.launch({
-            headless: false,//false
-            executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
-        });
+        var browser = await puppeteer.launch(browser_head);
         var page = await browser.newPage();
         var UAtb = UA[getRandomInt(UA.length)]['ua']
         console.log(UAtb)
@@ -133,10 +133,7 @@ async function GetJbCookie() {
     var countDownDate = 2
     while(countDownDate == 2){
         console.log('jd new loop'+countDownDate)
-        var browser = await puppeteer.launch({
-            headless: false,//false
-            executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
-        });
+        var browser = await puppeteer.launch(browser_head);
         var page = await browser.newPage();
         var UAtb = UA[getRandomInt(UA.length)]['ua']
         console.log(UAtb)
@@ -283,19 +280,13 @@ async function GetJbCookie() {
 }
 
 async function GetTbInfo() {
-    var browser = await puppeteer.launch({
-        headless: false,
-        executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
-    });
+    var browser = await puppeteer.launch(browser_head);
     var page = await browser.newPage();
     page.setUserAgent(UA[getRandomInt(UA.length)])
 }
 
 async function GetJbInfo() {
-    var browser = await puppeteer.launch({
-        headless: false,
-        executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
-    });
+    var browser = await puppeteer.launch(browser_head);
     var page = await browser.newPage();
     //page.setUserAgent(UA[getRandomInt(UA.length)])
     await page.goto('https://auth.alipay.com/login/index.htm');
@@ -311,10 +302,7 @@ async function GetJbInfo() {
 
 
 async function Browser() {
-    var browser = await puppeteer.launch({
-        headless: false,
-        executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
-    });
+    var browser = await puppeteer.launch(browser_head);
     //inbox
     //user-agent 自动切换
     //two code 3分钟过期
@@ -351,10 +339,7 @@ async function Browser() {
     var cookies1 = await page.cookies();
     console.log(cookies1)
     await browser.close()
-    var browser = await puppeteer.launch({
-        headless: false,
-        executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
-    });
+    var browser = await puppeteer.launch(browser_head);
     var page = await browser.newPage();
     for (n=0; n>cookies1.length; n++){
         console.log(n)

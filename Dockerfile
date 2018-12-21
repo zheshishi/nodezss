@@ -23,13 +23,12 @@ RUN apk --no-cache --virtual build-dependencies add \
     python \
     make \
     g++ \
-    && npm i --registry=https://registry.npm.taobao.org cnpm -g \
-    && cnpm i --registry=https://registry.npm.taobao.org \
+    && npm i --registry=https://registry.npm.taobao.org \
     && apk del build-dependencies
 
 # 拷贝所有源代码到工作目录
 COPY . /usr/src/app
 # 暴露容器端口
-EXPOSE 7001
+EXPOSE 80
 # 启动node应用
 CMD npm start

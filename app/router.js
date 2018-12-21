@@ -6,7 +6,7 @@
  */
 module.exports = app => {
     const { router, controller } = app;
-    router.get('/', controller.home.index);
+    router.get('/', "sell.index");
     //jwt
     router.get("/jwt", app.jwt, "render.index"); // use old api app.jwt
     router.post("/login", "login.Login");
@@ -46,7 +46,7 @@ module.exports = app => {
     router.get("/sell/autoclosetask", "sellTaskState.AutoCloseTask");//自动关闭
 
     router.get("/sell", "sell.index"); // sell Login
-    router.get("/", "sell.index"); // sell Login
+
     //登录 seller admin view
     router.get("/selllogin", "sellLogin.sellLoginGet"); 
     router.post("/selllogin", "sellLogin.sellLoginPost");
