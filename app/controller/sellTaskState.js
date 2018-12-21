@@ -130,17 +130,17 @@ class sellTaskState extends Controller {
         var productGetDetails = await this.app.mysql.query(productGetDetailsSql)
         var judgePlatformUser
         if(productGetDetails[0].orderNumber<1){
-            return this.ctx.body={status:2,message:'订单被抢完啦，手快有手慢无'}
+            return this.ctx.body={status:2,message:'订单被抢完啦，手快有手慢无。'}
         }
         console.log('productGetDetails.ShopSort:'+productGetDetails[0].ShopSort)
         if(productGetDetails[0].ShopSort==='taobao' || productGetDetails[0].ShopSort==='tmall' || productGetDetails[0].ShopSort==='1688'){
             judgePlatformUser = await this.app.mysql.get('UserAccount',{UserNameId:username.UserNameId,PlatForm:'tb'})
-            if(judgePlatformUser.length===0){
+            if(!judgePlatformUser){
                 return this.ctx.body = {status:1,message:'tb请绑定账号'}
             }
         }else if(productGetDetails[0].ShopSort==='jd'){
             judgePlatformUser = await this.app.mysql.get('UserAccount',{UserNameId:username.UserNameId,PlatForm:'jd'})
-            if(judgePlatformUser.length===0){
+            if(!judgePlatformUser){
                 return this.ctx.body = {status:1,message:'jd请绑定账号'}
             }
         }

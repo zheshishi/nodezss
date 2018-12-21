@@ -46,6 +46,7 @@ module.exports = app => {
     router.get("/sell/autoclosetask", "sellTaskState.AutoCloseTask");//自动关闭
 
     router.get("/sell", "sell.index"); // sell Login
+    router.get("/", "sell.index"); // sell Login
     //登录 seller admin view
     router.get("/selllogin", "sellLogin.sellLoginGet"); 
     router.post("/selllogin", "sellLogin.sellLoginPost");

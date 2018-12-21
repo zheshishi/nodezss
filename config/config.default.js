@@ -11,6 +11,11 @@ module.exports = appInfo => {
   config.webUrl = weburl;
   config.MoneyAlgorithm = MoneyAlgorithm;
   config.resql = resql;
+  config.cluster = {
+    listen: {
+    port: 80,
+    }
+    };
   config.security = {
     csrf: {
       enable: false,

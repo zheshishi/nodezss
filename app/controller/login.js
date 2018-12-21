@@ -55,12 +55,12 @@ module.exports = app => {
                 return this.ctx.body = {state:0,message:'blacklist'};
               }
             //check emulator
-            if(emulator==false){
-                let UserEmulatorSql = 'INSERT INTO UserEmulator (UserNameId,ip) values('+LoginedMysql.UserNameId+',"'+ip+'")'
-                let UserEmulatorSqlRun = await this.app.mysql.query(UserEmulatorSql)
-                let row = await BlackUserName(this.app, LoginedMysql.UserNameId)
-                return this.ctx.body = {state:0,message:'blacklist'};
-            }
+            // if(emulator==true){
+            //     let UserEmulatorSql = 'INSERT INTO UserEmulator (UserNameId,ip) values('+LoginedMysql.UserNameId+',"'+ip+'")'
+            //     let UserEmulatorSqlRun = await this.app.mysql.query(UserEmulatorSql)
+            //     let row = await BlackUserName(this.app, LoginedMysql.UserNameId)
+            //     return this.ctx.body = {state:0,message:'blacklist'};
+            // }
           let getMachineSql = await this.app.mysql.get('UserMachine', {UniqueID:UniqueID})
           if (getMachineSql){
                   //如果账号不是设备原来用户
@@ -143,6 +143,7 @@ module.exports = app => {
             if (LoginedMysql.length === 0){
                 return this.ctx.body={state:1,message:'请发验证码'}
             }
+            console.log('开始保存密码')
             // save mobile and password 保存密码
             let GetId = await this.app.mysql.get('UserName',{UserName: LoginedMysql[LoginedMysql.length -1].MobileNumber})
             if (GetId === null){
@@ -156,30 +157,34 @@ module.exports = app => {
                       UserNameId: LoginedMysql.UserNameId,
                       Balance: 0
                         }
-                  const createUserB = await this.app.mysql.insert('FinancialBalance',rowx)
+                  let createUserB = await this.app.mysql.insert('FinancialBalance',rowx)
             } else {
-              const row = {
+              let row = {
                   UserNameId: GetId.UserNameId,
                   PassWord: this.ctx.request.body.password
               }
-              const result = await this.app.mysql.update('UserName', row); // 更新 posts 表中的记录
-                     }
+              let update_password = `update UserName set PassWord ="`+this.ctx.request.body.password+`" where UserNameId=`+GetId.UserNameId
+              let result = await this.app.mysql.query(update_password);
+            }
 
             LoginedMysql = await this.app.mysql.get('UserName', { UserName: this.ctx.request.body.username, PassWord: this.ctx.request.body.password });
             if (LoginedMysql == null){
                 return this.ctx.body = {state:1,message:'no'};
             }
+            console.log('是否在黑名单')
             //check blackList
             if (LoginedMysql.Status==1){
-                return this.ctx.body = {state:0,message:'blacklist'};
+                return this.ctx.body = {state:0,message:'账户异常登录，请联系客服'};
             }
+            console.log('是否是虚拟机')
             //check emulator
-            if(emulator==false){
+            if(emulator==true){
                 let UserEmulatorSql = 'INSERT INTO UserEmulator (UserNameId,ip) values('+LoginedMysql.UserNameId+',"'+ip+'")'
                 let UserEmulatorSqlRun = await this.app.mysql.query(UserEmulatorSql)
                 let row = await BlackUserName(this.app, LoginedMysql.UserNameId)
-                return this.ctx.body = {state:0,message:'blacklist'};
+                return this.ctx.body = {state:0,message:'账户异常登录请联系管理员'};
             }
+            console.log('机器是否是自己的')
             let getMachineSql = await this.app.mysql.get('UserMachine', {UniqueID:UniqueID})
             if (getMachineSql){
                 //如果账号不是设备原来用户
@@ -192,7 +197,7 @@ module.exports = app => {
                         ip: ip
                     }
                     let createUser = await this.app.mysql.insert('UserLoginOtherMachine',rowX)
-                    return this.ctx.body = {state:0,message:'blacklist'};
+                    return this.ctx.body = {state:0,message:'账户异常登录，请联系客服'};
                 }
             }else{
                 let rowX = {
