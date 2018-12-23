@@ -388,7 +388,7 @@ class sellTaskState extends Controller {
         let State6VerifySql = await this.app.mysql.query(State6VerifySqlString)
         if(State6VerifySql){
             let Money1Sql = 'UPDATE FinancialBalance SET PerformMoney=PerformMoney-'+MoneySeller+' WHERE UserNameId='+getTask.UserNameId
-            let Money2Sql = 'UPDATE FinancialBalance SET PerformMoney=PerformMoney+'+MoneyBuyer+' WHERE UserNameId='+getTask.BuyUserNameId
+            let Money2Sql = 'UPDATE FinancialBalance SET Balance=Balance+'+MoneyBuyer+' WHERE UserNameId='+getTask.BuyUserNameId
             let Money1Sql1 =await this.app.mysql.query(Money1Sql)
             let Money2Sql2 =await this.app.mysql.query(Money2Sql)
             if(getTask.TaskCommentId!==null){
