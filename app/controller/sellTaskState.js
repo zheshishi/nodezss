@@ -34,7 +34,7 @@ async function CloseTaskId(app,taskId,UserNameId,CloseReason){
         var ChangeOrder =  await app.mysql.query(ChangeOrderSql); //获取订单，按订单时间排序获取
         //comment
         if(GetTaskId.BuyTaskCommentId){
-            var ChangeCommentSql = 'update BuyTaskComment SET TaskCommentState=2,BuyTaskId=null where BuyTaskCommentId = '+GetTaskId.BuyTaskCommentId
+            var ChangeCommentSql = 'update BuyTaskComment SET TaskCommentState=2 where BuyTaskCommentId = '+GetTaskId.BuyTaskCommentId
             var ChangeComment =  await app.mysql.query(ChangeCommentSql); //获取订单，按订单时间排序获取
         }
         let redisReturn =await app.redis.del(taskId)
@@ -149,61 +149,59 @@ class sellTaskState extends Controller {
         //version:系统版本
         //sort:分类
         //思考如果是新用户是否免费送
-        if(this.ctx.request.body.headers.version ==='1.0'){
             //店铺40天内是否做过？
-            var sqlsyn = 'SELECT * FROM SellOrder WHERE SellOrderId = '+ orderid +' and SellOrder.SellShopId IN (SELECT SellOrder.sellShopId FROM BuyTask JOIN SellOrder ON SellOrder.SellOrderId = BuyTask.SellOrderId WHERE buyUserNameId='+username.UserNameId+' AND BuyTaskState <> 0 AND  NOW() - INTERVAL 40 DAY < BuyTaskCreateTime);'
-            var BuyShop = await this.app.mysql.query(sqlsyn) //如果存在数据，那么做过这家店铺
-            if(BuyShop.length>0){
-                return this.ctx.body = {status: 2, message: '该店铺不能下单'}
-            }
-            //店铺
-            var sqluservalue = 'SELECT * FROM BuyTask JOIN SellOrder ON SellOrder.SellOrderId = '+orderid+' WHERE buyUserNameId='+ username.UserNameId +' AND BuyTaskState <> 0'
-            //搜下网站订单
-            //确定他的账户是否绑定
-            var BuyTask = await this.app.mysql.query(sqluservalue) //之前是否做过这个产品，
-            var judgeRebuy = 0
-            if(BuyTask.length>0) {
-                //查看复购率是否大于30%
-                if (productGetDetails[0].productBuy1 > 3) {
-                    if (productGetDetails[0].productBuy2 / productGetDetails[0].productBuy1 > 0.3) {
-                        judgeRebuy = 1
-                    }
+        var sqlsyn = 'SELECT * FROM SellOrder WHERE SellOrderId = '+ orderid +' and SellOrder.SellShopId IN (SELECT SellOrder.sellShopId FROM BuyTask JOIN SellOrder ON SellOrder.SellOrderId = BuyTask.SellOrderId WHERE buyUserNameId='+username.UserNameId+' AND BuyTaskState <> 0 AND  NOW() - INTERVAL 40 DAY < BuyTaskCreateTime);'
+        var BuyShop = await this.app.mysql.query(sqlsyn) //如果存在数据，那么做过这家店铺
+        if(BuyShop.length>0){
+            return this.ctx.body = {status: 2, message: '该店铺不能下单'}
+        }
+        //店铺
+        var sqluservalue = 'SELECT * FROM BuyTask JOIN SellOrder ON SellOrder.SellOrderId = '+orderid+' WHERE buyUserNameId='+ username.UserNameId +' AND BuyTaskState <> 0'
+        //搜下网站订单
+        //确定他的账户是否绑定
+        var BuyTask = await this.app.mysql.query(sqluservalue) //之前是否做过这个产品，
+        var judgeRebuy = 0
+        if(BuyTask.length>0) {
+            //查看复购率是否大于30%
+            if (productGetDetails[0].productBuy1 > 3) {
+                if (productGetDetails[0].productBuy2 / productGetDetails[0].productBuy1 > 0.3) {
+                    judgeRebuy = 1
                 }
             }
-            if(judgeRebuy === 1){
-                return this.ctx.body = {status:2,message:'不能下单'}
-            }else if(judgeRebuy === 0){
-                //judge user task state = 2
-                let clickTask2Sql = 'SELECT * FROM BuyTask WHERE buyUserNameId='+ username.UserNameId +' AND BuyTaskState = 2'
-                let clickTaskQuery = await this.app.mysql.query(clickTask2Sql) //插入任务
-                if(clickTaskQuery.length>0){
-                    let getTaskQuery = await CloseTaskId(this.app,clickTaskQuery[0].BuyTaskId,username.UserNameId,null)
-                }
-                //写下单的流程
-                //任务金额计算 + 总金额计算 + 图片数 + 账号费 + 附加佣金
-                let TaskAddMoney = productGetDetails[0].AddCoupons + productGetDetails[0].AddOpenOtherProduct + productGetDetails[0].AddSaveShop + productGetDetails[0].AddOpenProduct + productGetDetails[0].AddShoppingCar + productGetDetails[0].AddChat + productGetDetails[0].AddCommandsLike
-                let id_money = productGetDetails[0].huabeiId * 2
-                let task_total_money = productGetDetails[0].buyPrice * productGetDetails[0].buyNum
-                //TaskAddMoney = 附加任务集合
-                //idmoney = 账号数
-                //imageNumber = 图片张数
-                let Min = 40;
-                let MyDate = new Date(Date.now() + Min * 60*1000);
-                console.log(MyDate)
-                MyDate ='"'+MyDate.toMysqlFormat() +'"'
-                let CreateTaskSql = 'INSERT into BuyTask(buyUserNameId,SellOrderId,BuyTaskState,UserAccountId,PayMoney,AddMoney,AutoChangeState,AutoChangeTime)values('+username.UserNameId+','+orderid+',2,'+judgePlatformUser.UserAccountId+','+task_total_money+','+TaskAddMoney+',0,'+MyDate+');'
-                let BuyTask = await this.app.mysql.query(CreateTaskSql) //插入任务
-                let OrderReduceSql = 'update SellOrder SET orderNumber=orderNumber-1 where SellOrderId = '+orderid
-                let OrderReduceSqlx = await this.app.mysql.query(OrderReduceSql) //减少任务
-                if(BuyTask.affectedRows===1){
-                    //redis 设置倒计时
-                    let redisReturn =await AddRedis(this.app,BuyTask.insertId,40*60)
+        }
+        if(judgeRebuy === 1){
+            return this.ctx.body = {status:2,message:'不能下单'}
+        }else if(judgeRebuy === 0){
+            //judge user task state = 2
+            let clickTask2Sql = 'SELECT * FROM BuyTask WHERE buyUserNameId='+ username.UserNameId +' AND BuyTaskState = 2'
+            let clickTaskQuery = await this.app.mysql.query(clickTask2Sql) //插入任务
+            if(clickTaskQuery.length>0){
+                let getTaskQuery = await CloseTaskId(this.app,clickTaskQuery[0].BuyTaskId,username.UserNameId,null)
+            }
+            //写下单的流程
+            //任务金额计算 + 总金额计算 + 图片数 + 账号费 + 附加佣金
+            let TaskAddMoney = productGetDetails[0].AddCoupons + productGetDetails[0].AddOpenOtherProduct + productGetDetails[0].AddSaveShop + productGetDetails[0].AddOpenProduct + productGetDetails[0].AddShoppingCar + productGetDetails[0].AddChat + productGetDetails[0].AddCommandsLike
+            let id_money = productGetDetails[0].huabeiId * 2
+            let task_total_money = productGetDetails[0].buyPrice * productGetDetails[0].buyNum
+            //TaskAddMoney = 附加任务集合
+            //idmoney = 账号数
+            //imageNumber = 图片张数
+            let Min = 40;
+            let MyDate = new Date(Date.now() + Min * 60*1000);
+            console.log(MyDate)
+            MyDate ='"'+MyDate.toMysqlFormat() +'"'
+            let CreateTaskSql = 'INSERT into BuyTask(buyUserNameId,SellOrderId,BuyTaskState,UserAccountId,PayMoney,AddMoney,AutoChangeState,AutoChangeTime)values('+username.UserNameId+','+orderid+',2,'+judgePlatformUser.UserAccountId+','+task_total_money+','+TaskAddMoney+',0,'+MyDate+');'
+            let BuyTask = await this.app.mysql.query(CreateTaskSql) //插入任务
+            let OrderReduceSql = 'update SellOrder SET orderNumber=orderNumber-1 where SellOrderId = '+orderid
+            let OrderReduceSqlx = await this.app.mysql.query(OrderReduceSql) //减少任务
+            if(BuyTask.affectedRows===1){
+                //redis 设置倒计时
+                let redisReturn =await AddRedis(this.app,BuyTask.insertId,40*60)
 
-                    return this.ctx.body = {status:3,message:'下单成功，跳到订单任务区',taskId:BuyTask.insertId}
+                return this.ctx.body = {status:3,message:'下单成功，跳到订单任务区',taskId:BuyTask.insertId}
 
-                }else{
-                    return this.ctx.body = {status:4,message:'下单失败请重试，或联系管理员'}
-                }
+            }else{
+                return this.ctx.body = {status:4,message:'下单失败请重试，或联系管理员'}
             }
         }
     }
@@ -241,7 +239,6 @@ class sellTaskState extends Controller {
                 return this.ctx.body = {status:1,message:'订单修改金额不能>50，附加任务不能>20'}
             }
             //如果状态2就到3吗？
-            console.log(filesurl)
             let days = 3;
             let MyDate = new Date(Date.now() + days * 24*60*60*1000);
             console.log(MyDate)
@@ -255,7 +252,6 @@ class sellTaskState extends Controller {
         }
         return this.ctx.body = {username:'TaskState'}
     }
-
     async MobileTaskState6(){
         /*state0:需登录
           state1:错误提醒
@@ -311,27 +307,29 @@ class sellTaskState extends Controller {
         let State3VerifySqlString;
         let days = 8;
         let MyDate = new Date(Date.now() + days * 24*60*60*1000);
-        console.log(MyDate)
         MyDate ='"'+MyDate.toMysqlFormat() +'"'
         if(get_comment.length>0){
-            State3VerifySqlString = 'UPDATE BuyTask JOIN SellOrder ON BuyTask.SellOrderId=SellOrder.SellOrderId SET AutoChangeState=0,AutoChangeTime='+MyDate+',BuyTask.BuyTaskState=5,BuyTask.BuyTaskCommentId='+get_comment[0].TaskCommentId +' WHERE BuyTask.BuyTaskState in (3,4) AND BuyTask.BuyTaskId='+this.ctx.query.id+';'
-            let get_comment_state_3 = 'UPDATE BuyTaskComment SET TaskCommentState=3 WHERE BuyTaskComment.TaskCommentId='+get_comment[0].TaskCommentId
+            State3VerifySqlString = 'UPDATE BuyTask JOIN SellOrder ON BuyTask.SellOrderId=SellOrder.SellOrderId SET AutoChangeState=0,AutoChangeTime='+MyDate+',BuyTask.BuyTaskState=5,BuyTask.BuyTaskCommentId='+get_comment[0].BuyTaskCommentId +' WHERE BuyTask.BuyTaskState in (3,4) AND BuyTask.BuyTaskId='+this.ctx.query.id+';'
+            let get_comment_state_3 = 'UPDATE BuyTaskComment SET TaskCommentState=3 WHERE BuyTaskComment.BuyTaskCommentId='+get_comment[0].BuyTaskCommentId
             let get_comment_sql_run = await this.app.mysql.query(get_comment_state_3)
         }else{
             State3VerifySqlString = 'UPDATE BuyTask JOIN SellOrder ON BuyTask.SellOrderId=SellOrder.SellOrderId SET AutoChangeState=0,AutoChangeTime='+MyDate+', BuyTask.BuyTaskState=5 WHERE BuyTask.BuyTaskState in (3,4) AND BuyTask.BuyTaskId='+this.ctx.query.id+';'
         }
+        console.log(State3VerifySqlString)
         let State3VerifySql = await this.app.mysql.query(State3VerifySqlString)
         if(State3VerifySql){
             let redisReturn =await AddRedis(this.app,this.ctx.query.id,60*60*12*days)
         }
         return this.ctx.body=1
     }
-
     async SellTaskState6Verify(){
         console.log('SellTaskState6Verify：'+this.ctx.query.id)
         let taskId = this.ctx.query.id
-        let getTasksql = 'select * from BuyTask JOIN SellOrder ON BuyTask.SellOrderId=SellOrder.SellOrderId where BuyTask.BuyTaskId='+taskId
+        let getTasksql = 'select * from BuyTask JOIN SellOrder ON BuyTask.SellOrderId=SellOrder.SellOrderId where  BuyTask.BuyTaskState in (6,7) AND BuyTask.BuyTaskId='+taskId
         let getTask = await this.app.mysql.query(getTasksql)
+        if(!getTask){
+            return this.ctx.body='1'
+        }
         getTask = getTask[0]
         let VerifyJudge = 0
         if(this.ctx.query.auth==='redis'){
@@ -347,12 +345,6 @@ class sellTaskState extends Controller {
         if(VerifyJudge==0){
             return this.ctx.body='1'
         }
-
-
-        //1.附加任务资金+刷单费用算法+支付金额+任务类型+附加费用，保存到buytask任务中，卖家减财富+买家财富
-
-
-        console.log(getTask)
         let totalMoney
         let add_money
         let id_money
@@ -369,9 +361,8 @@ class sellTaskState extends Controller {
         let all_money = await this.config.MoneyAlgorithm(getTask.event,totalMoney,add_money,id_money)
         let all_money_seller = all_money[0]
         let all_money_buyer = all_money[1]
-        console.log(all_money)
         if(getTask.TaskCommentId!=null){
-            let SqlComment = 'select * from BuyTaskComment where TaskCommentId='+getTask.TaskCommentId
+            let SqlComment = 'select * from BuyTaskComment where BuyTaskComment='+getTask.BuyTaskComment
             let GetSqlComment = await this.app.mysql.query(SqlComment)
             GetSqlComment = GetSqlComment[0]
             comment_money_seller = GetSqlComment.SellMoney
@@ -383,6 +374,8 @@ class sellTaskState extends Controller {
         //2. 资金减少
         //3. 订单标为完成，并清除自动化状态与时间
         //4. redis删除
+        console.log('MoneySeller:'+MoneySeller)
+        console.log('MoneyBuyer:'+MoneyBuyer)
         let State6VerifySqlString = 'UPDATE BuyTask SET MoneySeller='+MoneySeller+',MoneyBuyer='+MoneyBuyer+', AutoChangeState=null, AutoChangeTime=null, BuyTaskState=1 WHERE BuyTaskState in (6,7) AND BuyTaskId='+this.ctx.query.id+';'
         //let State6VerifySqlString = 'UPDATE BuyTask SET MoneySeller='+MoneySeller+',MoneyBuyer='+MoneyBuyer+' AutoChangeState=null, AutoChangeTime=null, BuyTaskState=1 WHERE BuyTaskState in (6,7) AND BuyTaskId='+this.ctx.query.id+';'
         let State6VerifySql = await this.app.mysql.query(State6VerifySqlString)
@@ -391,11 +384,15 @@ class sellTaskState extends Controller {
             let Money2Sql = 'UPDATE FinancialBalance SET Balance=Balance+'+MoneyBuyer+' WHERE UserNameId='+getTask.BuyUserNameId
             let Money1Sql1 =await this.app.mysql.query(Money1Sql)
             let Money2Sql2 =await this.app.mysql.query(Money2Sql)
-            if(getTask.TaskCommentId!==null){
-                let SqlComment = 'UPDATE BuyTaskComment SET TaskCommentState=1 where TaskCommentId='+getTask.TaskCommentId
+
+            if(getTask.BuyTaskCommentId!==null){
+                let SqlComment = 'UPDATE BuyTaskComment SET TaskCommentState=1 where BuyTaskCommentId='+getTask.BuyTaskCommentId
+                console.log(SqlComment)
                 let GetSqlComment = await this.app.mysql.query(SqlComment)
             }
+            console.log('redisReturn')
             let redisReturn =await this.app.redis.del(this.ctx.query.id)
+            console.log('redisReturn_done')
         }
         return this.ctx.body=1
     }

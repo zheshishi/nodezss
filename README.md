@@ -31,3 +31,20 @@ $ npm stop
 
 
 [egg]: https://eggjs.org
+
+
+* qiniu
+
+```js
+  async createToken() {
+
+        const options = {
+            scope: `${this.option.bucket}`,
+            expires: 20 * 60,
+        };
+        const putPolicy = new qiniu.rs.PutPolicy(options);
+        const uploadToken = putPolicy.uploadToken(this.mac);
+        return uploadToken
+    }
+```
+

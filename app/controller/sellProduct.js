@@ -316,9 +316,19 @@ class sellController extends Controller {
             if(event!=1&&event!=2){
                 return await this.ctx.render('sellTaskComment.ejs', {message: '请填写有效信息'})
             }
+
+            var money = await this.app.mysql.get('FinancialBalance', {UserNameId: UserName.UserNameId})
+            let getTaskMoney = 2
+            if (money.Balance < getTaskMoney + 500) {
+                var returnmoney = getTaskMoney+ 500 - money.Balance
+                return await this.ctx.render('sellTaskComment.ejs', {
+                    message: '余额不足，请充值：'+returnmoney+'元'
+                })
+            }
+            var updateMoneySql ='UPDATE FinancialBalance SET Balance=Balance-'+ getTaskMoney+ ',PerformMoney=PerformMoney+'+getTaskMoney + ' WHERE UserNameId="' + UserName.UserNameId + '";'
+            var eventinsert = await this.app.mysql.query(updateMoneySql)
             var imgjson = imgjson
             var commentsql = "insert into BuyTaskComment(UserNameId, BuyTaskCommentEvent, BuyTaskCommentText,BuyTaskCommentImg,SellProductId)value("+UserName.UserNameId+","+event+",'"+Text+"','"+imgjson+"',"+productId+")"
-            console.log(commentsql)
             var commentsqlreturn =  await this.app.mysql.query(commentsql)
             return await this.ctx.render('sellTaskComment.ejs', {message: '保存成功'})
         }catch(e){
@@ -541,7 +551,6 @@ class sellController extends Controller {
         // https://item.m.jd.com/product/6165650.html
 
         // judge判断是否有产品与店铺
-        console.log('judgeProductExist')
         var judgeProductExist = 0
         var MysqlProduct = await this.app.mysql.select('SellProduct', {
             where: {ProductId: GetUrlId}
@@ -555,8 +564,6 @@ class sellController extends Controller {
                 }
             }
         }
-        // judge判断是否有产品与店铺
-        console.log('browser:'+GetUrlId)
         //3. spider
         // test  url 爬虫
         if (judgeProductExist === 0) {
