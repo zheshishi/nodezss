@@ -216,7 +216,7 @@ class sellTaskState extends Controller {
         //Regular
         var rePayMoney = /^([1-5]\d{0,9}|0)([.]?|(\.\d{1,2})?)$/
         var reOrderId = /^([1-9]\d{1,30})/
-        var reAddMoney = /^([1-9]\d{0,1})$/
+        var reAddMoney = /^([0-9]\d{0,1})$/
         if(this.ctx.request.body.headers.Authorization ==='' || this.ctx.request.body.headers.Authorization ===null ){
             console.log('noToken')
             return this.ctx.body = {status:0,message:'未知错误'}
@@ -264,7 +264,7 @@ class sellTaskState extends Controller {
         //Regular
         var rePayMoney = /^([1-5]\d{0,9}|0)([.]?|(\.\d{1,2})?)$/
         var reOrderId = /^([1-9]\d{1,30})/
-        var reAddMoney = /^([1-9]\d{0,1})$/
+        var reAddMoney = /^([0-9]\d{0,1})$/
         if(this.ctx.request.body.headers.Authorization ==='' || this.ctx.request.body.headers.Authorization ===null ){
             console.log('noToken')
             return this.ctx.body = {status:0,message:'未知错误'}
