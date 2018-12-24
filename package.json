@@ -11,6 +11,7 @@
     "cron": "^1.6.0",
     "crypto-js": "^3.1.9-1",
     "egg": "^2.2.1",
+    "egg-alinode": "^2.0.1",
     "egg-jwt": "^3.1.4",
     "egg-mysql": "^3.0.0",
     "egg-qiniu-upload": "^1.1.4",

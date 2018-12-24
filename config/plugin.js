@@ -6,7 +6,10 @@ exports.mysql = {
   enable: true,
   package: 'egg-mysql',
 };
-
+exports.alinode = {
+  enable: true,
+  package: 'egg-alinode',
+};
 exports.jwt = {
     enable: true,
     package: "egg-jwt"
