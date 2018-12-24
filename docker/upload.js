@@ -4,6 +4,7 @@ const { getRandomNum } = require('../utils');
 const assert = require('assert');
 class Qiniu {
   constructor(app) {
+    console.log('test_insert_qiniu')
     this.option = app.config.qiniu;
     this.mac = new qiniu.auth.digest.Mac(app.config.qiniu.ak, app.config.qiniu.sk);
     this.config = new qiniu.conf.Config();
@@ -11,47 +12,24 @@ class Qiniu {
   }
 
   async createToken() {
+    console.log('test_insert_createToken')
     const options = {
       scope: `${this.option.bucket}`,
-      expires: 24 * 60 * 60,
+      expires: 20 * 60,
     };
     const putPolicy = new qiniu.rs.PutPolicy(options);
     const uploadToken = putPolicy.uploadToken(this.mac);
     return uploadToken
   }
-  async upload(path = '', realname = '') {
-    const options = {
-      scope: `${this.option.bucket}`,
-      expires: 24 * 60 * 60,
-    };
-    const putPolicy = new qiniu.rs.PutPolicy(options);
-    const uploadToken = putPolicy.uploadToken(this.mac);
-    console.log(uploadToken)
-    const formUploader = new qiniu.form_up.FormUploader(this.config);
-    const putExtra = new qiniu.form_up.PutExtra();
-    const localFile = path;
-    const extname = realname.split('.')[realname.split('.').length - 1];
-    const key = getRandomNum(2, 18) + '.' + extname;
-    console.log(key)
-    return new Promise((resolved, reject) => {
-      formUploader.putFile(uploadToken, key, localFile, putExtra,
-        function(respErr, respBody, respInfo) {
-          if (respErr) {
-            reject(respErr);
-          }
-          if (respInfo.statusCode === 200) {
-            resolved(respBody);
-          } else {
-            resolved(respBody);
-          }
-        });
-      // 拼接出真实的访问链接并返回
-    }).then(res => {
-      return {
-        url: this.option.baseUrl + encodeURI(res.key),
-        key: res.key,
+  async upload() {
+      console.log('test_insert_upload')
+      const options = {
+          scope: `${this.option.bucket}`,
+          expires: 20 * 60,
       };
-    });
+      const putPolicy = new qiniu.rs.PutPolicy(options);
+      const uploadToken = putPolicy.uploadToken(this.mac);
+      return uploadToken
   }
   async info(key) {
     const bucketManager = new qiniu.rs.BucketManager(this.mac, this.config);

@@ -21,10 +21,7 @@ module.exports = appInfo => {
       enable: false,
     },
   };
-exports.alinode = {
-  appid: '77679',
-  secret: '011eb1fde12364efc0b1ff4ceb39de300394c3ec',
-};
+
   // add your config here
   config.static = {
     prefix: '/public/',

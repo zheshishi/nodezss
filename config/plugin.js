@@ -6,10 +6,7 @@ exports.mysql = {
   enable: true,
   package: 'egg-mysql',
 };
-exports.alinode = {
-  enable: true,
-  package: 'egg-alinode',
-};
+
 exports.jwt = {
     enable: true,
     package: "egg-jwt"
@@ -17,7 +14,7 @@ exports.jwt = {
 exports.qiniu = {
   enable: true,
   package: "egg-qiniu-upload"
-}
+};
 exports.security = {
   xframe: {
     enable: false,

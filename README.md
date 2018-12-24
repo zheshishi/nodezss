@@ -32,12 +32,10 @@ $ npm stop
 
 [egg]: https://eggjs.org
 
-
-* qiniu
-
+qiniu
 ```js
   async createToken() {
-
+        console.log('test_insert_createToken')
         const options = {
             scope: `${this.option.bucket}`,
             expires: 20 * 60,
@@ -47,4 +45,3 @@ $ npm stop
         return uploadToken
     }
 ```
-

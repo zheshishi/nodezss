@@ -127,8 +127,6 @@ module.exports = app => {
             	console.log('noToken')
 	            return this.ctx.body = {username:'username'}
             	}
-
-            console.log('verify Version and sort')
             //const token = this.app.jwt.sign({ username: this.ctx.request.body.username, password: this.ctx.request.body.password }, this.app.config.jwt.secret);
             const tokenVerify = this.app.jwt.verify(this.ctx.header.authorization, this.app.config.jwt.secret);
             var username = await this.app.mysql.get('UserName',{UserName:tokenVerify.username})//用户信息
