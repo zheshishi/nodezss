@@ -335,9 +335,10 @@ module.exports = app => {
 	            	//save product
 		        }catch(error){
 		            await browser.close()
-		            return this.ctx.body = {status:0,message:'未知错误请重试'}
 		        	console.log('chrome error');
 		        	console.log(error);
+		            return this.ctx.body = {status:0,message:'未知错误请重试'}
+
 	        }
 	        }
 	    }
