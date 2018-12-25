@@ -22,6 +22,7 @@ function urlgetshop(data) {
 }
 //url 获取产品
 function geturlfs(urlvalues) {
+    $('#url_message').text("请稍等,读取产品中...")
     if (urlvalues.includes('.com')) {
         $.ajax({
             method: "POST",
@@ -30,19 +31,26 @@ function geturlfs(urlvalues) {
                 getUrl: urlvalues
             },
             success: function (data, status) {
-            	console.log(data)
-                if (data !== null) {
+                console.log(status)
+                console.log(data)
+                console.log(data.status)
+                $('#url_message').text("")
+                if (data.status==1||data.status==0) {
+                    $('#url_message').text(data.message)
+                }else{
                     $("#SubSelectproduct").empty()
                     var AjaxSsll = '<option value=' + data.SellProductId + '>' + data.ProductId + ' - ' + JSON.parse(
                         data.Details).name + '</option>'
                     $("#SubSelectproduct").append(AjaxSsll)
-                    // refresh()
                 }
             }})
-    }}
+    }else{
+        $('#url_message').text("请输入正确网址")
+    }
+}
 
 function urlgetproduct(data) {
-    console.log(data)
+
     if (data !== 0) {
         $(document).ready(function () {
             $.ajax({
@@ -53,7 +61,8 @@ function urlgetproduct(data) {
                 },
                 success: function (data, status) {
                     // Call this function on succes
-                    if (data !== null) {
+                    console.log(data)
+                    if (!data !== null) {
                         $("#SubSelectproduct").empty()
                         $("#SubSelectproduct").append("<option value='0'>选择产品</option>")
                         for (var N in data) {

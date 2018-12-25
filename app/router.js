@@ -61,11 +61,11 @@ module.exports = app => {
     router.get("/sell/taskmanager", "sellProduct.TaskManagerGet");
     router.get("/sell/tasklist", "sellProduct.TaskList");
     router.get("/sell/taskcommentlist", "sellProduct.TaskCommentList");
-    router.post("/sell/productinfo", "sellProduct.productGetinfo");
     router.get("/sell/getshop", "sellProduct.getshop"); // ajax getshop
     router.post("/sell/getproduct", "sellProduct.getproduct"); // ajax getproduct
-    router.post("/sell/getproductid", "productGetinfo.getproductId"); // ajax getproduct
+    router.post("/sell/getproductid", "sellProduct.getproductId"); // ajax getproduct
     //router.post("/sell/getproductinfo", "sellProduct.getProductInfo"); // sell Login
+    router.post("/sell/productinfo", "productinfo.productinfo");
 
     //商家充值页面
     router.get("/sell/topup", "selltopup.topupget"); // sell Login

@@ -202,7 +202,7 @@
                 <h3 class="box-title">发布试用产品</h3>
             </div>
                 <span style="color:mediumvioletred"><%= shopname %></span>
-                <span style="color:red;"><%= message %></span><br>
+                <span id="message" style="color:red;"><%= message %></span><br>
                 <!-- /.box-header -->
                 <form method="post">
                 <strong style="color:mediumvioletred">类型：</strong>
@@ -217,7 +217,8 @@
 
                     <!--  获取产品 产品url -->
                 <strong style="color:mediumvioletred">网址：</strong>
-                <input id="geturlinput" type="text" class="geturl" name="geturl" onChange="geturlfs(this.value);"  placeholder="请输入产品链接https://... 、天猫、淘宝、1688、京东"><br><br>
+                <input id="geturlinput" type="text" class="geturl" name="geturl" onChange="geturlfs(this.value);"  placeholder="请输入产品链接https://... 、天猫、淘宝、1688、京东"><span id="url_message" style="color:green;"></span><br>
+<br><br>
            <!--  <button type="submit" class='btn bg-maroon margin' name='button' value="0">获取产品信息</button> -->
                 <%- include menu/selectShopProduct %>
                 
