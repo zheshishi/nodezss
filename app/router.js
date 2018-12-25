@@ -64,7 +64,7 @@ module.exports = app => {
     router.post("/sell/productinfo", "sellProduct.productGetinfo");
     router.get("/sell/getshop", "sellProduct.getshop"); // ajax getshop
     router.post("/sell/getproduct", "sellProduct.getproduct"); // ajax getproduct
-    router.post("/sell/getproductid", "sellProduct.getproductId"); // ajax getproduct
+    router.post("/sell/getproductid", "productGetinfo.getproductId"); // ajax getproduct
     //router.post("/sell/getproductinfo", "sellProduct.getProductInfo"); // sell Login
 
     //商家充值页面
