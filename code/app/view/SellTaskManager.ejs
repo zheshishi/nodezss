@@ -1,0 +1,256 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>试用平台 | 试用点评</title>
+    <!-- Tell the browser to be responsive to screen width -->
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="/public/css/fontawesomemin.css" rel="stylesheet">
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="/public/css/ioniconsmin.css" rel="stylesheet">
+    <!-- daterange picker -->
+    <link rel="stylesheet" href="/public/css/daterangepicker.css" rel="stylesheet">
+    <!-- bootstrap datepicker -->
+    <link rel="stylesheet" href="/public/css/bootstrapdatepickermin.css" rel="stylesheet">
+    <!-- iCheck for checkboxes and radio inputs -->
+    <link rel="stylesheet" href="/public/css/all.css" rel="stylesheet">
+    <!-- Bootstrap Color Picker -->
+    <link rel="stylesheet" href="/public/css/bootstrapcolorpickermin.css" rel="stylesheet">
+    <!-- Bootstrap time Picker -->
+    <link rel="stylesheet" href="/public/css/bootstraptimepickermin.css" rel="stylesheet">
+    <!-- Select2 -->
+    <link rel="stylesheet" href="/public/css/select2min.css" rel="stylesheet">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="/public/css/AdminLTEmin.css" rel="stylesheet">
+    <link rel="stylesheet" href="/public/css/allskinsmin.css" rel="stylesheet">
+
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" type="text/javascript"></script>
+    <link rel="stylesheet" href="/public/css/sellTaskManager.css">
+    <link rel="stylesheet" href="/public/css/widget.css">
+    <link rel="stylesheet" href="/public/css/common.css">
+    <link rel="stylesheet" href="/public/css/reset.css">
+    <link rel="stylesheet" href="/public/css/frame.css">
+    <script src="/public/js/main.js"></script>
+    <script>
+    //获取店铺名
+    window.onload = function(){
+        ajaxGetshop()
+        ajaxGetTaskList('',0,0,1,10,'','') //任务属性、店铺、产品、页数、读取数量、时间1和2
+        //window.setInterval(gettaskvalues, 1000);
+        }
+    function ClickAjaxGetTaskList(sendPage){
+            console.log('sendPage:'+sendPage)
+            let page
+            if(sendPage==undefined){
+                page = document.getElementById('nowpage').value
+            }else{
+                page = sendPage
+            }
+            let taskSort = document.getElementById('taskSort').value
+            let TimeStart = document.getElementById('TimeStart').value
+            let TimeEnd = document.getElementById('TimeEnd').value
+            let SubSelectproduct = document.getElementById('SubSelectproduct').value
+            let Selectshop = document.getElementById('Selectshop').value
+            ajaxGetTaskList(taskSort,Selectshop,SubSelectproduct,page,10,TimeStart,TimeEnd)
+        }
+
+    function SellTaskState3Verify(value){
+        console.log('SellTaskState3Verify:'+value)
+        $.ajax({
+            url: '/sell/selltaskstate3verify',
+            type: 'get',
+            data: {'id':value},
+            success: function(data) {
+                console.log('request data：'+data);
+                window.location.reload()
+            }
+        });
+    }
+    function SellTaskState6Verify(value){
+        console.log('selltaskstate6verify:'+value)
+        $.ajax({
+            url: '/sell/selltaskstate6verify',
+            type: 'get',
+            data: {'id':value},
+            success: function(data) {
+                console.log('request data：'+data);
+                window.location.reload()
+            }
+        });
+    }
+
+    function SellTaskState3Refuse(){
+        let value = document.getElementById('SellTaskState3RefuseButton').value
+        let text_value = document.getElementById('SellTaskState3RefuseText').value
+        console.log('selltaskstate3refuse:'+value)
+        console.log('selltaskstate3refuse:'+text_value)
+        $.ajax({
+            url: '/sell/selltaskstate3refuse',
+            type: 'get',
+            data: {'id':value,'text':text_value},
+            success: function(data) {
+                console.log('request data：'+data);
+                window.location.reload()
+            }
+        });
+    }
+
+    function SellTaskState6Refuse(){
+        let value = document.getElementById('SellTaskState6RefuseButton').value
+        let text_value = document.getElementById('SellTaskState6RefuseText').value
+        console.log('selltaskstate6refuse:'+value)
+        console.log('selltaskstate6refuse:'+text_value)
+        $.ajax({
+            url: '/sell/selltaskstate6refuse',
+            type: 'get',
+            data: {'id':value,'text':text_value},
+            success: function(data) {
+                window.location.reload()
+                console.log('request data：'+data);
+            }
+        });
+    }
+
+
+    function SellerCloseTask(){
+        let value = document.getElementById('SellerCloseTaskButton').value
+        let text_value = document.getElementById('SellerCloseTaskText').value
+        $.ajax({
+            url: '/sell/sellerclosetask',
+            type: 'get',
+            data: {'id':value,'text':text_value},
+            success: function(data) {
+                window.location.reload()
+                console.log('request data：'+data);
+            }
+        });
+    }
+
+
+
+    </script>
+        <style>
+            .UrlTitle {
+                padding: 25px;
+                display:inline;
+                font-size:30;
+            }
+            .geturl{
+                width: 500px;
+                display:inline;
+            }
+            .geturlclass{
+                display:inline;
+            }
+            .white_content {
+                display: none;
+                position: absolute;
+                top: 25%;
+                left: 25%;
+                width: 50%;
+                height: 25%;
+                padding: 20px;
+                border: 2px solid orange;
+                background-color: white;
+                z-index:1002;
+                overflow: auto;
+            }
+    </style>
+</head>
+
+<body class="hold-transition skin-blue sidebar-mini">
+<div class="wrapper">
+    <%- include menu/header %>
+    <!-- Left side column. contains the logo and sidebar -->
+    <%- include menu/section %>
+
+    <!-- 右侧任务区 -->
+    <div class="content-wrapper">
+        <div class="box box-warning">
+            <div class="box-header with-border">
+                <h3 class="box-title">试用任务中心</h3>
+            </div>
+                <!-- /.box-header -->
+
+                <div class="area-main">
+    <div class="contentCard">
+    <strong style="color:mediumvioletred">任务：</strong>
+    <select id='taskSort' name='taskSort' onchange='ClickAjaxGetTaskList()'>
+        <option value=''>进行中的任务</option>
+        <option value='1'>待支付任务</option>
+        <option value='2'>已完成的任务</option>
+        <option value='3'>已经取消的任务</option>
+        <option value='4'>全部任务</option>
+        <option value='5'>关闭中的任务</option>
+    </select>
+            <%- include menu/selectShopProduct %>
+
+        <div class="taskFilterPanel mt10">
+<!--             <span class="floatLeft mr10" title="任务号">任务号</span>
+            <input type="text" id="taskId" class="floatLeft mr10 inputText"> -->
+            <span>时间</span><input type="date" id='TimeStart' value="" min="2017-09-16"/>
+                -<input type="date" id='TimeEnd' value="" min="2017-09-16"/>
+            <button style="height: 20px; color:red" onclick='ClickAjaxGetTaskList()' >查询</button>
+
+        </span>
+        </div>
+        <div id="SellTaskState3Refuse" class="white_content">
+            <input id="SellTaskState3RefuseButton" value="x" type="hidden">
+            <text value= '' type="text" ID="SellTaskState3RefuseButtonx">拒绝申请</text><br>
+            拒绝理由：<input type="text" ID="SellTaskState3RefuseText"><br>
+            <a value="" id="SellTaskState3RefuseButton" onclick="SellTaskState3Refuse(this.value)">提交</a>
+            <a onclick = "document.getElementById('SellTaskState3Refuse').style.display='none'">关闭</a>
+        </div>
+
+        <div id="SellTaskState6Refuse" class="white_content">
+            <input id="SellTaskState6RefuseButton" value="x" type="hidden">
+            <text value= '' type="text" id="SellTaskState6RefuseButton">拒绝申请</text><br>
+            拒绝理由：<input type="text" ID="SellTaskState6RefuseText"><br>
+            <a value="" id="SellTaskState6RefuseButton1" onclick="SellTaskState6Refuse(this.value)">提交</a>
+            <a onclick = "document.getElementById('SellTaskState6Refuse').style.display='none'">关闭</a>
+        </div>
+
+
+        <div id="SellerCloseTask" class="white_content">
+            <input id="SellerCloseTaskButton" value="x" type="hidden">
+            <text type="text" ID="state5Text">关闭订单</text><br>
+            关闭原因：<input type="text" ID="SellerCloseTaskText"><br>
+            <a id='SellerCloseTaskButton' value=""  onclick="SellerCloseTask(this.value)">提交</a>
+            <a onclick = "document.getElementById('SellerCloseTask').style.display='none'">关闭</a>
+        </div>
+<div id="taskContainer">  
+
+</div>
+
+            <!--这里是分页区域-->
+
+<div class="row">
+
+    <div class="col-sm-7">
+        <div class="dataTables_paginate paging_simple_numbers" id="example2_paginate">
+            <ul class="pagination" id='pagination'>
+
+            </ul>
+        </div>
+    </div>
+</div>
+
+</div>
+</div>
+
+
+
+        </div>
+    </div>
+    <%- include menu/footer %>
+</div>
+
+    <!-- /.box-body -->
+
+</body>
+
+</html>

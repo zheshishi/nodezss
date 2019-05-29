@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>折试试 | Login</title>
+
+<link href="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="/public/css/AdminLTEmin.css">
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+
+<script>
+  // $(function () {
+  //   $('input').iCheck({
+  //     checkboxClass: 'icheckbox_square-blue',
+  //     radioClass: 'iradio_square-blue',
+  //     increaseArea: '20%' /* optional */
+  //   });
+  // });
+  function checkPhone(){ 
+    var username = document.getElementById('username').value;
+    var password = document.getElementById('password').value;
+    var textAter = document.getElementById('textAter')
+    console.log(password.length)
+    console.log(password)
+    if(!(/^1\d{10}$/.test(username))){ 
+        //alert("手机号码有误，请重填"); 
+        textAter.textContent = '手机号码有误，请重填' 
+        return false; 
+    } else if(password.length<6){
+        //alert("密码有误");  
+        textAter.textContent = '密码小于6位' 
+        return false; 
+    }else{
+      return true;
+    }
+}
+
+</script>
+
+</head>
+<meta charset="utf-8">
+<body class="hold-transition login-page">
+<div class="login-box">
+  <div class="login-logo">
+    <b>商家管理后台</b>
+  </div>
+  <!-- /.login-logo -->
+  <div class="login-box-body">
+
+    <form action="/selllogin" method="post" name='login' onsubmit='return checkPhone()'>
+      <div class="form-group has-feedback">
+        <input name="username" type="text" class="form-control" placeholder="手机号"
+         min="11" max="11" id="username"
+         pattern="^1\d{10}$"
+         title="请输入11位手机号"
+         >
+     </div>
+      <div class="form-group has-feedback">
+        <input name="password" id="password" 
+            min="6" max="20"
+            title="请输入6位以上的密码"
+            type="password" class="form-control" 
+            placeholder="登录密码">
+        <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+      </div>
+      <div class="row">
+        <div class="col-xs-8">
+          <div class="checkbox icheck">
+            <label>
+                  <a href="sellmobilelogin" class="text-center">手机验证码登录</a>
+            </label>
+          </div>
+          <font id ='textAter' color='red'><%= message %></font>
+        </div>
+        <!-- /.col -->
+        <div class="col-xs-4">
+          <button type="submit" class="btn btn-primary btn-block btn-flat">登录</button>
+        </div>
+        <!-- /.col -->
+      </div>
+    </form>
+
+
+  </div>
+  <!-- /.login-box-body -->
+</div>
+<!-- /.login-box -->
+
+
+</body>
+</html>

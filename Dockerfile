@@ -6,7 +6,7 @@ RUN apk --no-cache --virtual build-dependencies --update add tzdata \
     && echo "Asia/Shanghai" > /etc/timezone \
     && apk del tzdata
 
-# 创建app目录
+# 创建app 目录
 RUN mkdir -p /usr/src/app
 # 设置工作目录
 WORKDIR /usr/src/app

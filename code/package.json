@@ -1,0 +1,65 @@
+{
+  "name": "zss",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "dependencies": {
+    "axios": "^0.18.0",
+    "bankcardinfo": "^2.0.4",
+    "cnpm": "^6.0.0",
+    "cos-nodejs-sdk-v5": "^2.5.1",
+    "cron": "^1.6.0",
+    "crypto-js": "^3.1.9-1",
+    "egg": "^2.2.1",
+    "egg-alinode": "^2.0.1",
+    "egg-jwt": "^3.1.4",
+    "egg-mysql": "^3.0.0",
+    "egg-qiniu-upload": "^1.1.4",
+    "egg-redis": "^2.0.0",
+    "egg-scripts": "^2.11.0",
+    "egg-static": "^2.1.1",
+    "egg-view-ejs": "^2.0.0",
+    "form-data": "^2.3.3",
+    "ihuyi106": "^1.0.1",
+    "mysql": "^2.16.0",
+    "puppeteer": "^1.10.0",
+    "qcloudsms_js": "^0.1.1",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.2",
+    "sleep": "^5.2.3"
+  },
+  "devDependencies": {
+    "autod": "^3.0.1",
+    "autod-egg": "^1.0.0",
+    "egg-bin": "^4.3.5",
+    "egg-ci": "^1.8.0",
+    "egg-mock": "^3.14.0",
+    "eslint": "^4.11.0",
+    "eslint-config-egg": "^6.0.0",
+    "webstorm-disable-index": "^1.2.0"
+  },
+  "engines": {
+    "node": ">=8.9.0"
+  },
+  "scripts": {
+    "start": "egg-scripts start",
+    "stop": "egg-scripts stop --title=egg-server-zss",
+    "dev": "egg-bin dev",
+    "debug": "egg-bin debug",
+    "test": "npm run lint -- --fix && npm run test-local",
+    "test-local": "egg-bin test",
+    "cov": "egg-bin cov",
+    "lint": "eslint .",
+    "ci": "npm run lint && npm run cov",
+    "autod": "autod"
+  },
+  "ci": {
+    "version": "8"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "author": "van",
+  "license": "MIT"
+}

@@ -1,0 +1,14 @@
+<div>
+    <strong style="color:mediumvioletred">店铺：</strong>
+    <select id='Selectshop' name='Selectshop' onchange='urlgetproduct(this.value)'>
+        <option value='0'>选择店铺</option>
+    </select>
+    <strong style="color:mediumvioletred">产品：</strong>
+    <select id='SubSelectproduct'  name='SubSelectproduct' onchange='urlgetproductid(this.value)'>
+        <option value='0'>选择产品</option>
+    </select>
+    <input id='productinfoplatformID' name="productinfoplatformID" type="hidden" value="" readonly>
+    <input id='productinfoID' name='productinfoID' type="hidden" value='' readonly>
+    <input id='infoproduct' name='infoproduct' type="hidden" value='' readonly>
+    <input id='infoplatform' name='infoplatform' type="hidden" value='' readonly>    
+</div>
